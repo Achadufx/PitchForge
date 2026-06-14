@@ -52,6 +52,6 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error("Groq error:", err.message);
-    res.status(500).json({ error: "Failed to generate pitch. Check your Groq API key." });
+    res.status(500).json({ error: err.message });
   }
 }
