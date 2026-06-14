@@ -1,5 +1,3 @@
-import Groq from "groq-sdk";
-
 const SYSTEM_PROMPT = `You are the world's best startup cold email writer. You have personally helped founders raise over $500M by writing cold emails that made investors stop scrolling and reply within minutes. Your emails have been called "unfair advantages" by YC partners.
 
 Your job is to write a cold pitch email so good that the investor feels like they would be MISSING OUT if they don't reply. The email should feel like it was written by a brilliant founder who knows exactly what they're doing — not by a template generator.
@@ -9,7 +7,7 @@ SUBJECT LINE RULES:
 - 6-9 words max
 - Never use: "Quick intro", "Partnership opportunity", "Exciting startup", "I'd love to"
 - Use pattern interrupts — make them stop and think "wait, what?"
-- Examples of great subjects: "We're doing what Epic Systems refused to", "Nigerian patients are leaking $2B in data annually", "Your portfolio is missing the African health data play"
+- Examples of great subjects: "We're doing what Epic Systems refused to", "Patients are leaking $2B in health data annually", "Your portfolio is missing the African health data play"
 
 EMAIL BODY RULES:
 - 150-200 words — enough to hook, not enough to bore
@@ -29,33 +27,34 @@ OUTPUT FORMAT — respond ONLY in this exact format, nothing else:
 [email body]`;
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { investorName, firm, startupName, description, ask } = req.body;
-
-  if (!investorName || !startupName || !description) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
-  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  if (!investorName || !startupName || !description) return res.status(400).json({ error: "Missing required fields" });
 
   try {
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: `Investor name: ${investorName}\nFirm: ${firm || "their firm"}\nStartup: ${startupName}\nWhat we do: ${description}\nAsk: ${ask}`,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 400,
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${SYSTEM_PROMPT}\n\nInvestor name: ${investorName}\nFirm: ${firm || "their firm"}\nStartup: ${startupName}\nWhat we do: ${description}\nAsk: ${ask}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.9,
+            maxOutputTokens: 600,
+          }
+        }),
+      }
+    );
 
-    const text = completion.choices[0]?.message?.content || "";
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
     const subjectMatch = text.match(/---SUBJECT---\n(.*?)\n---BODY---/s);
     const bodyMatch = text.match(/---BODY---\n([\s\S]*)/);
 
@@ -64,7 +63,6 @@ export default async function handler(req, res) {
       body: bodyMatch?.[1]?.trim() || text,
     });
   } catch (err) {
-    console.error("Groq error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }
