@@ -352,7 +352,7 @@ export default function PitchBlast() {
   return (
     <>
       <Head>
-        <title>PitchBlast — AI-powered investor outreach</title>
+        <title>PitchWire — AI-powered investor outreach</title>
         <meta name="description" content="Upload investors. Describe your startup. Send personalized pitches in minutes." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -361,7 +361,7 @@ export default function PitchBlast() {
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
               <span style={{ fontSize: 28 }}>⚡</span>
-              <span style={{ fontSize: 26, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.5px" }}>PitchBlast</span>
+              <span style={{ fontSize: 26, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.5px" }}>PitchWire</span>
             </div>
             <p style={{ color: "#64748b", fontSize: 14, margin: 0 }}>Upload investors. Describe your startup. Send personalized pitches in minutes.</p>
           </div>
@@ -375,7 +375,7 @@ export default function PitchBlast() {
           </div>
 
           <p style={{ textAlign: "center", color: "#94a3b8", fontSize: 12, marginTop: 20 }}>
-            Powered by Groq AI · PitchBlast
+            Powered by Groq AI · PitchWire
           </p>
         </div>
       </div>
