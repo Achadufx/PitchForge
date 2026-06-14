@@ -254,9 +254,32 @@ function ReviewStep({ investors, startup, onNext, onBack }) {
                 style={{ marginTop: 3, accentColor: "#0057FF", width: 16, height: 16, flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 14 }}>{pitch.name}</div>
-                <div style={{ color: "#64748b", fontSize: 12, marginBottom: 8 }}>{pitch.email}{pitch.firm ? ` · ${pitch.firm}` : ""}</div>
-                <div style={{ fontSize: 12, color: "#0057FF", fontWeight: 600, marginBottom: 4 }}>Subject: {pitch.subject}</div>
-                <div style={{ fontSize: 13, color: "#374151", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{pitch.body}</div>
+<div style={{ color: "#64748b", fontSize: 12, marginBottom: 6 }}>{pitch.email}{pitch.firm ? ` · ${pitch.firm}` : ""}</div>
+<div style={{ fontSize: 12, color: "#0057FF", fontWeight: 600, marginBottom: 4 }}>Subject: {pitch.subject}</div>
+<div style={{ fontSize: 13, color: "#374151", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{pitch.body}</div>
+<button
+  onClick={async () => {
+    const updated = [...pitches];
+    updated[i] = { ...updated[i], body: "Regenerating...", subject: "..." };
+    setPitches(updated);
+    try {
+      const res = await fetch(`${API_URL}/api/generate-pitch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ investorName: pitch.name, firm: pitch.firm || "", startupName: startup.name, description: startup.description, ask: startup.ask }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      updated[i] = { ...updated[i], subject: data.subject, body: data.body };
+    } catch (err) {
+      updated[i] = { ...updated[i], body: `Failed: ${err.message}` };
+    }
+    setPitches([...updated]);
+  }}
+  style={{ marginTop: 8, background: "none", border: "1px solid #cbd5e1", borderRadius: 6, padding: "4px 12px", fontSize: 12, color: "#64748b", cursor: "pointer" }}
+>
+  🔄 Regenerate
+</button>
               </div>
             </div>
           </div>
