@@ -91,7 +91,7 @@ function UploadStep({ onNext }) {
         <input id="csv-input" type="file" accept=".csv" style={{ display: "none" }} onChange={(e) => handleFile(e.target.files[0])} />
       </div>
 
-      {error && <p style={{ color: "#f87171", marginTop: 12, fontSize: 13 }}>⚠ {error}</p>}
+      {error && <p style={{ color: "#f87171", marginTop: 12, fontSize: 13 }}>⚠️ {error}</p>}
 
       {investors.length > 0 && (
         <div style={{ marginTop: 20 }}>
@@ -156,7 +156,7 @@ function DescribeStep({ onNext, onBack }) {
       <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
         <button onClick={onBack} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "12px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>← Back</button>
         <button onClick={() => onNext(startup)} disabled={!valid} style={{ flex: 1, background: valid ? "#6366f1" : "#1e293b", color: valid ? "#fff" : "#475569", border: "none", borderRadius: 8, padding: "12px 28px", fontWeight: 700, fontSize: 14, cursor: valid ? "pointer" : "not-allowed", transition: "all 0.2s" }}>
-          Generate Pitches ⚡
+          Generate Pitches ⚡️
         </button>
       </div>
     </div>
@@ -215,7 +215,7 @@ function ReviewStep({ investors, startup, onNext, onBack }) {
 
   if (generating) return (
     <div style={{ textAlign: "center", padding: "48px 0" }}>
-      <div style={{ fontSize: 40, marginBottom: 16 }}>⚡</div>
+      <div style={{ fontSize: 40, marginBottom: 16 }}>⚡️</div>
       <h3 style={{ fontWeight: 700, color: "#f1f5f9", marginBottom: 6 }}>Crafting personalized pitches...</h3>
       <p style={{ color: "#475569", marginBottom: 28, fontSize: 13 }}>{progress} of {investors.length} done</p>
       <div style={{ background: "#1e293b", borderRadius: 99, height: 6, overflow: "hidden", maxWidth: 300, margin: "0 auto" }}>
@@ -256,7 +256,7 @@ function ReviewStep({ investors, startup, onNext, onBack }) {
                 <div style={{ fontSize: 11, color: "#475569", marginBottom: 10 }}>{pitch.email}</div>
 
                 {pitch.error ? (
-                  <div style={{ color: "#f87171", fontSize: 12 }}>⚠ {pitch.error}</div>
+                  <div style={{ color: "#f87171", fontSize: 12 }}>⚠️ {pitch.error}</div>
                 ) : (
                   <>
                     <div style={{ fontSize: 12, color: "#818cf8", fontWeight: 600, marginBottom: 8 }}>
@@ -317,7 +317,7 @@ function SendStep({ pitches, onRestart }) {
         <h2 style={{ fontSize: 24, fontWeight: 800, color: "#f1f5f9", marginBottom: 8 }}>{succeeded} pitch{succeeded !== 1 ? "es" : ""} sent!</h2>
         {failed.length > 0 && (
           <div style={{ marginBottom: 16 }}>
-            {failed.map((r, i) => <p key={i} style={{ color: "#f87171", fontSize: 13 }}>⚠ {r.name}: {r.error}</p>)}
+            {failed.map((r, i) => <p key={i} style={{ color: "#f87171", fontSize: 13 }}>⚠️ {r.name}: {r.error}</p>)}
           </div>
         )}
         <p style={{ color: "#475569", marginBottom: 36, fontSize: 14 }}>Now sit back and let the replies come in.</p>
@@ -373,4 +373,39 @@ export default function PitchWire() {
       <div style={{ minHeight: "100vh", background: "#020817", fontFamily: "'Inter', system-ui, sans-serif", padding: "40px 16px" }}>
         <div style={{ maxWidth: 640, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, ma
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{ width: 32, height: 32, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>⚡</div>
+              <span style={{ fontSize: 22, fontWeight: 800, color: "#f1f5f9", letterSpacing: "-0.5px" }}>PitchWire</span>
+            </div>
+            <p style={{ color: "#475569", fontSize: 13 }}>AI-powered investor outreach for founders</p>
+          </div>
+
+          <div style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 16, padding: "32px 28px" }}>
+            <StepIndicator current={step} />
+
+            {step === "upload" && (
+              <UploadStep onNext={(inv) => { setInvestors(inv); setStep("describe"); }} />
+            )}
+            {step === "describe" && (
+              <DescribeStep
+                onNext={(s) => { setStartup(s); setStep("review"); }}
+                onBack={() => setStep("upload")}
+              />
+            )}
+            {step === "review" && (
+              <ReviewStep
+                investors={investors}
+                startup={startup}
+                onNext={(p) => { setFinalPitches(p); setStep("send"); }}
+                onBack={() => setStep("describe")}
+              />
+            )}
+            {step === "send" && (
+              <SendStep pitches={finalPitches} onRestart={restart} />
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
