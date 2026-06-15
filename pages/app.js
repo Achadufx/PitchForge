@@ -368,7 +368,7 @@ export default function PitchWire() {
     supabase.auth.getSession().then(({ data: { session` } }) => {
       if (!session) { router.push("/login"); return; }
       setUser(session.user);
-      const count = parseInt(localStorage.getItem(`pitches_${session.user.id}) || "0");
+      const count = parseInt(localStorage.getItem(`pitches_${session.user.id}`) || "0");
       setPitchCount(count);
       setAuthChecking(false);
     });
