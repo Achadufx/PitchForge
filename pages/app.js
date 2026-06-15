@@ -71,7 +71,36 @@ function UploadStep({ onNext, pitchCount }) {
           <div style={{ fontSize: 20, marginBottom: 8 }}>🔒</div>
           <div style={{ fontWeight: 700, color: "#a78bfa", marginBottom: 6 }}>You've used your 10 free pitches</div>
           <div style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>Upgrade to keep sending personalized pitches to investors.</div>
-          <a href="/pricing" style={{ background: "#7c3aed", color: "#fff", padding: "10px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Upgrade — $19/mo →</a>
+          <button
+  onClick={async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch("/api/create-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: "starter", userId: session.user.id, userEmail: session.user.email }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+  }}
+  style={{ background: "#7c3aed", color: "#fff", padding: "10px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}
+>
+  Upgrade — $19/mo →
+</button>
+<button
+  onClick={async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch("/api/create-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: "pro", userId: session.user.id, userEmail: session.user.email }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+  }}
+  style={{ background: "transparent", color: "#a78bfa", padding: "10px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, border: "1px solid rgba(124,58,237,0.3)", cursor: "pointer", marginTop: 8 }}
+>
+  Go Pro — $49/mo →
+</button>
         </div>
       )}
       <div
