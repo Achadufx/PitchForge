@@ -1,4 +1,3 @@
-export { default } from './app';
 
 import { useEffect, useRef, useState } from 'react';
 
