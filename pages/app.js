@@ -359,6 +359,41 @@ function SendStep({ pitches, onRestart }) {
 }
 
 export default function PitchWire() {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [pitchCount, setPitchCount] = useState(0);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) { router.push("/login"); return; }
+      setUser(session.user);
+      const count = parseInt(localStorage.getItem(pitches_${session.user.id}) || "0");
+      setPitchCount(count);
+      setAuthChecking(false);
+    });
+  }, []);
+
+  const incrementPitchCount = (n = 1) => {
+    if (!user) return;
+    const newCount = pitchCount + n;
+    setPitchCount(newCount);
+    localStorage.setItem(pitches_${user.id}, newCount.toString());
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  if (authChecking) return (
+    <div style={{ minHeight: "100vh", background: "#020817", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 14, fontFamily: "Inter, system-ui" }}>Loading...</div>
+    </div>
+  );
+
+  const FREE_LIMIT = 10;
+  const isAtLimit = pitchCount >= FREE_LIMIT;
   const [step, setStep] = useState("upload");
   const [investors, setInvestors] = useState([]);
   const [startup, setStartup] = useState(null);
