@@ -1,3 +1,4 @@
+export { default } from './app';
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
