@@ -1,3 +1,4 @@
+'use client';
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -1190,7 +1191,7 @@ export default function PitchWireLanding() {
         </ul>
         <div className="nav-right">
           <a href="#" className="nav-login">Sign in</a>
-          <a href="#" className="nav-cta">Start free →</a>
+          <a href="/app" className="nav-cta">Start free →</a>
         </div>
       </nav>
 
@@ -1209,7 +1210,7 @@ export default function PitchWireLanding() {
           <h1>Your unfair<br /><em>advantage</em><br />in the room.</h1>
           <p className="hero-sub">Upload your pitch deck. Discover investors who actually fit. Send personalized pitches that don't sound like templates — in minutes, not weeks.</p>
           <div className="hero-actions">
-            <a href="#" className="btn-primary">Start for free — no card needed →</a>
+            <a href="/app" className="btn-primary">Start for free — no card needed →</a>
             <a href="#how" className="btn-ghost">See how it works</a>
           </div>
           <div className="hero-stats">
@@ -1498,7 +1499,7 @@ export default function PitchWireLanding() {
           <div className="eyebrow" style={{ justifyContent: 'center', marginBottom: '24px' }}>Get started today</div>
           <div className="cta-title">Stop writing cold<br />emails <em>manually.</em></div>
           <p className="cta-sub">10 free pitches. No credit card. No setup.<br />Upload your deck and send your first campaign in minutes.</p>
-          <a href="#" className="btn-primary" style={{ fontSize: '16px', padding: '16px 36px' }}>Start for free — takes 2 minutes →</a>
+          <a href="/app" className="btn-primary" style={{ fontSize: '16px', padding: '16px 36px' }}>Start for free — takes 2 minutes →</a>
           <p className="cta-note">No credit card required · Cancel anytime · Built for founders</p>
         </div>
       </section>
@@ -1506,7 +1507,7 @@ export default function PitchWireLanding() {
       {/* FOOTER */}
       <footer className="pw-footer">
         <div className="footer-inner">
-          <a href="#" className="footer-logo">⚡ PitchWire</a>
+          <a href="/" className="footer-logo">⚡ PitchWire</a>
           <ul className="footer-links">
             <li><a href="#features">Features</a></li>
             <li><a href="#how">How it works</a></li>
