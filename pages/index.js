@@ -1190,7 +1190,7 @@ export default function PitchWireLanding() {
           <li><a href="#pricing">Pricing</a></li>
         </ul>
         <div className="nav-right">
-          <a href="#" className="nav-login">Sign in</a>
+          <a href="/login" className="nav-login">Sign in</a>
           <a href="/app" className="nav-cta">Start free →</a>
         </div>
       </nav>
@@ -1459,7 +1459,7 @@ export default function PitchWireLanding() {
                 <li><span className="price-check">✓</span> CSV upload</li>
                 <li><span className="price-check">✓</span> PitchWire watermark</li>
               </ul>
-              <button className="price-btn price-btn-outline">Get started free</button>
+             <a href="/login" className="price-btn price-btn-outline">Get started free</a>
             </div>
             <div className="pricing-card hot">
               <div className="price-tier">Starter</div>
@@ -1472,7 +1472,7 @@ export default function PitchWireLanding() {
                 <li><span className="price-check">✓</span> Investor fit scoring</li>
                 <li><span className="price-check">✓</span> Campaign tracking</li>
               </ul>
-              <button className="price-btn price-btn-solid">Get Starter →</button>
+              <a href="/login" className="price-btn price-btn-solid">Get Starter →</a>
             </div>
             <div className="pricing-card">
               <div className="price-tier">Pro</div>
@@ -1486,7 +1486,7 @@ export default function PitchWireLanding() {
                 <li><span className="price-check">✓</span> Open &amp; reply tracking</li>
                 <li><span className="price-check">✓</span> Priority support</li>
               </ul>
-              <button className="price-btn price-btn-outline">Get Pro →</button>
+              <a href="/login" className="price-btn price-btn-outline">Get Pro →</a>
             </div>
           </div>
         </div>
