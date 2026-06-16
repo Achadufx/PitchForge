@@ -6,6 +6,35 @@ export const config = {
   },
 };
 
+// Helper function to extract JSON from text
+function extractJSON(text) {
+  try {
+    // Try to parse as-is first
+    return JSON.parse(text);
+  } catch (e) {
+    // Clean the text
+    let clean = text.trim();
+    clean = clean.replace(/^```json\s*/i, "");
+    clean = clean.replace(/^```\s*/i, "");
+    clean = clean.replace(/\s*```$/i, "");
+    clean = clean.trim();
+
+    // Find JSON object boundaries
+    const start = clean.indexOf("{");
+    const end = clean.lastIndexOf("}");
+    
+    if (start === -1 || end === -1) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(clean.slice(start, end + 1));
+    } catch (e2) {
+      return null;
+    }
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -33,20 +62,21 @@ export default async function handler(req, res) {
 
     const MODEL = "gemini-2.5-flash";
 
-const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 1500,
-      },
-    }),
-  }
-);
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 1500,
+          },
+        }),
+      }
+    );
+
     const data = await response.json();
 
     if (data.error) {
@@ -58,33 +88,24 @@ const response = await fetch(
     if (!text) {
       return res.status(500).json({ error: "AI returned empty response. Try a different file." });
     }
-console.log("RAW GEMINI RESPONSE:");
-console.log(text);
-    let clean = text.trim();
-    clean = clean.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
+
+    console.log("RAW GEMINI RESPONSE:");
+    console.log(text);
 
     const parsed = extractJSON(text);
 
-if (!parsed) {
-  return res.status(500).json({
-    error: "AI returned invalid JSON format",
-    raw: text,
-  });
-}
-
-return res.json({
-  profile: parsed,
-  success: true,
-});
-} catch (e) {
-  console.error("JSON parse error:");
-  console.error(clean);
-
-  return res.status(500).json({
-    error: "AI returned invalid JSON",
-    raw: clean
-  });
+    if (!parsed) {
+      return res.status(500).json({
+        error: "AI returned invalid JSON format",
+        raw: text,
+      });
     }
+
+    return res.json({
+      profile: parsed,
+      success: true,
+    });
+
   } catch (err) {
     console.error("Analysis error:", err.message);
     res.status(500).json({ error: "Analysis failed: " + err.message });
