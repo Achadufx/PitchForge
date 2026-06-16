@@ -130,6 +130,36 @@ function DocumentUpload({ onComplete, plan }) {
   const removeDoc = (i) => setDocs(prev => prev.filter((_, idx) => idx !== i));
 
   const extractAndAnalyze = async () => {
+  if (docs.length === 0) return;
+  setAnalyzing(true);
+  setError("");
+
+  try {
+    const files = docs.map(doc => ({
+      name: doc.name,
+      base64: doc.base64,
+      mimeType: doc.mimeType || "application/pdf",
+    }));
+
+    const updated = docs.map(d => ({ ...d, status: "extracting" }));
+    setDocs(updated);
+
+    const analysisRes = await fetch("/api/analyze-documents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ files }),
+    });
+
+    const analysisData = await analysisRes.json();
+    if (!analysisRes.ok) throw new Error(analysisData.error);
+
+    setDocs(docs.map(d => ({ ...d, status: "done" })));
+    onComplete(analysisData.profile);
+  } catch (err) {
+    setError("Failed to analyze documents: " + err.message);
+  }
+  setAnalyzing(false);
+};
     if (docs.length === 0) return;
     setAnalyzing(true);
     setError("");
