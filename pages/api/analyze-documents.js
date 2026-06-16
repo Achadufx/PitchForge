@@ -32,17 +32,16 @@ export default async function handler(req, res) {
     }
 
     const response = await fetch(
-  "https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=" + process.env.GEMINI_API_KEY,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1500 },
-        }),
-      }
-    );
-
+  "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=" + process.env.GEMINI_API_KEY,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts }],
+      generationConfig: { temperature: 0.1, maxOutputTokens: 1500 },
+    }),
+  }
+);
     const data = await response.json();
 
     if (data.error) {
