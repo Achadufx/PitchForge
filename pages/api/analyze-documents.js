@@ -58,7 +58,8 @@ const response = await fetch(
     if (!text) {
       return res.status(500).json({ error: "AI returned empty response. Try a different file." });
     }
-
+console.log("RAW GEMINI RESPONSE:");
+console.log(text);
     let clean = text.trim();
     clean = clean.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
 
@@ -68,9 +69,23 @@ const response = await fetch(
       return res.status(500).json({ error: "Could not parse AI response. Please try again." });
     }
 
-    const parsed = JSON.parse(clean.slice(start, end + 1));
-    res.json({ profile: parsed, success: true });
+    try {
+  const parsed = JSON.parse(clean.slice(start, end + 1));
 
+  res.json({
+    profile: parsed,
+    success: true
+  });
+
+} catch (e) {
+  console.error("JSON parse error:");
+  console.error(clean);
+
+  return res.status(500).json({
+    error: "AI returned invalid JSON",
+    raw: clean
+  });
+    }
   } catch (err) {
     console.error("Analysis error:", err.message);
     res.status(500).json({ error: "Analysis failed: " + err.message });
