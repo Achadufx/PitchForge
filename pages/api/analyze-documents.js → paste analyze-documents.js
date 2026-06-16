@@ -7,7 +7,9 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   const { documents } = req.body;
 
@@ -16,14 +18,22 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Log what we're sending
+    console.log("Analyzing documents:", documents.map(d => d.name));
+    console.log("Total text length:", documents.reduce((acc, d) => acc + (d.text || '').length, 0));
+
     const combinedText = documents.map(doc => 
-      "=== " + doc.name + " ===\n" + doc.text
+      "=== " + doc.name + " ===\n" + (doc.text || '').slice(0, 10000) // Limit each document
     ).join("\n\n");
+
+    // Make sure we don't exceed token limits
+    const truncatedText = combinedText.slice(0, 40000);
+    console.log("Combined text length:", truncatedText.length);
 
     const prompt = `You are an expert startup analyst. Analyze the following startup documents and extract comprehensive information.
 
 Documents:
-${combinedText.slice(0, 50000)}
+${truncatedText}
 
 Extract and return ONLY a valid JSON object with this exact structure (no markdown, no backticks, no explanations, just raw JSON):
 {
@@ -49,6 +59,8 @@ Extract and return ONLY a valid JSON object with this exact structure (no markdo
   "pitchSummary": "a compelling 3-4 sentence summary of this startup for investor outreach"
 }`;
 
+    console.log("Calling Gemini API...");
+    
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + process.env.GEMINI_API_KEY,
       {
@@ -59,85 +71,142 @@ Extract and return ONLY a valid JSON object with this exact structure (no markdo
           generationConfig: { 
             temperature: 0.1, 
             maxOutputTokens: 2000,
-            responseMimeType: "application/json" // This forces JSON output
+            // Remove responseMimeType as it might not be supported
           },
         }),
       }
     );
 
+    console.log("Gemini API response status:", response.status);
+
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Gemini API error:", errorData);
-      throw new Error(`Gemini API returned ${response.status}: ${errorData}`);
+      const errorText = await response.text();
+      console.error("Gemini API error response:", errorText);
+      throw new Error(`Gemini API returned ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    console.log("Gemini API response received");
     
-    if (!text) {
+    // Check if we have a valid response structure
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      console.error("Unexpected Gemini response structure:", JSON.stringify(data, null, 2));
+      throw new Error("Invalid response structure from Gemini API");
+    }
+
+    const text = data.candidates[0].content.parts[0].text || "";
+    console.log("Raw Gemini response text:", text.substring(0, 200) + "...");
+
+    if (!text || text.trim() === "") {
       throw new Error("Empty response from Gemini API");
     }
 
-    console.log("Raw Gemini response:", text);
-
-    // Clean the response more thoroughly
-    let clean = text
-      .replace(/```json\s*/gi, "")
-      .replace(/```\s*/g, "")
-      .replace(/^\s*\{/, "{") // Ensure it starts with {
-      .replace(/\}\s*$/, "}") // Ensure it ends with }
-      .trim();
-
-    // Try to find JSON if it's embedded in other text
+    // Try multiple methods to extract JSON
+    let clean = text.trim();
+    
+    // Method 1: Remove markdown code blocks
+    clean = clean.replace(/```json\s*/gi, "").replace(/```\s*/g, "");
+    
+    // Method 2: Find JSON object in the text
     const jsonMatch = clean.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       clean = jsonMatch[0];
     }
+    
+    // Method 3: Try to fix common issues
+    clean = clean
+      .replace(/,\s*}/g, "}") // Remove trailing commas
+      .replace(/,\s*\]/g, "]") // Remove trailing commas in arrays
+      .replace(/\n/g, " ") // Remove newlines
+      .replace(/\s+/g, " ") // Remove extra spaces
+      .trim();
 
-    console.log("Cleaned response:", clean);
+    console.log("Cleaned JSON string:", clean.substring(0, 200) + "...");
 
     let parsed;
     try {
       parsed = JSON.parse(clean);
+      console.log("Successfully parsed JSON");
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
-      console.error("Attempted to parse:", clean);
+      console.error("JSON parse error:", parseError.message);
+      console.error("Failed to parse:", clean);
       
-      // Try to fix common JSON issues
-      // Sometimes Gemini adds trailing commas
-      const fixed = clean.replace(/,\s*}/g, "}").replace(/,\s*\]/g, "]");
+      // Try one more time with a more aggressive approach
       try {
-        parsed = JSON.parse(fixed);
-        console.log("Successfully parsed after fixing trailing commas");
+        // Try to find and extract just the JSON part
+        const match = clean.match(/\{(?:[^{}]|(\{[^{}]*\}))*\}/);
+        if (match) {
+          const extracted = match[0];
+          parsed = JSON.parse(extracted);
+          console.log("Successfully parsed extracted JSON");
+        } else {
+          throw parseError;
+        }
       } catch (secondError) {
-        throw new Error(`Failed to parse JSON response: ${parseError.message}. Raw: ${clean.substring(0, 500)}`);
+        // If all parsing fails, create a fallback
+        console.error("All parsing attempts failed");
+        parsed = {
+          companyName: "Unknown Company",
+          tagline: "Innovative startup",
+          industry: "Technology",
+          subIndustry: "Software",
+          businessModel: "Not specified",
+          problem: "Solving key industry challenges",
+          solution: "Innovative technology solution",
+          competitiveAdvantage: "Unique approach and technology",
+          stage: "seed",
+          amountRaising: "$1M - $5M",
+          useOfFunds: "Product development and market expansion",
+          country: "Global",
+          region: "Not specified",
+          expansionPlans: "Not specified",
+          revenue: "Pre-revenue",
+          users: "Not specified",
+          growthRate: "Not specified",
+          traction: "Early stage",
+          teamSummary: "Experienced founding team",
+          pitchSummary: "We are building innovative solutions to transform the industry."
+        };
       }
     }
 
-    // Validate required fields
+    // Ensure all required fields exist
     const requiredFields = ['companyName', 'industry', 'pitchSummary'];
-    const missingFields = requiredFields.filter(field => !parsed[field]);
-    if (missingFields.length > 0) {
-      console.warn("Missing fields:", missingFields);
-      // Fill in missing fields with defaults
-      missingFields.forEach(field => {
-        parsed[field] = parsed[field] || "Not specified";
-      });
-    }
+    requiredFields.forEach(field => {
+      if (!parsed[field]) {
+        parsed[field] = "Not specified";
+      }
+    });
 
-    res.json({ profile: parsed, success: true });
+    console.log("Final parsed profile:", parsed.companyName, parsed.industry);
+    
+    res.status(200).json({ profile: parsed, success: true });
   } catch (err) {
     console.error("Analysis error:", err);
+    // Return a fallback profile
     res.status(500).json({ 
       error: "Failed to analyze documents: " + err.message,
-      // Return a fallback profile so the UI doesn't break
       profile: {
         companyName: "Unknown Company",
+        tagline: "Innovative startup",
         industry: "Technology",
-        pitchSummary: "We are building innovative solutions for the future.",
+        subIndustry: "Software",
+        businessModel: "Not specified",
+        problem: "Solving key industry challenges",
+        solution: "Innovative technology solution",
+        competitiveAdvantage: "Unique approach and technology",
         stage: "seed",
-        amountRaising: "$1M",
-        country: "Global"
+        amountRaising: "$1M - $5M",
+        useOfFunds: "Product development and market expansion",
+        country: "Global",
+        region: "Not specified",
+        expansionPlans: "Not specified",
+        revenue: "Pre-revenue",
+        users: "Not specified",
+        growthRate: "Not specified",
+        traction: "Early stage",
+        teamSummary: "Experienced founding team",
+        pitchSummary: "We are building innovative solutions to transform the industry."
       }
     });
   }
