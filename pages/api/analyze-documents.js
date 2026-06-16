@@ -63,20 +63,19 @@ console.log(text);
     let clean = text.trim();
     clean = clean.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
 
-    const start = clean.indexOf("{");
-    const end = clean.lastIndexOf("}");
-    if (start === -1 || end === -1) {
-      return res.status(500).json({ error: "Could not parse AI response. Please try again." });
-    }
+    const parsed = extractJSON(text);
 
-    try {
-  const parsed = JSON.parse(clean.slice(start, end + 1));
-
-  res.json({
-    profile: parsed,
-    success: true
+if (!parsed) {
+  return res.status(500).json({
+    error: "AI returned invalid JSON format",
+    raw: text,
   });
+}
 
+return res.json({
+  profile: parsed,
+  success: true,
+});
 } catch (e) {
   console.error("JSON parse error:");
   console.error(clean);
