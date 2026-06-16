@@ -24,12 +24,33 @@ function extractJSON(text) {
     const end = clean.lastIndexOf("}");
     
     if (start === -1 || end === -1) {
+      console.log("No JSON object found in text");
+      console.log("Text:", clean.substring(0, 500));
       return null;
     }
 
+    let jsonStr = clean.slice(start, end + 1);
+    
+    // Try to fix common JSON issues
+    jsonStr = jsonStr.replace(/,\s*}/g, '}');
+    jsonStr = jsonStr.replace(/,\s*]/g, ']');
+    // Fix unescaped quotes in strings
+    jsonStr = jsonStr.replace(/(?<!\\)"/g, (match, offset, string) => {
+      // If the quote is inside a value, we might need to escape it
+      const before = string.substring(0, offset);
+      const after = string.substring(offset + 1);
+      // Simple heuristic: if it's preceded by a colon or comma, it's a value
+      if (before.match(/[:,]\s*$/)) {
+        return '"';
+      }
+      return match;
+    });
+
     try {
-      return JSON.parse(clean.slice(start, end + 1));
+      return JSON.parse(jsonStr);
     } catch (e2) {
+      console.log("Failed to parse JSON after cleaning");
+      console.log("Cleaned JSON:", jsonStr.substring(0, 500));
       return null;
     }
   }
@@ -47,7 +68,36 @@ export default async function handler(req, res) {
   try {
     const parts = [
       {
-        text: "You are an expert startup analyst. Analyze the following startup documents and extract key information. Return ONLY a valid JSON object with no markdown, no backticks, no explanation. Just raw JSON.\n\nExample format:\n{\"companyName\":\"Acme\",\"tagline\":\"We fix X\",\"industry\":\"Healthcare\",\"subIndustry\":\"Health Data\",\"businessModel\":\"SaaS\",\"problem\":\"Patients cant access records\",\"solution\":\"Secure patient data vault\",\"competitiveAdvantage\":\"Cryptographic ownership\",\"stage\":\"pre-seed\",\"amountRaising\":\"$500K\",\"useOfFunds\":\"Product and team\",\"country\":\"Nigeria\",\"region\":\"Lagos\",\"expansionPlans\":\"Africa then global\",\"revenue\":\"Pre-revenue\",\"users\":\"0\",\"growthRate\":\"N/A\",\"traction\":\"MVP live, dual portals\",\"teamSummary\":\"Technical founders with domain expertise\",\"pitchSummary\":\"We give patients control over their medical records using end-to-end encryption and tamper-proof audit trails. Starting in Africa expanding globally.\"}"
+        text: `You are an expert startup analyst. Analyze the following startup documents and extract key information.
+
+IMPORTANT: Return ONLY a valid JSON object. Do not include any markdown, backticks, explanations, or extra text. Just the raw JSON.
+
+The JSON must have these exact keys:
+- companyName (string)
+- tagline (string)
+- industry (string)
+- subIndustry (string)
+- businessModel (string)
+- problem (string)
+- solution (string)
+- competitiveAdvantage (string)
+- stage (string)
+- amountRaising (string)
+- useOfFunds (string)
+- country (string)
+- region (string)
+- expansionPlans (string)
+- revenue (string)
+- users (string)
+- growthRate (string)
+- traction (string)
+- teamSummary (string)
+- pitchSummary (string)
+
+If you cannot determine a value, use "Not specified".
+
+Example format:
+{"companyName":"Acme","tagline":"We fix X","industry":"Healthcare","subIndustry":"Health Data","businessModel":"SaaS","problem":"Patients cant access records","solution":"Secure patient data vault","competitiveAdvantage":"Cryptographic ownership","stage":"pre-seed","amountRaising":"$500K","useOfFunds":"Product and team","country":"Nigeria","region":"Lagos","expansionPlans":"Africa then global","revenue":"Pre-revenue","users":"0","growthRate":"N/A","traction":"MVP live, dual portals","teamSummary":"Technical founders with domain expertise","pitchSummary":"We give patients control over their medical records using end-to-end encryption and tamper-proof audit trails."}`
       }
     ];
 
@@ -71,7 +121,7 @@ export default async function handler(req, res) {
           contents: [{ parts }],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 1500,
+            maxOutputTokens: 2000,
           },
         }),
       }
@@ -89,15 +139,33 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "AI returned empty response. Try a different file." });
     }
 
-    console.log("RAW GEMINI RESPONSE:");
+    console.log("=== RAW GEMINI RESPONSE ===");
     console.log(text);
+    console.log("=== END RAW RESPONSE ===");
 
     const parsed = extractJSON(text);
 
     if (!parsed) {
+      // Try one more time with a more aggressive approach
+      try {
+        // Look for any JSON-like structure
+        const matches = text.match(/\{[^{]*\{[^}]*\}[^}]*\}/);
+        if (matches) {
+          const deepParsed = extractJSON(matches[0]);
+          if (deepParsed) {
+            return res.json({
+              profile: deepParsed,
+              success: true,
+            });
+          }
+        }
+      } catch (e) {
+        console.log("Deep extraction failed:", e.message);
+      }
+
       return res.status(500).json({
-        error: "AI returned invalid JSON format",
-        raw: text,
+        error: "AI returned invalid JSON format. Please try again with fewer files or use manual input.",
+        raw: text.substring(0, 500),
       });
     }
 
