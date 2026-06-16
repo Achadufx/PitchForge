@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     for (const file of files) {
       parts.push({
         inlineData: {
-          mimeType: file.mimeType,
+          mimeType: file.mimeType || "application/pdf",
           data: file.base64,
         },
       });
