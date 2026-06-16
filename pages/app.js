@@ -46,18 +46,6 @@ function StepIndicator({ current }) {
   );
 }
 
-function DocumentUpload({ onComplete, plan }) {
-  const [docs, setDocs] = useState([]);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [error, setError] = useState("");
-  const docLimit = PLAN_DOC_LIMITS[plan] || 3;
-
-  const handleFiles = async (fileList) => {
-    const arr = Array.from(fileList);
-    if (docs.length + arr.length > docLimit) {
-      setError(
-        "You can upload up to " + docLimit + " documents on your current plan."
-
 function DescribeStep({ onNext, onBack, plan }) {
   const [mode, setMode] = useState("upload");
   const [startup, setStartup] = useState({
@@ -197,23 +185,21 @@ function SendStep({ pitches, onRestart }) {
       const data = await res.json();
       setResults(data.results || []);
     } catch (err) {
-      setResults(
-        pitches.map((p) => ({ ...p, success: false, error: err.message }))
-      );
+      setResults(pitches.map(p => ({ ...p, success: false, error: err.message })));
     }
     setSending(false);
     setDone(true);
   };
 
   if (done) {
-    const succeeded = results.filter((r) => r.success).length;
+    const succeeded = results.filter(r => r.success).length;
     return (
-      <div style={{ textAlign: "center", padding: "40px 0" }}> <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div> <h2 style={{ fontSize: 22, fontWeight: 800, color: "#f1f5f9", marginBottom: 8, }} > {succeeded} pitch{succeeded !== 1 ? "es" : ""} sent! </h2> <p style={{ color: "#475569", marginBottom: 32, fontSize: 14 }}> Now sit back and let the replies come in. </p> <button onClick={onRestart} style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "12px 32px", fontWeight: 700, fontSize: 14, cursor: "pointer", }} > Start new campaign </button> </div>
+      <div style={{ textAlign: "center", padding: "40px 0" }}> <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div> <h2 style={{ fontSize: 22, fontWeight: 800, color: "#f1f5f9", marginBottom: 8 }}> {succeeded} pitch{succeeded !== 1 ? "es" : ""} sent! </h2> <p style={{ color: "#475569", marginBottom: 32, fontSize: 14 }}> Now sit back and let the replies come in. </p> <button onClick={onRestart} style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "12px 32px", fontWeight: 700, fontSize: 14, cursor: "pointer" }} > Start new campaign </button> </div>
     );
   }
 
   return (
-    <div> <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9", }} > Ready to launch </h2> <p style={{ color: "#64748b", marginBottom: 20, fontSize: 13 }}> Your name will appear as the sender. </p> <div style={{ marginBottom: 16 }}> <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px", }} > Your name </label> <input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="e.g. Samuel" style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 14, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0", }} /> </div> <div style={{ background: "#052e16", border: "1px solid #166534", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 13, color: "#4ade80", display: "flex", alignItems: "center", gap: 8, }} > <span>✓</span> <span> {pitches.length} pitch{pitches.length !== 1 ? "es" : ""} queued and ready </span> </div> <button onClick={handleSend} disabled={sending || !senderName} style={{ width: "100%", background: sending || !senderName ? "#1e293b" : "linear-gradient(135deg,#7c3aed,#4f46e5)", color: sending || !senderName ? "#475569" : "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontWeight: 700, fontSize: 15, cursor: sending || !senderName ? "not-allowed" : "pointer", }} > {sending ? "Sending..." : "🚀 Send " + pitches.length + " Pitch" + (pitches.length !== 1 ? "es" : "")} </button> </div>
+    <div> <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }} > Ready to launch </h2> <p style={{ color: "#64748b", marginBottom: 20, fontSize: 13 }}> Your name will appear as the sender. </p> <div style={{ marginBottom: 16 }}> <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px", }} > Your name </label> <input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="e.g. Samuel" style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 14, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0", }} /> </div> <div style={{ background: "#052e16", border: "1px solid #166534", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 13, color: "#4ade80", display: "flex", alignItems: "center", gap: 8 }} > <span>✓</span><span>{pitches.length} pitch{pitches.length !== 1 ? "es" : ""} queued and ready</span> </div> <button onClick={handleSend} disabled={sending || !senderName} style={{ width: "100%", background: (sending || !senderName) ? "#1e293b" : "linear-gradient(135deg,#7c3aed,#4f46e5)", color: (sending || !senderName) ? "#475569" : "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontWeight: 700, fontSize: 15, cursor: (sending || !senderName) ? "not-allowed" : "pointer" }} > {sending ? "Sending..." : "🚀 Send " + pitches.length + " Pitch" + (pitches.length !== 1 ? "es" : "")} </button> </div>
   );
 }
 
@@ -232,21 +218,16 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user }) {
     localStorage.setItem("pitches_" + user.id, newCount.toString());
   };
 
-  const restart = () => {
-    setStep("upload");
-    setInvestors([]);
-    setStartup(null);
-    setFinalPitches([]);
-  };
+  const restart = () => { setStep("upload"); setInvestors([]); setStartup(null); setFinalPitches([]); };
 
   return (
-    <div> <div style={{ marginBottom: 24 }}> <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4, }} > New Campaign </h1> <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> Upload your investor list and send personalized pitches in minutes. </p> </div> {isAtLimit ? ( <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 14, padding: 32, textAlign: "center", }} > <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div> <h3 style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: "-0.5px", }} > {plan === "starter" ? "You've hit your Starter limit." : "You've used all 10 free pitches."} </h3> <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", marginBottom: 24, lineHeight: 1.6, maxWidth: 400, margin: "0 auto 24px", }} > {plan === "starter" ? "Upgrade to Pro and unlock 500 pitches/month, Claude AI, deep investor research, and a full fundraising CRM." : "Upgrade to keep sending. Starter gives you 100 pitches/month. Pro gives you 500 plus Claude AI and deep investor research."} </p> <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", }} > {plan === "free" && ( <a href="/upgrade?plan=starter" style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", border: "1px solid rgba(124,58,237,0.25)", }} > Starter — $29/mo </a> )} <a href="/upgrade" style={{ background: "#7c3aed", color: "#fff", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", }} > Upgrade to Pro — $79/mo → </a> </div> </div> ) : ( <div style={{ background: "#0f172a", borderRadius: 16, padding: 24, border: "1px solid #1e293b", }} > <StepIndicator current={step} /> {step === "upload" && ( <div> <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9", }} > Upload your investor list </h2> <p style={{ color: "#64748b", marginBottom: 20, fontSize: 13 }}> CSV with columns: name, email, firm (optional) </p> <div onClick={() => document.getElementById("csv-input").click()} style={{ border: "2px dashed #334155", borderRadius: 12, padding: "40px 24px", textAlign: "center", cursor: "pointer", background: "#0a0f1e", }} > <div style={{ fontSize: 32, marginBottom: 10 }}>📂</div> <div style={{ fontWeight: 600, color: "#e2e8f0", marginBottom: 4, fontSize: 14, }} > Drop CSV here or click to browse </div> <input id="csv-input" type="file" accept=".csv" style={{ display: "none" }} onChange={(e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { try { const parsed = parseCsv(ev.target.result); if (parsed[0]?.name && parsed[0]?.email) { setInvestors(parsed); setStep("describe"); } } catch {} }; reader.readAsText(file); }} /> </div> </div> )} {step === "describe" && ( <DescribeStep onNext={(s) => { setStartup(s); setStep("review"); }} onBack={() => setStep("upload")} plan={plan} /> )} {step === "review" && ( <ReviewStep investors={investors} startup={startup} onNext={(p) => { setFinalPitches(p); setStep("send"); }} onBack={() => setStep("describe")} onPitchGenerated={incrementPitchCount} /> )} {step === "send" && ( <SendStep pitches={finalPitches} onRestart={restart} /> )} </div> )} </div>
+    <div> <div style={{ marginBottom: 24 }}> <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}> New Campaign </h1> <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> Upload your investor list and send personalized pitches in minutes. </p> </div> {isAtLimit ? ( <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 14, padding: 32, textAlign: "center" }} > <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div> <h3 style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: "-0.5px" }}> {plan === "starter" ? "You've hit your Starter limit." : "You've used all 10 free pitches."} </h3> <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", marginBottom: 24, lineHeight: 1.6, maxWidth: 400, margin: "0 auto 24px" }} > {plan === "starter" ? "Upgrade to Pro and unlock 500 pitches/month, Claude AI, deep investor research, and a full fundraising CRM." : "Upgrade to keep sending. Starter gives you 100 pitches/month. Pro gives you 500 plus Claude AI and deep investor research."} </p> <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}> {plan === "free" && ( <a href="/upgrade?plan=starter" style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", border: "1px solid rgba(124,58,237,0.25)" }} > Starter — $29/mo </a> )} <a href="/upgrade" style={{ background: "#7c3aed", color: "#fff", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none" }} > Upgrade to Pro — $79/mo → </a> </div> </div> ) : ( <div style={{ background: "#0f172a", borderRadius: 16, padding: 24, border: "1px solid #1e293b" }} > <StepIndicator current={step} /> {step === "upload" && ( <div> <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}> Upload your investor list </h2> <p style={{ color: "#64748b", marginBottom: 20, fontSize: 13 }}> CSV with columns: name, email, firm (optional) </p> <div onClick={() => document.getElementById("csv-input").click()} style={{ border: "2px dashed #334155", borderRadius: 12, padding: "40px 24px", textAlign: "center", cursor: "pointer", background: "#0a0f1e" }} > <div style={{ fontSize: 32, marginBottom: 10 }}>📂</div> <div style={{ fontWeight: 600, color: "#e2e8f0", marginBottom: 4, fontSize: 14 }}> Drop CSV here or click to browse </div> <input id="csv-input" type="file" accept=".csv" style={{ display: "none" }} onChange={(e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { try { const parsed = parseCsv(ev.target.result); if (parsed[0]?.name && parsed[0]?.email) { setInvestors(parsed); setStep("describe"); } } catch {} }; reader.readAsText(file); }} /> </div> </div> )} {step === "describe" && <DescribeStep onNext={(s) => { setStartup(s); setStep("review"); }} onBack={() => setStep("upload")} plan={plan} />} {step === "review" && <ReviewStep investors={investors} startup={startup} onNext={(p) => { setFinalPitches(p); setStep("send"); }} onBack={() => setStep("describe")} onPitchGenerated={incrementPitchCount} />} {step === "send" && <SendStep pitches={finalPitches} onRestart={restart} />} </div> )} </div>
   );
 }
 
 function InvestorsTab({ plan }) {
   return (
-    <div> <div style={{ marginBottom: 28 }}> <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4, }} > Investor Discovery </h1> <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> Find investors that match your startup. </p> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "48px 32px", textAlign: "center", }} > <div style={{ fontSize: 40, marginBottom: 16 }}>🔍</div> <h3 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 8, }} > Investor database coming soon </h3> <p style={{ fontSize: 14, color: "rgba(255,255,255,0.35)", maxWidth: 380, margin: "0 auto 24px", lineHeight: 1.6, }} > We're building a curated database of thousands of active investors with fit scoring, activity tracking, and deep AI research. For now, upload your list as CSV on the Campaign tab. </p> {plan === "free" && ( <a href="/upgrade" style={{ display: "inline-block", background: "#7c3aed", color: "#fff", padding: "10px 24px", borderRadius: 8, fontWeight: 700, fontSize: 13, textDecoration: "none", }} > Upgrade to get early access → </a> )} </div> </div>
+    <div> <div style={{ marginBottom: 28 }}> <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}> Investor Discovery </h1> <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> Find investors that match your startup. </p> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "48px 32px", textAlign: "center" }} > <div style={{ fontSize: 40, marginBottom: 16 }}>🔍</div> <h3 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 8 }}> Investor database coming soon </h3> <p style={{ fontSize: 14, color: "rgba(255,255,255,0.35)", maxWidth: 380, margin: "0 auto 24px", lineHeight: 1.6 }} > We're building a curated database of thousands of active investors with fit scoring, activity tracking, and deep AI research. For now, upload your list as CSV on the Campaign tab. </p> {plan === "free" && ( <a href="/upgrade" style={{ display: "inline-block", background: "#7c3aed", color: "#fff", padding: "10px 24px", borderRadius: 8, fontWeight: 700, fontSize: 13, textDecoration: "none" }} > Upgrade to get early access → </a> )} </div> </div>
   );
 }
 
@@ -260,22 +241,16 @@ function AccountTab({ user, plan, pitchCount, onSignOut }) {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: p,
-          userId: user.id,
-          userEmail: user.email,
-        }),
+        body: JSON.stringify({ plan: p, userId: user.id, userEmail: user.email }),
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
     setCheckoutLoading("");
   };
 
   return (
-    <div> <div style={{ marginBottom: 28 }}> <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4, }} > Account </h1> <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> Manage your plan and account settings. </p> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 16, }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16, }} > Profile </div> <div style={{ display: "flex", alignItems: "center", gap: 14 }}> <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color: "#fff", }} > {user?.email?.[0]?.toUpperCase() || "F"} </div> <div> <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 2, }} > {user?.user_metadata?.full_name || "Founder"} </div> <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> {user?.email} </div> </div> </div> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 16, }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16, }} > Current Plan </div> <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, }} > <div> <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 2, textTransform: "capitalize", }} > {plan} </div> <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> {pitchCount} of {limit} pitches used </div> </div> <div style={{ fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: plan === "pro" ? "rgba(74,222,128,0.1)" : plan === "starter" ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.06)", color: plan === "pro" ? "#4ade80" : plan === "starter" ? "#a78bfa" : "rgba(255,255,255,0.3)", textTransform: "uppercase", }} > {plan} </div> </div> <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 99, height: 6, overflow: "hidden", }} > <div style={{ background: pitchCount / limit >= 0.9 ? "#f87171" : "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: Math.min((pitchCount / limit) * 100, 100) + "%", }} /> </div> </div> {plan !== "pro" && ( <div style={{ background: "#0f0f0f", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 14, padding: 24, marginBottom: 16, }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16, }} > Upgrade </div> <div style={{ display: "flex", flexDirection: "column", gap: 10 }}> {plan === "free" && ( <button onClick={() => handleCheckout("starter")} disabled={checkoutLoading === "starter"} style={{ width: "100%", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", }} > {checkoutLoading === "starter" ? "Loading..." : "Starter — $29/mo · 100 pitches/month →"} </button> )} <button onClick={() => handleCheckout("pro")} disabled={checkoutLoading === "pro"} style={{ width: "100%", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", background: "#7c3aed", color: "#fff", border: "none", }} > {checkoutLoading === "pro" ? "Loading..." : "Pro — $79/mo · 500 pitches + Claude AI + CRM →"} </button> </div> </div> )} <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16, }} > Danger Zone </div> <button onClick={onSignOut} style={{ background: "transparent", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 8, padding: "10px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer", }} > Sign out </button> </div> </div>
+    <div> <div style={{ marginBottom: 28 }}> <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}> Account </h1> <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> Manage your plan and account settings. </p> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 16 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Profile </div> <div style={{ display: "flex", alignItems: "center", gap: 14 }}> <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color: "#fff" }} > {user?.email?.[0]?.toUpperCase() || "F"} </div> <div> <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 2 }} > {user?.user_metadata?.full_name || "Founder"} </div> <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> {user?.email} </div> </div> </div> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 16 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Current Plan </div> <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}> <div> <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 2, textTransform: "capitalize" }} > {plan} </div> <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }} > {pitchCount} of {limit} pitches used </div> </div> <div style={{ fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: plan === "pro" ? "rgba(74,222,128,0.1)" : plan === "starter" ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.06)", color: plan === "pro" ? "#4ade80" : plan === "starter" ? "#a78bfa" : "rgba(255,255,255,0.3)", textTransform: "uppercase" }} > {plan} </div> </div> <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 99, height: 6, overflow: "hidden" }}> <div style={{ background: pitchCount / limit >= 0.9 ? "#f87171" : "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: Math.min((pitchCount / limit) * 100, 100) + "%" }} /> </div> </div> {plan !== "pro" && ( <div style={{ background: "#0f0f0f", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 14, padding: 24, marginBottom: 16 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Upgrade </div> <div style={{ display: "flex", flexDirection: "column", gap: 10 }}> {plan === "free" && ( <button onClick={() => handleCheckout("starter")} disabled={checkoutLoading === "starter"} style={{ width: "100%", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)" }} > {checkoutLoading === "starter" ? "Loading..." : "Starter — $29/mo · 100 pitches/month →"} </button> )} <button onClick={() => handleCheckout("pro")} disabled={checkoutLoading === "pro"} style={{ width: "100%", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", background: "#7c3aed", color: "#fff", border: "none" }} > {checkoutLoading === "pro" ? "Loading..." : "Pro — $79/mo · 500 pitches + Claude AI + CRM →"} </button> </div> </div> )} <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Danger Zone </div> <button onClick={onSignOut} style={{ background: "transparent", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 8, padding: "10px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer" }} > Sign out </button> </div> </div>
   );
 }
 
@@ -289,16 +264,10 @@ export default function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.push("/login");
-        return;
-      }
+      if (!session) { router.push("/login"); return; }
       setUser(session.user);
-      const count = parseInt(
-        localStorage.getItem("pitches_" + session.user.id) || "0"
-      );
-      const savedPlan =
-        localStorage.getItem("plan_" + session.user.id) || "free";
+      const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
+      const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
       setPitchCount(count);
       setPlan(savedPlan);
       setAuthChecking(false);
@@ -310,12 +279,29 @@ export default function App() {
     router.push("/login");
   };
 
-  if (authChecking)
-    return (
-      <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", }} > <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 14, fontFamily: "Inter, system-ui", }} > Loading... </div> </div>
-    );
+  if (authChecking) return (
+    <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 14, fontFamily: "Inter, system-ui" }}>Loading...</div>
+    </div>
+  );
 
   return (
-    <> <Head> <title>PitchWire — Dashboard</title> <meta name="viewport" content="width=device-width, initial-scale=1" /> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" /> </Head> <div style={{ display: "flex", minHeight: "100vh", background: "#000", fontFamily: "'Inter', system-ui, sans-serif", }} > <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} /> <main style={{ marginLeft: 220, flex: 1, padding: "40px", overflowY: "auto", minHeight: "100vh", }} > <div style={{ maxWidth: 720, margin: "0 auto" }}> {activeTab === "campaign" && ( <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} /> )} {activeTab === "investors" && <InvestorsTab plan={plan} />} {activeTab === "account" && ( <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} /> )} </div> </main> </div> </>
+    <>
+      <Head>
+        <title>PitchWire — Dashboard</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      </Head>
+      <div style={{ display: "flex", minHeight: "100vh", background: "#000", fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />
+        <main style={{ marginLeft: 220, flex: 1, padding: "40px", overflowY: "auto", minHeight: "100vh" }}>
+          <div style={{ maxWidth: 720, margin: "0 auto" }}>
+            {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} />}
+            {activeTab === "investors" && <InvestorsTab plan={plan} />}
+            {activeTab === "account" && <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />}
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
