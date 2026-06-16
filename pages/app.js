@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import { supabase } from "../lib/supabase";
+import DocumentUpload from "../components/DocumentUpload";
 import { useRouter } from "next/router";
 
 const API_URL = "";
