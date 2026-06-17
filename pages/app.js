@@ -59,46 +59,46 @@ function DescribeStep({ onNext, onBack, plan }) {
   const valid = startup.name && startup.description && startup.ask;
 
   const handleProfileComplete = async (p) => {
-    setProfile(p);
-    setIsAnalyzing(true);
+  setProfile(p);
+  setIsAnalyzing(true);
+  
+  // Auto-analyze and find matching investors using Gemini data
+  try {
+    const res = await fetch("/api/analyze-startup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companyName: p.companyName || "",
+        description: p.pitchSummary || p.description || "",  // ← CHANGED: fallback to p.description
+        amountRaising: p.amountRaising || "",
+        industry: p.sector || p.industry || "",  // ← CHANGED: Gemini uses 'sector'
+        stage: p.stage || "",
+        sector: p.sector || "",
+      }),
+    });
     
-    // Auto-analyze and find matching investors
-    try {
-      const res = await fetch("/api/analyze-startup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: p.companyName || "",
-          description: p.pitchSummary || "",
-          amountRaising: p.amountRaising || "",
-          industry: p.industry || "",
-          stage: p.stage || "",
-          sector: p.sector || "",
-        }),
-      });
-      
-      const data = await res.json();
-      if (data.success) {
-        setMatchedInvestors(data.matchedInvestors || []);
-        setStartup({
-          name: data.analysis?.companyName || p.companyName || "",
-          description: data.analysis?.description || p.pitchSummary || "",
-          ask: data.analysis?.amountRaising || p.amountRaising || "",
-        });
-      }
-    } catch (err) {
-      console.error("Analysis failed:", err);
-      // Fallback to basic profile data
+    const data = await res.json();
+    if (data.success) {
+      setMatchedInvestors(data.matchedInvestors || []);
       setStartup({
-        name: p.companyName || "",
-        description: p.pitchSummary || "",
-        ask: p.amountRaising || "",
+        name: data.analysis?.companyName || p.companyName || "",
+        description: data.analysis?.description || p.pitchSummary || p.description || "",  // ← CHANGED: added p.description
+        ask: data.analysis?.amountRaising || p.amountRaising || "",
       });
     }
-    
-    setIsAnalyzing(false);
-    setMode("review");
-  };
+  } catch (err) {
+    console.error("Investor matching failed:", err);
+    // Fallback to basic profile data
+    setStartup({
+      name: p.companyName || "",
+      description: p.pitchSummary || p.description || "",  // ← CHANGED: added p.description
+      ask: p.amountRaising || "",
+    });
+  }
+  
+  setIsAnalyzing(false);
+  setMode("review");
+};
 
   if (mode === "review" && profile) {
     return (
@@ -142,31 +142,31 @@ function DescribeStep({ onNext, onBack, plan }) {
             </p>
             
             {/* AI Analysis Results */}
-            <div style={{ background: "#0a0f1e", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 10, padding: 16, marginBottom: 16 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 10 }}>
-                AI Analysis
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {[
-                  ["Industry", profile.industry],
-                  ["Stage", profile.stage],
-                  ["Raising", profile.amountRaising],
-                  ["Location", profile.country],
-                  ["Model", profile.businessModel],
-                  ["Traction", profile.traction],
-                  ["Matched Investors", matchedInvestors.length > 0 ? `${matchedInvestors.length} found` : null],
-                ]
-                  .filter(([, v]) => v)
-                  .map(([k, v], i) => (
-                    <div key={i}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>
-                        {k}
-                      </div>
-                      <div style={{ fontSize: 12, color: "#cbd5e1" }}>{v}</div>
-                    </div>
-                  ))}
-              </div>
-            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+  {[
+    ["Sector", profile.sector],
+    ["Stage", profile.stage],
+    ["Raising", profile.amountRaising],
+    ["Location", profile.country],
+    ["Model", profile.businessModel],
+    ["Traction", profile.traction],
+    ["Revenue", profile.revenue],
+    ["Users", profile.users],
+    ["Problem", profile.problem],
+    ["Solution", profile.solution],
+    ["Competitive Advantage", profile.competitiveAdvantage],
+    ["Matched Investors", matchedInvestors.length > 0 ? `${matchedInvestors.length} found` : null],
+  ]
+    .filter(([, v]) => v && v !== "undefined" && v !== "null")
+    .map(([k, v], i) => (
+      <div key={i}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>
+          {k}
+        </div>
+        <div style={{ fontSize: 12, color: "#cbd5e1" }}>{v}</div>
+      </div>
+    ))}
+</div>
 
             {/* Match Summary */}
             {matchedInvestors.length > 0 && (
