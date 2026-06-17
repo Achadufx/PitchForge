@@ -26,15 +26,15 @@ export default async function handler(req, res) {
       .maybeSingle();
 
     if (error) {
-      console.error("Fetch error:", error);
+      console.error("❌ Fetch error:", error);
       return res.status(500).json({ error: error.message });
     }
 
-    console.log("📥 Profile found:", data ? "Yes" : "No");
+    console.log("📥 Profile:", data ? "Found" : "Not found");
     res.json({ success: true, profile: data || null });
 
   } catch (err) {
-    console.error("Unexpected error:", err);
+    console.error("❌ Unexpected error:", err);
     res.status(500).json({ error: err.message });
   }
 }
