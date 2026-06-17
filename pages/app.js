@@ -4,7 +4,9 @@ import { supabase } from "../lib/supabase";
 import DocumentUpload from "../components/DocumentUpload";
 import { useRouter } from "next/router";
 import AccountTab from "../components/AccountTab";
-
+import CrmTab from "../components/CrmTab";
+import FollowupsTab from "../components/FollowupsTab";
+import TemplatesTab from "../components/TemplatesTab";
 const API_URL = "";
 const PLAN_LIMITS = { free: 10, starter: 100, pro: 500 };
 const PLAN_DOC_LIMITS = { free: 3, starter: 999, pro: 999 };
@@ -963,10 +965,13 @@ export default function App() {
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />
         <main style={{ marginLeft: 220, flex: 1, padding: "40px", overflowY: "auto", minHeight: "100vh" }}>
           <div style={{ maxWidth: 720, margin: "0 auto" }}>
-            {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} preloadedInvestors={preloadedInvestors} clearPreload={() => setPreloadedInvestors(null)} />}
-            {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setPreloadedInvestors(invs); setActiveTab("campaign"); }} />}
-            {activeTab === "account" && <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />}
-          </div>
+  {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} preloadedInvestors={preloadedInvestors} clearPreload={() => setPreloadedInvestors(null)} />}
+  {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setPreloadedInvestors(invs); setActiveTab("campaign"); }} />}
+  {activeTab === "crm" && <CrmTab />}
+  {activeTab === "followups" && <FollowupsTab />}
+  {activeTab === "templates" && <TemplatesTab />}
+  {activeTab === "account" && <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />}
+</div>
         </main>
       </div>
     </>
