@@ -54,28 +54,314 @@ function DescribeStep({ onNext, onBack, plan }) {
     ask: "",
   });
   const [profile, setProfile] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [matchedInvestors, setMatchedInvestors] = useState([]);
   const valid = startup.name && startup.description && startup.ask;
 
-  const handleProfileComplete = (p) => {
+  const handleProfileComplete = async (p) => {
     setProfile(p);
-    setStartup({
-      name: p.companyName || "",
-      description: p.pitchSummary || "",
-      ask: p.amountRaising || "",
-    });
+    setIsAnalyzing(true);
+    
+    // Auto-analyze and find matching investors
+    try {
+      const res = await fetch("/api/analyze-startup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: p.companyName || "",
+          description: p.pitchSummary || "",
+          amountRaising: p.amountRaising || "",
+          industry: p.industry || "",
+          stage: p.stage || "",
+          sector: p.sector || "",
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setMatchedInvestors(data.matchedInvestors || []);
+        setStartup({
+          name: data.analysis?.companyName || p.companyName || "",
+          description: data.analysis?.description || p.pitchSummary || "",
+          ask: data.analysis?.amountRaising || p.amountRaising || "",
+        });
+      }
+    } catch (err) {
+      console.error("Analysis failed:", err);
+      // Fallback to basic profile data
+      setStartup({
+        name: p.companyName || "",
+        description: p.pitchSummary || "",
+        ask: p.amountRaising || "",
+      });
+    }
+    
+    setIsAnalyzing(false);
     setMode("review");
   };
 
   if (mode === "review" && profile) {
     return (
-      <div> <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9", }} > AI understood your startup ✓ </h2> <p style={{ color: "#64748b", marginBottom: 16, fontSize: 13 }}> Review and edit before generating pitches. </p> <div style={{ background: "#0a0f1e", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 10, padding: 16, marginBottom: 16, }} > <div style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 10, }} > AI Analysis </div> <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }} > {[ ["Industry", profile.industry], ["Stage", profile.stage], ["Raising", profile.amountRaising], ["Location", profile.country], ["Model", profile.businessModel], ["Traction", profile.traction], ] .filter(([, v]) => v) .map(([k, v], i) => ( <div key={i}> <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2, }} > {k} </div> <div style={{ fontSize: 12, color: "#cbd5e1" }}>{v}</div> </div> ))} </div> </div> {[ { key: "name", label: "Company name" }, { key: "description", label: "Pitch description (AI will use this)", multiline: true, }, { key: "ask", label: "Amount raising" }, ].map(({ key, label, multiline }) => ( <div key={key} style={{ marginBottom: 14 }}> <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.5px", }} > {label} </label> {multiline ? ( <textarea value={startup[key]} onChange={(e) => setStartup({ ...startup, [key]: e.target.value }) } rows={4} style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, resize: "vertical", outline: "none", fontFamily: "inherit", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0", }} /> ) : ( <input value={startup[key]} onChange={(e) => setStartup({ ...startup, [key]: e.target.value }) } style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0", }} /> )} </div> ))} <div style={{ display: "flex", gap: 10 }}> <button onClick={() => setMode("upload")} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "11px 18px", fontWeight: 600, fontSize: 13, cursor: "pointer", }} > ← Re-upload </button> <button onClick={onBack} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "11px 18px", fontWeight: 600, fontSize: 13, cursor: "pointer", }} > ← Back </button> <button onClick={() => onNext(startup)} disabled={!valid} style={{ flex: 1, background: valid ? "#7c3aed" : "#1e293b", color: valid ? "#fff" : "#475569", border: "none", borderRadius: 8, padding: "11px 20px", fontWeight: 700, fontSize: 14, cursor: valid ? "pointer" : "not-allowed", }} > Generate Pitches ⚡ </button> </div> </div>
+      <div>
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}>
+          {isAnalyzing ? "🧠 AI is analyzing your documents..." : "✅ AI understood your startup"}
+        </h2>
+        
+        {isAnalyzing ? (
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <div style={{ fontSize: 36, marginBottom: 16 }}>🔍</div>
+            <p style={{ color: "#64748b", marginBottom: 28, fontSize: 13 }}>
+              Analyzing your documents and matching with relevant investors...
+            </p>
+            <div style={{ background: "#1e293b", borderRadius: 99, height: 6, overflow: "hidden", maxWidth: 300, margin: "0 auto" }}>
+              <div style={{ 
+                background: "linear-gradient(90deg,#7c3aed,#a78bfa)", 
+                height: "100%", 
+                borderRadius: 99, 
+                width: "60%", 
+                transition: "width 0.4s ease",
+                animation: "pulse 1.5s infinite"
+              }} />
+            </div>
+            <style>{`
+              @keyframes pulse {
+                0%, 100% { width: 60%; }
+                50% { width: 85%; }
+              }
+            `}</style>
+          </div>
+        ) : (
+          <>
+            <p style={{ color: "#64748b", marginBottom: 16, fontSize: 13 }}>
+              Review and edit before generating pitches.
+              {matchedInvestors.length > 0 && (
+                <span style={{ color: "#a78bfa", fontWeight: 600 }}>
+                  {" "}We found {matchedInvestors.length} relevant investors for your startup!
+                </span>
+              )}
+            </p>
+            
+            {/* AI Analysis Results */}
+            <div style={{ background: "#0a0f1e", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 10, padding: 16, marginBottom: 16 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 10 }}>
+                AI Analysis
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {[
+                  ["Industry", profile.industry],
+                  ["Stage", profile.stage],
+                  ["Raising", profile.amountRaising],
+                  ["Location", profile.country],
+                  ["Model", profile.businessModel],
+                  ["Traction", profile.traction],
+                  ["Matched Investors", matchedInvestors.length > 0 ? `${matchedInvestors.length} found` : null],
+                ]
+                  .filter(([, v]) => v)
+                  .map(([k, v], i) => (
+                    <div key={i}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>
+                        {k}
+                      </div>
+                      <div style={{ fontSize: 12, color: "#cbd5e1" }}>{v}</div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Match Summary */}
+            {matchedInvestors.length > 0 && (
+              <div style={{ background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: 8, padding: 12, marginBottom: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#a78bfa", marginBottom: 6 }}>
+                  🎯 Top investor matches:
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {matchedInvestors.slice(0, 5).map((inv, i) => (
+                    <span key={i} style={{ 
+                      fontSize: 11, 
+                      color: "#cbd5e1", 
+                      background: "rgba(124,58,237,0.08)", 
+                      padding: "3px 10px", 
+                      borderRadius: 99 
+                    }}>
+                      {inv.firm || inv.name}
+                    </span>
+                  ))}
+                  {matchedInvestors.length > 5 && (
+                    <span style={{ fontSize: 11, color: "#64748b" }}>
+                      +{matchedInvestors.length - 5} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Editable fields */}
+            {[
+              { key: "name", label: "Company name" },
+              { key: "description", label: "Pitch description (AI will use this)", multiline: true },
+              { key: "ask", label: "Amount raising" },
+            ].map(({ key, label, multiline }) => (
+              <div key={key} style={{ marginBottom: 14 }}>
+                <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  {label}
+                </label>
+                {multiline ? (
+                  <textarea
+                    value={startup[key] || ""}
+                    onChange={(e) => setStartup({ ...startup, [key]: e.target.value })}
+                    rows={4}
+                    style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, resize: "vertical", outline: "none", fontFamily: "inherit", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0" }}
+                  />
+                ) : (
+                  <input
+                    value={startup[key] || ""}
+                    onChange={(e) => setStartup({ ...startup, [key]: e.target.value })}
+                    style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0" }}
+                  />
+                )}
+              </div>
+            ))}
+            
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setMode("upload")} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "11px 18px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                ← Re-upload
+              </button>
+              <button onClick={onBack} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "11px 18px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                ← Back
+              </button>
+              <button 
+                onClick={() => onNext({ ...startup, matchedInvestors })} 
+                disabled={!valid} 
+                style={{ 
+                  flex: 1, 
+                  background: valid ? "#7c3aed" : "#1e293b", 
+                  color: valid ? "#fff" : "#475569", 
+                  border: "none", 
+                  borderRadius: 8, 
+                  padding: "11px 20px", 
+                  fontWeight: 700, 
+                  fontSize: 14, 
+                  cursor: valid ? "pointer" : "not-allowed" 
+                }}
+              >
+                Generate Pitches ⚡
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     );
   }
 
+  // Upload and manual modes (unchanged from your original)
   return (
-    <div> <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9", }} > Describe your startup </h2> <div style={{ display: "flex", gap: 0, background: "#0a0f1e", border: "1px solid #1e293b", borderRadius: 8, padding: 4, marginBottom: 20, }} > <button onClick={() => setMode("upload")} style={{ flex: 1, padding: "8px", borderRadius: 6, border: "none", cursor: "pointer", background: mode === "upload" ? "#7c3aed" : "transparent", color: mode === "upload" ? "#fff" : "#64748b", fontFamily: "inherit", fontSize: 13, fontWeight: 600, transition: "all 0.15s", }} > 📄 Upload Documents </button> <button onClick={() => setMode("manual")} style={{ flex: 1, padding: "8px", borderRadius: 6, border: "none", cursor: "pointer", background: mode === "manual" ? "#7c3aed" : "transparent", color: mode === "manual" ? "#fff" : "#64748b", fontFamily: "inherit", fontSize: 13, fontWeight: 600, transition: "all 0.15s", }} > ✏️ Type Manually </button> </div> {mode === "upload" && ( <div> <DocumentUpload onComplete={handleProfileComplete} plan={plan} /> <button onClick={onBack} style={{ background: "transparent", color: "#475569", border: "none", fontSize: 13, cursor: "pointer", marginTop: 12, padding: 0, }} > ← Back </button> </div> )} {mode === "manual" && ( <div> {[ { key: "name", label: "Startup name", placeholder: "e.g. ForcepX" }, { key: "description", label: "What you do", placeholder: "e.g. We give patients cryptographic control over their medical records.", multiline: true, }, { key: "ask", label: "What you're raising", placeholder: "e.g. $500K pre-seed", }, ].map(({ key, label, placeholder, multiline }) => ( <div key={key} style={{ marginBottom: 16 }}> <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px", }} > {label} </label> {multiline ? ( <textarea value={startup[key]} onChange={(e) => setStartup({ ...startup, [key]: e.target.value }) } placeholder={placeholder} rows={3} style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, resize: "vertical", outline: "none", fontFamily: "inherit", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0", }} /> ) : ( <input value={startup[key]} onChange={(e) => setStartup({ ...startup, [key]: e.target.value }) } placeholder={placeholder} style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0", }} /> )} </div> ))} <div style={{ display: "flex", gap: 10 }}> <button onClick={onBack} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "12px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer", }} > ← Back </button> <button onClick={() => onNext(startup)} disabled={!valid} style={{ flex: 1, background: valid ? "#7c3aed" : "#1e293b", color: valid ? "#fff" : "#475569", border: "none", borderRadius: 8, padding: "12px 28px", fontWeight: 700, fontSize: 14, cursor: valid ? "pointer" : "not-allowed", }} > Generate Pitches ⚡ </button> </div> </div> )} </div>
+    <div>
+      <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}>Describe your startup</h2>
+      <div style={{ display: "flex", gap: 0, background: "#0a0f1e", border: "1px solid #1e293b", borderRadius: 8, padding: 4, marginBottom: 20 }}>
+        <button 
+          onClick={() => setMode("upload")} 
+          style={{ 
+            flex: 1, 
+            padding: "8px", 
+            borderRadius: 6, 
+            border: "none", 
+            cursor: "pointer", 
+            background: mode === "upload" ? "#7c3aed" : "transparent", 
+            color: mode === "upload" ? "#fff" : "#64748b", 
+            fontFamily: "inherit", 
+            fontSize: 13, 
+            fontWeight: 600, 
+            transition: "all 0.15s" 
+          }}
+        >
+          📄 Upload Documents
+        </button>
+        <button 
+          onClick={() => setMode("manual")} 
+          style={{ 
+            flex: 1, 
+            padding: "8px", 
+            borderRadius: 6, 
+            border: "none", 
+            cursor: "pointer", 
+            background: mode === "manual" ? "#7c3aed" : "transparent", 
+            color: mode === "manual" ? "#fff" : "#64748b", 
+            fontFamily: "inherit", 
+            fontSize: 13, 
+            fontWeight: 600, 
+            transition: "all 0.15s" 
+          }}
+        >
+          ✏️ Type Manually
+        </button>
+      </div>
+      
+      {mode === "upload" && (
+        <div>
+          <DocumentUpload onComplete={handleProfileComplete} plan={plan} />
+          <button onClick={onBack} style={{ background: "transparent", color: "#475569", border: "none", fontSize: 13, cursor: "pointer", marginTop: 12, padding: 0 }}>
+            ← Back
+          </button>
+        </div>
+      )}
+      
+      {mode === "manual" && (
+        <div>
+          {[
+            { key: "name", label: "Startup name", placeholder: "e.g. ForcepX" },
+            { key: "description", label: "What you do", placeholder: "e.g. We give patients cryptographic control over their medical records.", multiline: true },
+            { key: "ask", label: "What you're raising", placeholder: "e.g. $500K pre-seed" },
+          ].map(({ key, label, placeholder, multiline }) => (
+            <div key={key} style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                {label}
+              </label>
+              {multiline ? (
+                <textarea
+                  value={startup[key]}
+                  onChange={(e) => setStartup({ ...startup, [key]: e.target.value })}
+                  placeholder={placeholder}
+                  rows={3}
+                  style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, resize: "vertical", outline: "none", fontFamily: "inherit", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0" }}
+                />
+              ) : (
+                <input
+                  value={startup[key]}
+                  onChange={(e) => setStartup({ ...startup, [key]: e.target.value })}
+                  placeholder={placeholder}
+                  style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 13, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0" }}
+                />
+              )}
+            </div>
+          ))}
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={onBack} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "12px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+              ← Back
+            </button>
+            <button 
+              onClick={() => onNext(startup)} 
+              disabled={!valid} 
+              style={{ 
+                flex: 1, 
+                background: valid ? "#7c3aed" : "#1e293b", 
+                color: valid ? "#fff" : "#475569", 
+                border: "none", 
+                borderRadius: 8, 
+                padding: "12px 28px", 
+                fontWeight: 700, 
+                fontSize: 14, 
+                cursor: valid ? "pointer" : "not-allowed" 
+              }}
+            >
+              Generate Pitches ⚡
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
+
 
 async function generateSingle(inv, startup) {
   console.log(`📧 Generating pitch for: ${inv.name}`);
@@ -144,7 +430,8 @@ async function generateSingle(inv, startup) {
       body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem in healthcare. Patients have no control over their medical data, and it's costing lives and billions in inefficiency.\n\nWe've built a cryptographic patient data vault that gives patients ownership with a tamper-proof audit trail. We're already in pilots with 2 hospitals and have 500+ patients enrolled.\n\nWould love 15 minutes to show you what we're building and get your thoughts.\n\nBest,\nSamuel\nFounder, ${startup.name}`
     };
   }
-  }
+}
+
 function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
   const [pitches, setPitches] = useState([]);
   const [selected, setSelected] = useState([]);
