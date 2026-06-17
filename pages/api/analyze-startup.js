@@ -15,8 +15,7 @@ export default async function handler(req, res) {
   try {
     console.log("🔍 Matching investors for:", { companyName, industry, stage, sector });
 
-    // Find matching investors from database
-    const matchedInvestors = await findMatchingInvestors({ industry, stage, sector, description });
+    const matchedInvestors = await findMatchingInvestors({ industry, stage, sector, description, amountRaising });
 
     const analysis = {
       companyName: companyName || "",
@@ -40,7 +39,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function findMatchingInvestors({ industry, stage, sector, description }) {
+async function findMatchingInvestors({ industry, stage, sector, description, amountRaising }) {
   try {
     // Normalize search term - convert to lowercase for matching
     let searchTerm = (sector || industry || "").toLowerCase().trim();
@@ -48,28 +47,22 @@ async function findMatchingInvestors({ industry, stage, sector, description }) {
     
     console.log(`📊 Search term: "${searchTerm}", Stage: "${stageLower}"`);
     
-    // If no search term, detect from description
+    // Detect sector from description if not provided
     if (!searchTerm && description) {
       const descLower = description.toLowerCase();
       if (descLower.includes("health") || descLower.includes("medical") || descLower.includes("patient") || descLower.includes("clinical") || descLower.includes("hospital")) {
         searchTerm = "healthtech";
-      } else if (descLower.includes("fintech") || descLower.includes("financial") || descLower.includes("payment") || descLower.includes("banking")) {
+      } else if (descLower.includes("fintech") || descLower.includes("financial") || descLower.includes("payment")) {
         searchTerm = "fintech";
-      } else if (descLower.includes("saas") || descLower.includes("software") || descLower.includes("platform")) {
+      } else if (descLower.includes("saas") || descLower.includes("software")) {
         searchTerm = "saas";
-      } else if (descLower.includes("ai") || descLower.includes("machine learning") || descLower.includes("data")) {
+      } else if (descLower.includes("ai") || descLower.includes("machine learning")) {
         searchTerm = "ai/ml";
-      } else if (descLower.includes("climate") || descLower.includes("renewable") || descLower.includes("sustainable")) {
-        searchTerm = "climate tech";
-      } else if (descLower.includes("education") || descLower.includes("learning") || descLower.includes("edtech")) {
-        searchTerm = "edtech";
-      } else if (descLower.includes("agriculture") || descLower.includes("agri") || descLower.includes("farm")) {
-        searchTerm = "agritech";
       }
       console.log(`🔍 Detected sector from description: "${searchTerm}"`);
     }
 
-    // First, try to get ALL investors and filter manually (more reliable)
+    // Fetch all investors
     console.log(`🔍 Fetching all investors from database...`);
     const { data: allInvestors, error: allError } = await supabaseAdmin
       .from('investors')
@@ -83,96 +76,151 @@ async function findMatchingInvestors({ industry, stage, sector, description }) {
     
     console.log(`📊 Total investors in database: ${allInvestors?.length || 0}`);
     
-    // If no investors in database
     if (!allInvestors || allInvestors.length === 0) {
       console.log("⚠️ No investors found in database");
       return [];
     }
 
-    // Filter investors manually
-    let matched = allInvestors.filter(inv => {
-      // If no search term, include all
-      if (!searchTerm) return true;
+    // Filter and score investors
+    const scored = allInvestors.map(inv => {
+      let score = 0;
+      let matchReasons = [];
       
-      // Check if investor has sectors
-      if (!inv.sectors || inv.sectors.length === 0) return false;
-      
-      // Check if any sector matches (case insensitive)
-      return inv.sectors.some(s => {
-        const sectorLower = s.toLowerCase().trim();
-        // Check for exact match or partial match
-        return sectorLower === searchTerm || 
-               sectorLower.includes(searchTerm) || 
-               searchTerm.includes(sectorLower);
-      });
-    });
-
-    console.log(`✅ Found ${matched.length} investors matching sector "${searchTerm}"`);
-
-    // If no matches with sector, try to match by notes (for healthtech investors)
-    if (matched.length === 0 && searchTerm) {
-      console.log(`🔄 No sector matches, trying notes/description match...`);
-      matched = allInvestors.filter(inv => {
-        const notes = (inv.notes || "").toLowerCase();
-        const firm = (inv.firm || "").toLowerCase();
-        const searchLower = searchTerm.toLowerCase();
+      // === SECTOR MATCH (Weight: 40 points) ===
+      if (searchTerm && inv.sectors && inv.sectors.length > 0) {
+        const sectorLower = searchTerm.toLowerCase();
+        let bestSectorMatch = 0;
         
-        return notes.includes(searchLower) || 
-               firm.includes(searchLower) ||
-               (searchTerm === "healthtech" && (notes.includes("health") || notes.includes("medical") || notes.includes("patient")));
-      });
-      console.log(`✅ Found ${matched.length} investors from notes/firm match`);
-    }
+        inv.sectors.forEach(s => {
+          const sLower = s.toLowerCase().trim();
+          // Exact match
+          if (sLower === sectorLower) {
+            bestSectorMatch = Math.max(bestSectorMatch, 40);
+            matchReasons.push("Exact sector match");
+          }
+          // Partial match (sector contains search term)
+          else if (sLower.includes(sectorLower) || sectorLower.includes(sLower)) {
+            bestSectorMatch = Math.max(bestSectorMatch, 30);
+            matchReasons.push("Partial sector match");
+          }
+          // Related match (e.g., "healthtech" matches "healthcare")
+          else if (
+            (sLower.includes("health") && sectorLower.includes("health")) ||
+            (sLower.includes("financ") && sectorLower.includes("financ")) ||
+            (sLower.includes("tech") && sectorLower.includes("tech"))
+          ) {
+            bestSectorMatch = Math.max(bestSectorMatch, 20);
+            matchReasons.push("Related sector");
+          }
+        });
+        
+        score += bestSectorMatch;
+      } else if (!searchTerm) {
+        // If no search term, give partial points
+        score += 20;
+        matchReasons.push("No sector specified");
+      }
 
-    // Score and sort matches
-    const scored = matched.map(inv => {
-      let score = 70; // Base score
-      
-      // Boost score for sector match
-      if (searchTerm && inv.sectors) {
-        const exactMatch = inv.sectors.some(s => s.toLowerCase().trim() === searchTerm);
-        if (exactMatch) {
-          score += 20;
-        } else {
-          const partialMatch = inv.sectors.some(s => {
-            const sLower = s.toLowerCase().trim();
-            return sLower.includes(searchTerm) || searchTerm.includes(sLower);
-          });
-          if (partialMatch) score += 10;
+      // === STAGE MATCH (Weight: 25 points) ===
+      if (stageLower && inv.stages && inv.stages.length > 0) {
+        let bestStageMatch = 0;
+        
+        inv.stages.forEach(s => {
+          const sLower = s.toLowerCase().trim();
+          // Exact match
+          if (sLower === stageLower) {
+            bestStageMatch = Math.max(bestStageMatch, 25);
+            if (!matchReasons.includes("Exact stage match")) {
+              matchReasons.push("Exact stage match");
+            }
+          }
+          // Related stage (seed matches pre-seed, etc.)
+          else if (
+            (stageLower === "seed" && sLower === "pre-seed") ||
+            (stageLower === "pre-seed" && sLower === "seed") ||
+            (stageLower === "series-a" && (sLower === "seed" || sLower === "growth")) ||
+            (stageLower === "growth" && (sLower === "series-a" || sLower === "series-b"))
+          ) {
+            bestStageMatch = Math.max(bestStageMatch, 18);
+            if (!matchReasons.includes("Related stage")) {
+              matchReasons.push("Related stage");
+            }
+          }
+        });
+        
+        score += bestStageMatch;
+      }
+
+      // === REGION MATCH (Weight: 15 points) ===
+      if (inv.region) {
+        const regionLower = inv.region.toLowerCase();
+        // Africa focus (if startup is in Africa)
+        if (regionLower.includes("africa")) {
+          score += 15;
+          matchReasons.push("Africa-focused");
+        }
+        // Global focus
+        else if (regionLower.includes("global")) {
+          score += 10;
+          matchReasons.push("Global investor");
+        }
+        // Other regions
+        else if (regionLower.includes("usa") || regionLower.includes("europe")) {
+          score += 5;
+          matchReasons.push("International investor");
         }
       }
-      
-      // Boost score for stage match
-      if (stageLower && inv.stages) {
-        const stageMatch = inv.stages.some(s => {
-          const sLower = s.toLowerCase().trim();
-          return sLower === stageLower || 
-                 sLower.includes(stageLower) || 
-                 stageLower.includes(sLower) ||
-                 (stageLower === "seed" && sLower === "pre-seed") ||
-                 (stageLower === "pre-seed" && sLower === "seed") ||
-                 (stageLower === "series-a" && sLower === "seed") ||
-                 (stageLower === "growth" && sLower === "series-a");
-        });
-        if (stageMatch) score += 15;
+
+      // === SOURCE BONUS (Weight: 10 points) ===
+      if (inv.source === 'verified') {
+        score += 10;
+        matchReasons.push("Verified investor");
       }
-      
-      // Boost score for region/continent match
-      if (inv.region && (inv.region.toLowerCase().includes("africa") || inv.region.toLowerCase().includes("global"))) {
-        score += 5;
+
+      // === AMOUNT RAISING MATCH (Weight: 10 points) ===
+      if (amountRaising && inv.notes) {
+        const notesLower = inv.notes.toLowerCase();
+        // Check if they invest in similar amounts
+        if (amountRaising.includes("500") && notesLower.includes("500")) {
+          score += 8;
+          matchReasons.push("Investment amount match");
+        }
+        if (notesLower.includes("pre-seed") && stageLower === "pre-seed") {
+          score += 5;
+        }
       }
+
+      // Cap at 100
+      score = Math.min(score, 100);
       
-      return { ...inv, score: Math.min(score, 100) };
+      // Remove duplicate match reasons
+      matchReasons = [...new Set(matchReasons)];
+      
+      return { 
+        ...inv, 
+        score: Math.round(score),
+        matchReasons: matchReasons.slice(0, 3).join(", ") // Keep top 3 reasons
+      };
     });
+
+    // Filter out investors with 0 score if we have a search term
+    let filtered = scored;
+    if (searchTerm) {
+      filtered = scored.filter(inv => inv.score > 10);
+    }
     
     // Sort by score descending
-    scored.sort((a, b) => b.score - a.score);
+    filtered.sort((a, b) => b.score - a.score);
     
     // Return top 20
-    const topResults = scored.slice(0, 20);
-    console.log(`📊 Top matches:`, topResults.map(r => ({ firm: r.firm, score: r.score, sectors: r.sectors })));
+    const topResults = filtered.slice(0, 20);
+    console.log(`📊 Top matches:`, topResults.map(r => ({ firm: r.firm, score: r.score, reasons: r.matchReasons })));
     
-    return topResults;
+    // Add unique IDs to each investor
+    return topResults.map((inv, index) => ({
+      ...inv,
+      id: inv.id || `investor-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+    }));
   } catch (err) {
     console.error("Error matching investors:", err);
     return [];
