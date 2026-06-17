@@ -358,7 +358,7 @@ function InvestorsTab({ plan, onStartCampaign }) {
 <option value="">All regions</option>
           {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
-        {(filters.sector  filters.stage  filters.region) && (
+       {(filters.sector || filters.stage || filters.region) && (
           <button onClick={() => setFilters({ sector: "", stage: "", region: "" })} style={{ background: "transparent", color: "#475569", border: "none", fontSize: 12, cursor: "pointer", padding: "8px 4px" }}>
             Clear filters ×
           </button>
