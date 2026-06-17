@@ -81,7 +81,8 @@ WRITE THE EMAIL NOW:`;
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.9,
-              maxOutputTokens: 800,
+              maxOutputTokens: 2048,
+              thinkingBudget: 0,
             },
           }),
         }
