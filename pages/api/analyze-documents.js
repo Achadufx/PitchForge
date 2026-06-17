@@ -49,8 +49,6 @@ async function extractTextFromFile(file) {
   try {
     let text = "";
     
-    // ----- TEXT EXTRACTION FOR DOCUMENT TYPES -----
-    
     if (file.mimeType === "application/pdf" || file.name.endsWith(".pdf")) {
       try {
         const pdf = require("pdf-parse");
@@ -133,7 +131,8 @@ async function extractTextFromFile(file) {
     
     if (text && text.length > 0) {
       text = text.replace(/\s+/g, " ").trim();
-      return { type: "text", text: text.slice(0, 20000), name: file.name };
+      // Reduce text size to avoid token limits - only keep first 10000 chars per file
+      return { type: "text", text: text.slice(0, 10000), name: file.name };
     } else {
       console.log(`⚠️ No readable text found in: ${file.name}`);
       return null;
@@ -174,105 +173,27 @@ export default async function handler(req, res) {
       }
     }
     
-    // Build the parts array for Gemini
     const parts = [];
     
-    // Build the prompt text
-    let promptText = `You are a world-class startup analyst and venture capital advisor with 15+ years of experience. You've helped over 100 startups raise more than $2B in funding. Your superpower is understanding a startup deeply and extracting the most compelling narrative for investors.
+    let promptText = `You are a world-class startup analyst and venture capital advisor. Analyze the provided documents and extract comprehensive information.
 
-YOUR MISSION:
-Analyze the provided documents and extract comprehensive, accurate information that tells a compelling investment story.
-
-INVESTOR PERSPECTIVE:
-Think like a top-tier venture capitalist evaluating this startup. Consider:
-- Market size and opportunity (TAM, SAM, SOM)
-- Product-market fit and validation
-- Traction and momentum
-- Team expertise and background
-- Competitive moats and defensibility
-- Scalability and growth potential
-- Path to profitability
-- Business model viability
-- Exit opportunities and multiples
-
-SECTOR-SPECIFIC GUIDANCE:
-Identify the sector and apply relevant context:
-
-Fintech:
-- Regulatory compliance (KYC/AML, banking regulations)
-- Payment processing and infrastructure
-- Banking the unbanked
-- Financial inclusion
-- Cryptocurrency/Blockchain
-- Risk management and fraud prevention
-
-SaaS/Software:
-- Recurring revenue models
-- Customer acquisition cost (CAC) and lifetime value (LTV)
-- Churn rate and retention
-- Product-led growth
-- Integration ecosystem
-
-AI/ML and Deep Tech:
-- Proprietary algorithms and data
-- Training data quality and quantity
-- Compute infrastructure requirements
-- AI ethics and bias mitigation
-- API-first approach
-
-E-commerce/DTC:
-- Customer acquisition channels
-- Unit economics (AOV, margins, shipping)
-- Supply chain and logistics
-- Brand building and community
-- Customer lifetime value
-
-HealthTech/MedTech:
-- Regulatory approvals (FDA, HIPAA, GDPR)
-- Clinical validation and trials
-- Hospital/health system partnerships
-- Reimbursement pathways
-- Patient outcomes evidence
-
-Climate/CleanTech:
-- Environmental impact metrics
-- Regulatory incentives and carbon credits
-- Hardware vs. software approach
-- Manufacturing and supply chain
-- Energy efficiency and sustainability
-
-EdTech:
-- Learning outcomes and efficacy
-- School/district partnerships
-- Parent/student engagement
-- Curriculum alignment
-- Teacher adoption and training
-
-AgriTech/FoodTech:
-- Crop yield improvements
-- Supply chain optimization
-- Sustainability practices
-- Farmer adoption and training
-- Food safety and traceability
-
-Mobility/Transportation:
-- Fleet management and optimization
-- EV infrastructure
-- Safety and compliance
-- Last-mile delivery
-- Ride-sharing and autonomous vehicles
+SECTOR GUIDANCE:
+- Fintech: Regulatory compliance, payments, financial inclusion, banking
+- SaaS: Recurring revenue, CAC/LTV, churn, product-led growth
+- AI/ML: Proprietary algorithms, data quality, compute, ethics
+- E-commerce: Unit economics, acquisition channels, supply chain, brand
+- HealthTech: Regulatory approvals, clinical trials, hospital partnerships
+- ClimateTech: Environmental impact, incentives, manufacturing
+- EdTech: Learning outcomes, school partnerships, curriculum
+- AgriTech: Crop yields, supply chain, sustainability, farmer adoption
+- Mobility: Fleet management, EV infrastructure, safety, delivery
 
 EXTRACTION GUIDELINES:
-1. Read ALL documents thoroughly before extracting
-2. Look for consistent information across documents
-3. If information conflicts, use the most recent or specific source
-4. Make reasonable inferences based on industry knowledge
-5. Be specific - use exact numbers, dates, and names when available
-6. Identify the unique value proposition and differentiation
-7. Understand the customer value proposition
-8. Capture the business model and revenue strategy
-9. Note all key partnerships and customer relationships
-10. Document any validation, traction, or market proof
+- Read ALL documents thoroughly
+- Be specific - use exact numbers, dates, and names
+- Identify unique value proposition
+- Capture business model and revenue strategy
+- Note key partnerships and traction
 
 `;
     
@@ -284,65 +205,39 @@ EXTRACTION GUIDELINES:
     }
     
     if (imageContent.length > 0) {
-      promptText += `\nIMAGES: ${imageContent.length} image(s) attached. Please analyze them for visual information like charts, graphs, screenshots, or diagrams that may contain important startup information.\n\n`;
+      promptText += `\nIMAGES: ${imageContent.length} image(s) attached. Analyze charts, graphs, screenshots, or diagrams.\n\n`;
     }
     
     promptText += `
-IMPORTANT: Return ONLY a valid JSON object.
+IMPORTANT: Return ONLY a valid JSON object with these exact keys:
+- companyName (string)
+- tagline (string)
+- sector (string)
+- subSector (string)
+- businessModel (string)
+- problem (string)
+- solution (string)
+- competitiveAdvantage (string)
+- stage (string)
+- amountRaising (string)
+- useOfFunds (string)
+- country (string)
+- region (string)
+- expansionPlans (string)
+- revenue (string)
+- users (string)
+- growthRate (string)
+- traction (string)
+- teamSummary (string)
+- pitchSummary (string)
 
-DO NOT:
-- include markdown
-- include backticks
-- include json code blocks
-- include explanations
-- include notes
-- include text before the JSON
-- include text after the JSON
+DO NOT include markdown, backticks, or explanations. Just the raw JSON.
 
-Every value must be a string.
+Example format:
+{"companyName":"ForcepX","tagline":"Giving patients cryptographic ownership of their health data","sector":"HealthTech","subSector":"Health Data and Privacy","businessModel":"B2B2C SaaS","problem":"Patients cannot access or control their medical records","solution":"Patient-controlled data vault with encryption and audit trails","competitiveAdvantage":"First mover with blockchain audit trail","stage":"Pre-seed","amountRaising":"$500K","useOfFunds":"Product development and pilot scaling","country":"Nigeria","region":"Lagos","expansionPlans":"West Africa then global","revenue":"Pre-revenue","users":"500+ patients","growthRate":"40% MoM","traction":"2 hospital pilots, 500 patients","teamSummary":"Healthcare and cybersecurity experts","pitchSummary":"ForcepX gives patients ownership of their medical records. With 500+ patients and 2 hospital pilots, we're raising $500K to scale across West Africa."}`;
 
-If you cannot determine a value, use "Not specified" or make a reasonable inference.
-
-The JSON must have these exact keys:
-- companyName (string) - The exact company name
-- tagline (string) - A powerful one-sentence description
-- sector (string) - Primary sector (Fintech, SaaS, AI/ML, HealthTech, E-commerce, etc.)
-- subSector (string) - Specific niche within the sector
-- businessModel (string) - How they generate revenue
-- problem (string) - Detailed description of the problem being solved
-- solution (string) - What they built and how it works
-- competitiveAdvantage (string) - What makes them uniquely positioned to win
-- stage (string) - Idea, MVP, Pilot, Pre-seed, Seed, Series A, Series B, Growth
-- amountRaising (string) - Amount being raised
-- useOfFunds (string) - How they will use the investment
-- country (string) - Primary country of operations
-- region (string) - Specific region or city
-- expansionPlans (string) - Future expansion strategy
-- revenue (string) - Current revenue status
-- users (string) - Number of users or customers
-- growthRate (string) - Growth metrics
-- traction (string) - Key milestones and achievements
-- teamSummary (string) - Founding team expertise and backgrounds
-- pitchSummary (string) - A powerful 4-5 sentence investor pitch
-
-EXAMPLES BY SECTOR:
-
-Example 1 - Fintech:
-{"companyName":"PayFast Africa","tagline":"Making digital payments accessible to Africa's unbanked population","sector":"Fintech","subSector":"Mobile Payments","businessModel":"Transaction fees + B2B SaaS","problem":"60 percent of adults in Sub-Saharan Africa lack access to formal banking services. They rely on cash, which is risky and inefficient.","solution":"Mobile-first payment platform that allows users to send, receive, and store money using only a phone number.","competitiveAdvantage":"First mover in 3 African markets with 10,000+ agent network","stage":"Seed","amountRaising":"$2M","useOfFunds":"Market expansion and product development","country":"Nigeria","region":"Lagos","expansionPlans":"West Africa then East Africa","revenue":"$50K MRR","users":"100,000+ active users","growthRate":"40 percent MoM user growth","traction":"2.5M transactions processed, 10,000+ agents","teamSummary":"Ex-MTN and Paystack founders","pitchSummary":"60 percent of Africans are excluded from the digital economy. PayFast Africa is the payment platform for the unbanked, with 100,000+ users across 3 countries. We're raising $2M to expand into 5 new countries."}
-
-Example 2 - AI/ML:
-{"companyName":"DataSense AI","tagline":"Predictive analytics that prevents customer churn","sector":"AI/ML","subSector":"Predictive Analytics","businessModel":"B2B SaaS Subscription","problem":"Companies lose 20-50 percent of customers annually due to churn. Current approaches are reactive.","solution":"AI platform that predicts customer churn 90 days in advance with actionable recommendations.","competitiveAdvantage":"Proprietary algorithm with 92 percent accuracy and 50+ integrations","stage":"Seed","amountRaising":"$3M","useOfFunds":"Sales team expansion and product development","country":"USA","region":"San Francisco","expansionPlans":"Europe and Asia Pacific","revenue":"$200K ARR","users":"50 enterprise customers","growthRate":"100 percent YoY growth","traction":"50 enterprise customers including 3 Fortune 500 companies","teamSummary":"AI researchers from Stanford and MIT","pitchSummary":"Companies are bleeding customers and don't know why until it's too late. DataSense AI predicts churn with 92 percent accuracy. With 50 enterprise customers, we're raising $3M to scale globally."}
-
-Example 3 - E-commerce:
-{"companyName":"EcoWear","tagline":"Sustainable fashion made affordable","sector":"E-commerce","subSector":"Sustainable Fashion DTC","businessModel":"Direct-to-consumer subscription","problem":"Fast fashion is the second largest polluter globally, yet sustainable fashion is expensive.","solution":"Affordable sustainable fashion using recycled materials with full supply chain transparency.","competitiveAdvantage":"20-30 percent lower prices through vertical integration","stage":"Seed","amountRaising":"$1.5M","useOfFunds":"Inventory and marketing","country":"UK","region":"London","expansionPlans":"European and US expansion","revenue":"$80K MRR","users":"5,000+ subscribers","growthRate":"35 percent MoM growth","traction":"5,000 subscribers, 300 percent YoY revenue growth","teamSummary":"Experienced fashion entrepreneurs","pitchSummary":"Fast fashion is destroying our planet. EcoWear makes sustainable fashion affordable. With 5,000 subscribers and 300 percent growth, we're raising $1.5M to expand globally."}
-
-Example 4 - HealthTech:
-{"companyName":"ForcepX","tagline":"Giving patients cryptographic ownership of their health data","sector":"HealthTech","subSector":"Health Data and Privacy","businessModel":"B2B2C SaaS","problem":"Patients cannot access, share, or verify who has seen their medical records. Data is fragmented across providers, with no transparency or control for patients.","solution":"Patient-controlled data vault with end-to-end encryption, seamless provider integration, and a tamper-proof blockchain audit trail.","competitiveAdvantage":"First-mover advantage in cryptographic patient data ownership in Africa. Proprietary blockchain audit trail technology with HIPAA-grade security.","stage":"Pre-seed","amountRaising":"$500K","useOfFunds":"Product development and pilot program scaling","country":"Nigeria","region":"Lagos","expansionPlans":"West Africa expansion followed by global partnerships","revenue":"Pre-revenue","users":"500+ patients enrolled","growthRate":"40 percent MoM patient enrollment","traction":"Working MVP with 2 hospital pilots, 500+ patients enrolled, 98 percent patient satisfaction","teamSummary":"CEO: 10 years healthcare software. CTO: 12 years cybersecurity, former Google engineer.","pitchSummary":"Patients are locked out of their own medical data. ForcepX gives patients ownership and control with cryptographic technology. We've proven demand with 500+ patients and 2 hospital pilots. With a world-class team, we're raising $500K to scale across West Africa."}`;
-
-    // Add text part
     parts.push({ text: promptText });
     
-    // Add images as inlineData
     for (const image of imageContent) {
       parts.push({
         inlineData: {
@@ -360,7 +255,7 @@ Example 4 - HealthTech:
       });
     }
 
-    // YOUR WORKING GEMINI CONFIGURATION
+    // Gemini configuration with INCREASED token limit
     const MODEL = "gemini-2.5-flash";
 
     const response = await fetch(
@@ -372,7 +267,7 @@ Example 4 - HealthTech:
           contents: [{ parts }],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 1500,
+            maxOutputTokens: 8192, // Increased from 1500 to 8192
           },
         }),
       }
@@ -395,7 +290,7 @@ Example 4 - HealthTech:
 
     if (finishReason === "MAX_TOKENS") {
       return res.status(500).json({
-        error: "Gemini output was truncated because it exceeded the token limit."
+        error: "Gemini output was truncated because it exceeded the token limit. Please try with fewer documents or use manual input."
       });
     }
     
