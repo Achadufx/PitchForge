@@ -34,17 +34,7 @@ function extractJSON(text) {
     // Try to fix common JSON issues
     jsonStr = jsonStr.replace(/,\s*}/g, '}');
     jsonStr = jsonStr.replace(/,\s*]/g, ']');
-    // Fix unescaped quotes in strings
-    jsonStr = jsonStr.replace(/(?<!\\)"/g, (match, offset, string) => {
-      // If the quote is inside a value, we might need to escape it
-      const before = string.substring(0, offset);
-      const after = string.substring(offset + 1);
-      // Simple heuristic: if it's preceded by a colon or comma, it's a value
-      if (before.match(/[:,]\s*$/)) {
-        return '"';
-      }
-      return match;
-    });
+    
 
     try {
       return JSON.parse(jsonStr);
@@ -68,10 +58,24 @@ export default async function handler(req, res) {
   try {
     const parts = [
       {
-        text: `You are an expert startup analyst. Analyze the following startup documents and extract key information.
+text: `You are an expert startup analyst. Analyze the following startup documents and extract key information.
 
-IMPORTANT: Return ONLY a valid JSON object. Do not include any markdown, backticks, explanations, or extra text. Just the raw JSON.
+IMPORTANT: Return ONLY a valid JSON object.
 
+DO NOT:
+- include markdown
+- include \`\`\`json
+- include backticks
+- include explanations
+- include notes
+- include text before the JSON
+- include text after the JSON
+
+Every value must be a string.
+
+If you cannot determine a value, use "Not specified".
+
+The JSON must have these exact keys:
 The JSON must have these exact keys:
 - companyName (string)
 - tagline (string)
@@ -118,23 +122,48 @@ Example format:
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 2000,
-          },
-        }),
-      }
-    );
+  contents: [{ parts }],
+  generationConfig: {
+    temperature: 0.1,
+    maxOutputTokens: 8192,
+    responseMimeType: "application/json",
+  },
+}),
 
     const data = await response.json();
 
-    if (data.error) {
-      return res.status(500).json({ error: "Gemini error: " + data.error.message });
-    }
+console.log("=== FULL GEMINI RESPONSE ===");
+console.log(JSON.stringify(data, null, 2));
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+if (data.error) {
+  return res.status(500).json({
+    error: "Gemini error: " + data.error.message
+  });
+}
 
+console.log(
+  "FINISH REASON:",
+  data.candidates?.[0]?.finishReason
+);
+
+console.log(
+  "USAGE:",
+  JSON.stringify(data.usageMetadata, null, 2)
+);
+
+const text =
+  data.candidates?.[0]?.content?.parts
+    ?.map(part => part.text || "")
+    .join("") || "";
+    const finishReason =
+  data.candidates?.[0]?.finishReason;
+
+if (finishReason === "MAX_TOKENS") {
+  return res.status(500).json({
+    error:
+      "Gemini output was truncated because it exceeded the token limit."
+  });
+}
     if (!text) {
       return res.status(500).json({ error: "AI returned empty response. Try a different file." });
     }
