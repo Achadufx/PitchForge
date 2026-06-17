@@ -145,19 +145,73 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     setProfile(p);
     setIsAnalyzing(true);
     
-    try {
-      const res = await fetch("/api/analyze-startup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: p.companyName || "",
-          description: p.pitchSummary || p.description || "",
-          amountRaising: p.amountRaising || "",
-          industry: p.sector || p.industry || "",
-          stage: p.stage || "",
-          sector: p.sector || "",
-        }),
-      });
+    // Save profile to Supabase using the API
+try {
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log("👤 Saving profile for user:", user?.id);
+  
+  if (user) {
+    const profileData = {
+      userId: user.id,
+      companyName: data.analysis?.companyName || p.companyName || "",
+      tagline: p.tagline || "",
+      industry: data.analysis?.industry || p.sector || "",
+      subIndustry: p.subSector || "",
+      businessModel: data.analysis?.businessModel || p.businessModel || "",
+      problem: p.problem || "",
+      solution: p.solution || "",
+      competitiveAdvantage: p.competitiveAdvantage || "",
+      stage: data.analysis?.stage || p.stage || "",
+      amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
+      useOfFunds: p.useOfFunds || "",
+      country: p.country || "",
+      region: p.region || "",
+      expansionPlans: p.expansionPlans || "",
+      revenue: data.analysis?.revenue || p.revenue || "",
+      usersCount: data.analysis?.users || p.users || "",
+      growthRate: p.growthRate || "",
+      traction: data.analysis?.traction || p.traction || "",
+      teamSummary: p.teamSummary || "",
+      pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || p.description || ""
+    };
+    
+    console.log("📝 Sending profile data:", profileData);
+    
+    const saveResponse = await fetch("/api/save-startup-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profileData)
+    });
+
+    const saveData = await saveResponse.json();
+    console.log("💾 Save response:", saveData);
+    
+    if (saveData.success) {
+      console.log("✅ Profile saved to Supabase!");
+      // Update the savedProfile state with the saved data
+      if (setSavedProfile) {
+        setSavedProfile({
+          company_name: data.analysis?.companyName || p.companyName || "",
+          industry: data.analysis?.industry || p.sector || "",
+          stage: data.analysis?.stage || p.stage || "",
+          amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
+          country: p.country || "",
+          business_model: data.analysis?.businessModel || p.businessModel || "",
+          traction: data.analysis?.traction || p.traction || "",
+          revenue: data.analysis?.revenue || p.revenue || "",
+          users_count: data.analysis?.users || p.users || "",
+          pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
+        });
+      }
+    } else {
+      console.error("❌ Save failed:", saveData.error);
+    }
+  } else {
+    console.error("❌ No user found");
+  }
+} catch (saveErr) {
+  console.error("❌ Failed to save profile:", saveErr);
+}
       
       const data = await res.json();
       if (data.success) {
