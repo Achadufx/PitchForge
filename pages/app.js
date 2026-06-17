@@ -93,20 +93,20 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
   const [profile, setProfile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [matchedInvestors, setMatchedInvestors] = useState([]);
-  const [selectedInvestors, setSelectedInvestors] = useState([]);
+  const [selectedIndices, setSelectedIndices] = useState([]); // Store indices instead of investor objects
   const [showCsvUpload, setShowCsvUpload] = useState(false);
-  const valid = startup.name && startup.description && startup.ask && selectedInvestors.length > 0;
+  const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
 
   useEffect(() => {
     if (preloadedInvestors && preloadedInvestors.length > 0) {
       const withScores = preloadedInvestors.map(inv => ({
         ...inv,
-        id: inv.id || `investor-${Math.random().toString(36).substr(2, 9)}`,
+        firm: inv.firm || inv.name || 'Unknown Investor',
         score: 95,
         source: 'manual'
       }));
       setMatchedInvestors(withScores);
-      setSelectedInvestors(withScores);
+      setSelectedIndices(withScores.map((_, i) => i)); // Select all
     }
   }, [preloadedInvestors]);
 
@@ -132,13 +132,15 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
       if (data.success) {
         const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
           ...inv,
-          id: inv.id || `investor-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          firm: inv.firm || inv.name || 'Unknown Investor',
+          name: inv.name || inv.firm || 'Unknown Investor',
           score: inv.score || Math.floor(Math.random() * 25) + 70,
           source: 'auto'
         }));
         scoredInvestors.sort((a, b) => b.score - a.score);
         setMatchedInvestors(scoredInvestors);
-        setSelectedInvestors(scoredInvestors.slice(0, 5));
+        // Auto-select top 5
+        setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
         setStartup({
           name: data.analysis?.companyName || p.companyName || "",
           description: data.analysis?.description || p.pitchSummary || p.description || "",
@@ -158,19 +160,18 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
     setMode("review");
   };
 
-  const toggleInvestor = (investor) => {
-    setSelectedInvestors(prev => {
-      const isAlreadySelected = prev.some(i => i.id === investor.id || i.email === investor.email);
-      if (isAlreadySelected) {
-        return prev.filter(i => i.id !== investor.id && i.email !== investor.email);
+  const toggleInvestor = (index) => {
+    setSelectedIndices(prev => {
+      if (prev.includes(index)) {
+        return prev.filter(i => i !== index);
       } else {
-        return [...prev, investor];
+        return [...prev, index];
       }
     });
   };
 
-  const isSelected = (investor) => {
-    return selectedInvestors.some(i => i.id === investor.id || i.email === investor.email);
+  const isSelected = (index) => {
+    return selectedIndices.includes(index);
   };
 
   const handleCsvUpload = (e) => {
@@ -183,13 +184,18 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
         if (parsed[0]?.name && parsed[0]?.email) {
           const csvInvestors = parsed.map(inv => ({
             ...inv,
-            id: 'csv-' + Math.random().toString(36).substr(2, 9),
+            firm: inv.firm || inv.name || 'Unknown Investor',
+            name: inv.name || inv.firm || 'Unknown Investor',
             score: 100,
-            source: 'csv',
-            firm: inv.firm || ''
+            source: 'csv'
           }));
-          setMatchedInvestors(prev => [...prev, ...csvInvestors]);
-          setSelectedInvestors(prev => [...prev, ...csvInvestors]);
+          setMatchedInvestors(prev => {
+            const newList = [...prev, ...csvInvestors];
+            // Auto-select new CSV investors
+            const newIndices = csvInvestors.map((_, i) => prev.length + i);
+            setSelectedIndices(prevIndices => [...prevIndices, ...newIndices]);
+            return newList;
+          });
           setShowCsvUpload(false);
         }
       } catch(err) {
@@ -197,6 +203,11 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
       }
     };
     reader.readAsText(file);
+  };
+
+  // Get selected investors from indices
+  const getSelectedInvestors = () => {
+    return selectedIndices.map(i => matchedInvestors[i]).filter(Boolean);
   };
 
   if (mode === "review" && profile) {
@@ -227,7 +238,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
             <p style={{ color: "#64748b", marginBottom: 16, fontSize: 13 }}>
               Review your startup profile and select investors to pitch to.
               <span style={{ color: "#a78bfa", fontWeight: 600, display: "block", marginTop: 4 }}>
-                {matchedInvestors.length} investors found · {selectedInvestors.length} selected
+                {matchedInvestors.length} investors found · {selectedIndices.length} selected
               </span>
             </p>
             
@@ -292,7 +303,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
                     🎯 Matched Investors
                   </span>
                   <span style={{ fontSize: 12, color: "#64748b", marginLeft: 8 }}>
-                    {selectedInvestors.length} selected
+                    {selectedIndices.length} selected
                   </span>
                 </div>
                 <button 
@@ -332,28 +343,28 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
                     No investors matched. Upload a CSV or try different documents.
                   </div>
                 )}
-                {matchedInvestors.map((inv, i) => (
+                {matchedInvestors.map((inv, index) => (
                   <div 
-                    key={inv.id || i}
-                    onClick={() => toggleInvestor(inv)}
+                    key={index}
+                    onClick={() => toggleInvestor(index)}
                     style={{ 
                       display: "flex", 
                       alignItems: "center", 
                       gap: 10, 
                       padding: "10px 12px", 
                       borderRadius: 8, 
-                      border: "1px solid " + (isSelected(inv) ? "rgba(124,58,237,0.4)" : "rgba(255,255,255,0.06)"), 
-                      background: isSelected(inv) ? "rgba(124,58,237,0.08)" : "transparent",
+                      border: "1px solid " + (isSelected(index) ? "rgba(124,58,237,0.4)" : "rgba(255,255,255,0.06)"), 
+                      background: isSelected(index) ? "rgba(124,58,237,0.08)" : "transparent",
                       cursor: "pointer",
                       transition: "all 0.15s"
                     }}
                   >
                     <input 
                       type="checkbox" 
-                      checked={isSelected(inv)} 
+                      checked={isSelected(index)} 
                       onChange={(e) => {
                         e.stopPropagation();
-                        toggleInvestor(inv);
+                        toggleInvestor(index);
                       }}
                       style={{ accentColor: "#7c3aed", cursor: "pointer" }} 
                     />
@@ -398,7 +409,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
                 ← Back
               </button>
               <button 
-                onClick={() => onNext({ startup, selectedInvestors })} 
+                onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })} 
                 disabled={!valid} 
                 style={{ 
                   flex: 1, 
@@ -437,6 +448,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
     </div>
   );
 }
+
 
 async function generateSingle(inv, startup) {
   console.log(`📧 Generating pitch for: ${inv.name}`);
