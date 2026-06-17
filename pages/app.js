@@ -28,7 +28,7 @@ function parseCsv(text) {
     });
 }
 
-function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, }) {
+function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut }) {
   const limit = PLAN_LIMITS[plan] || 10;
   const pct = Math.min((pitchCount / limit) * 100, 100);
   const tabs = [
@@ -40,7 +40,51 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, }
     { key: "account", icon: "👤", label: "Account" },
   ];
   return (
-    <div style={{ width: 220, background: "#080808", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", height: "100vh", position: "fixed", left: 0, top: 0, zIndex: 50, }} > <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.07)", }} > <div style={{ display: "flex", alignItems: "center", gap: 8 }}> <div style={{ width: 28, height: 28, background: "linear-gradient(135deg,#7c3aed,#4f46e5)", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, }} > ⚡ </div> <span style={{ fontSize: 16, fontWeight: 800, color: "#fff", letterSpacing: "-0.4px", }} > PitchWire </span> </div> </div> <nav style={{ padding: "12px 10px", flex: 1 }}> {tabs.map((tab) => ( <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: activeTab === tab.key ? "rgba(124,58,237,0.15)" : "transparent", color: activeTab === tab.key ? "#a78bfa" : "rgba(255,255,255,0.4)", fontFamily: "inherit", fontSize: 14, fontWeight: activeTab === tab.key ? 700 : 500, marginBottom: 2, transition: "all 0.15s", textAlign: "left", }} > <span style={{ fontSize: 16 }}>{tab.icon}</span> {tab.label} {activeTab === tab.key && ( <div style={{ marginLeft: "auto", width: 4, height: 4, borderRadius: "50%", background: "#a78bfa", }} /> )} </button> ))} </nav> <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.07)", }} > <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "14px", }} > <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, }} > <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", }} > {plan} plan </span> <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}> {pitchCount}/{limit} </span> </div> <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 99, height: 4, overflow: "hidden", marginBottom: 12, }} > <div style={{ background: pct >= 90 ? "#f87171" : "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: pct + "%", transition: "width 0.3s", }} /> </div> {plan === "free" && ( <button onClick={() => setActiveTab("account")} style={{ width: "100%", padding: "8px", borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: "pointer", background: "#7c3aed", color: "#fff", border: "none", }} > Upgrade → </button> )} {plan === "starter" && ( <button onClick={() => setActiveTab("account")} style={{ width: "100%", padding: "8px", borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: "pointer", background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.2)", }} > Upgrade to Pro → </button> )} {plan === "pro" && ( <div style={{ fontSize: 11, color: "#4ade80", fontWeight: 600, textAlign: "center", }} > ✓ Pro — Full access </div> )} </div> <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, padding: "8px 4px", }} > <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#fff", flexShrink: 0, }} > {user?.email?.[0]?.toUpperCase() || "U"} </div> <div style={{ flex: 1, minWidth: 0 }}> <div style={{ fontSize: 12, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", }} > {user?.user_metadata?.full_name || "Founder"} </div> <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", }} > {user?.email} </div> </div> <button onClick={onSignOut} title="Sign out" style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.2)", fontSize: 14, padding: 4, }} > → </button> </div> </div> </div>
+    <div style={{ width: 220, background: "#080808", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", height: "100vh", position: "fixed", left: 0, top: 0, zIndex: 50 }}>
+      <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 28, height: 28, background: "linear-gradient(135deg,#7c3aed,#4f46e5)", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>⚡</div>
+          <span style={{ fontSize: 16, fontWeight: 800, color: "#fff", letterSpacing: "-0.4px" }}>PitchWire</span>
+        </div>
+      </div>
+      <nav style={{ padding: "12px 10px", flex: 1 }}>
+        {tabs.map((tab) => (
+          <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: activeTab === tab.key ? "rgba(124,58,237,0.15)" : "transparent", color: activeTab === tab.key ? "#a78bfa" : "rgba(255,255,255,0.4)", fontFamily: "inherit", fontSize: 14, fontWeight: activeTab === tab.key ? 700 : 500, marginBottom: 2, transition: "all 0.15s", textAlign: "left" }}>
+            <span style={{ fontSize: 16 }}>{tab.icon}</span>
+            {tab.label}
+            {activeTab === tab.key && <div style={{ marginLeft: "auto", width: 4, height: 4, borderRadius: "50%", background: "#a78bfa" }} />}
+          </button>
+        ))}
+      </nav>
+      <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "14px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px" }}>{plan} plan</span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{pitchCount}/{limit}</span>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 99, height: 4, overflow: "hidden", marginBottom: 12 }}>
+            <div style={{ background: pct >= 90 ? "#f87171" : "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: pct + "%", transition: "width 0.3s" }} />
+          </div>
+          {plan === "free" && <button onClick={() => setActiveTab("account")} style={{ width: "100%", padding: "8px", borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: "pointer", background: "#7c3aed", color: "#fff", border: "none" }}>Upgrade →</button>}
+          {plan === "starter" && <button onClick={() => setActiveTab("account")} style={{ width: "100%", padding: "8px", borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: "pointer", background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.2)" }}>Upgrade to Pro →</button>}
+          {plan === "pro" && <div style={{ fontSize: 11, color: "#4ade80", fontWeight: 600, textAlign: "center" }}>✓ Pro — Full access</div>}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, padding: "8px 4px" }}>
+          <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#fff", flexShrink: 0 }}>
+            {user?.email?.[0]?.toUpperCase() || "U"}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {user?.user_metadata?.full_name || "Founder"}
+            </div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {user?.email}
+            </div>
+          </div>
+          <button onClick={onSignOut} title="Sign out" style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.2)", fontSize: 14, padding: 4 }}>→</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -49,43 +93,24 @@ function StepIndicator({ current }) {
   const STEPS = ["describe", "review", "send"];
   const currentIndex = STEPS.indexOf(current);
   return (
-    <div style={{ display: "flex", alignItems: "center", marginBottom: 28 }}> 
-      {labels.map((label, i) => { 
-        const active = i === currentIndex; 
-        const done = currentIndex > i; 
-        return ( 
-          <div key={i} style={{ display: "flex", alignItems: "center", flex: i < labels.length - 1 ? 1 : "none" }} > 
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }} > 
-              <div style={{ 
-                width: 26, 
-                height: 26, 
-                borderRadius: "50%", 
-                background: done ? "#10b981" : active ? "#7c3aed" : "#1e293b", 
-                border: "2px solid " + (done ? "#10b981" : active ? "#7c3aed" : "#334155"), 
-                color: done || active ? "#fff" : "#64748b", 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center", 
-                fontSize: 10, 
-                fontWeight: 700 
-              }} > 
-                {done ? "✓" : i + 1} 
-              </div> 
-              <span style={{ 
-                fontSize: 9, 
-                fontWeight: active ? 700 : 400, 
-                color: active ? "#a78bfa" : done ? "#10b981" : "#475569", 
-                whiteSpace: "nowrap" 
-              }} > 
-                {label} 
-              </span> 
-            </div> 
-            {i < labels.length - 1 && ( 
-              <div style={{ flex: 1, height: 2, background: done ? "#10b981" : "#1e293b", margin: "0 6px", marginBottom: 14 }} /> 
-            )} 
-          </div> 
-        ); 
-      })} 
+    <div style={{ display: "flex", alignItems: "center", marginBottom: 28 }}>
+      {labels.map((label, i) => {
+        const active = i === currentIndex;
+        const done = currentIndex > i;
+        return (
+          <div key={i} style={{ display: "flex", alignItems: "center", flex: i < labels.length - 1 ? 1 : "none" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <div style={{ width: 26, height: 26, borderRadius: "50%", background: done ? "#10b981" : active ? "#7c3aed" : "#1e293b", border: "2px solid " + (done ? "#10b981" : active ? "#7c3aed" : "#334155"), color: done || active ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700 }}>
+                {done ? "✓" : i + 1}
+              </div>
+              <span style={{ fontSize: 9, fontWeight: active ? 700 : 400, color: active ? "#a78bfa" : done ? "#10b981" : "#475569", whiteSpace: "nowrap" }}>
+                {label}
+              </span>
+            </div>
+            {i < labels.length - 1 && <div style={{ flex: 1, height: 2, background: done ? "#10b981" : "#1e293b", margin: "0 6px", marginBottom: 14 }} />}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -104,7 +129,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   const [showCsvUpload, setShowCsvUpload] = useState(false);
   const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
 
-  // Auto-load saved profile if it exists
   useEffect(() => {
     if (savedProfile) {
       console.log("📋 Auto-loading saved profile:", savedProfile.company_name);
@@ -145,153 +169,60 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     setProfile(p);
     setIsAnalyzing(true);
     
-    // Save profile to Supabase using the API
-try {
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log("👤 Saving profile for user:", user?.id);
-  
-  if (user) {
-    const profileData = {
-      userId: user.id,
-      companyName: data.analysis?.companyName || p.companyName || "",
-      tagline: p.tagline || "",
-      industry: data.analysis?.industry || p.sector || "",
-      subIndustry: p.subSector || "",
-      businessModel: data.analysis?.businessModel || p.businessModel || "",
-      problem: p.problem || "",
-      solution: p.solution || "",
-      competitiveAdvantage: p.competitiveAdvantage || "",
-      stage: data.analysis?.stage || p.stage || "",
-      amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
-      useOfFunds: p.useOfFunds || "",
-      country: p.country || "",
-      region: p.region || "",
-      expansionPlans: p.expansionPlans || "",
-      revenue: data.analysis?.revenue || p.revenue || "",
-      usersCount: data.analysis?.users || p.users || "",
-      growthRate: p.growthRate || "",
-      traction: data.analysis?.traction || p.traction || "",
-      teamSummary: p.teamSummary || "",
-      pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || p.description || ""
-    };
-    
-    console.log("📝 Sending profile data:", profileData);
-    
-    const saveResponse = await fetch("/api/save-startup-profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(profileData)
-    });
-
-    const saveData = await saveResponse.json();
-    console.log("💾 Save response:", saveData);
-    
-    if (saveData.success) {
-      console.log("✅ Profile saved to Supabase!");
-      // Update the savedProfile state with the saved data
-      if (setSavedProfile) {
-        setSavedProfile({
-          company_name: data.analysis?.companyName || p.companyName || "",
-          industry: data.analysis?.industry || p.sector || "",
-          stage: data.analysis?.stage || p.stage || "",
-          amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
-          country: p.country || "",
-          business_model: data.analysis?.businessModel || p.businessModel || "",
-          traction: data.analysis?.traction || p.traction || "",
-          revenue: data.analysis?.revenue || p.revenue || "",
-          users_count: data.analysis?.users || p.users || "",
-          pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
-        });
-      }
-    } else {
-      console.error("❌ Save failed:", saveData.error);
-    }
-  } else {
-    console.error("❌ No user found");
-  }
-} catch (saveErr) {
-  console.error("❌ Failed to save profile:", saveErr);
-}
-      
-const handleProfileComplete = async (p) => {
-  setProfile(p);
-  setIsAnalyzing(true);
-  
-  try {
-    const res = await fetch("/api/analyze-startup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        companyName: p.companyName || "",
-        description: p.pitchSummary || p.description || "",
-        amountRaising: p.amountRaising || "",
-        industry: p.sector || p.industry || "",
-        stage: p.stage || "",
-        sector: p.sector || "",
-      }),
-    });
-    
-    const data = await res.json();
-    if (data.success) {
-      const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
-        ...inv,
-        firm: inv.firm || inv.name || 'Unknown Investor',
-        name: inv.name || inv.firm || 'Unknown Investor',
-        score: inv.score || Math.floor(Math.random() * 25) + 70,
-        source: 'auto'
-      }));
-      scoredInvestors.sort((a, b) => b.score - a.score);
-      setMatchedInvestors(scoredInvestors);
-      setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
-      setStartup({
-        name: data.analysis?.companyName || p.companyName || "",
-        description: data.analysis?.description || p.pitchSummary || p.description || "",
-        ask: data.analysis?.amountRaising || p.amountRaising || "",
+    try {
+      const res = await fetch("/api/analyze-startup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: p.companyName || "",
+          description: p.pitchSummary || p.description || "",
+          amountRaising: p.amountRaising || "",
+          industry: p.sector || p.industry || "",
+          stage: p.stage || "",
+          sector: p.sector || "",
+        }),
       });
+      
+      const data = await res.json();
+      if (data.success) {
+        const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
+          ...inv,
+          firm: inv.firm || inv.name || 'Unknown Investor',
+          name: inv.name || inv.firm || 'Unknown Investor',
+          score: inv.score || Math.floor(Math.random() * 25) + 70,
+          source: 'auto'
+        }));
+        scoredInvestors.sort((a, b) => b.score - a.score);
+        setMatchedInvestors(scoredInvestors);
+        setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
+        setStartup({
+          name: data.analysis?.companyName || p.companyName || "",
+          description: data.analysis?.description || p.pitchSummary || p.description || "",
+          ask: data.analysis?.amountRaising || p.amountRaising || "",
+        });
 
-      // Save profile to Supabase using the API
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log("👤 Saving profile for user:", user?.id);
-        
-        if (user) {
-          const profileData = {
-            userId: user.id,
-            companyName: data.analysis?.companyName || p.companyName || "",
-            tagline: p.tagline || "",
-            industry: data.analysis?.industry || p.sector || "",
-            subIndustry: p.subSector || "",
-            businessModel: data.analysis?.businessModel || p.businessModel || "",
-            problem: p.problem || "",
-            solution: p.solution || "",
-            competitiveAdvantage: p.competitiveAdvantage || "",
-            stage: data.analysis?.stage || p.stage || "",
-            amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
-            useOfFunds: p.useOfFunds || "",
-            country: p.country || "",
-            region: p.region || "",
-            expansionPlans: p.expansionPlans || "",
-            revenue: data.analysis?.revenue || p.revenue || "",
-            usersCount: data.analysis?.users || p.users || "",
-            growthRate: p.growthRate || "",
-            traction: data.analysis?.traction || p.traction || "",
-            teamSummary: p.teamSummary || "",
-            pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || p.description || ""
-          };
-          
-          console.log("📝 Sending profile data:", profileData);
-          
-          const saveResponse = await fetch("/api/save-startup-profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(profileData)
-          });
-
-          const saveData = await saveResponse.json();
-          console.log("💾 Save response:", saveData);
-          
-          if (saveData.success) {
-            console.log("✅ Profile saved to Supabase!");
+        // Save profile to Supabase
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await fetch("/api/save-startup-profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userId: user.id,
+                companyName: data.analysis?.companyName || p.companyName || "",
+                industry: data.analysis?.industry || p.sector || "",
+                stage: data.analysis?.stage || p.stage || "",
+                amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
+                country: p.country || "",
+                businessModel: data.analysis?.businessModel || p.businessModel || "",
+                traction: data.analysis?.traction || p.traction || "",
+                revenue: data.analysis?.revenue || p.revenue || "",
+                usersCount: data.analysis?.users || p.users || "",
+                pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || p.description || ""
+              })
+            });
+            console.log("✅ Profile saved to Supabase");
             if (setSavedProfile) {
               setSavedProfile({
                 company_name: data.analysis?.companyName || p.companyName || "",
@@ -306,28 +237,24 @@ const handleProfileComplete = async (p) => {
                 pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
               });
             }
-          } else {
-            console.error("❌ Save failed:", saveData.error);
           }
-        } else {
-          console.error("❌ No user found");
+        } catch (saveErr) {
+          console.error("Failed to save profile:", saveErr);
         }
-      } catch (saveErr) {
-        console.error("❌ Failed to save profile:", saveErr);
       }
+    } catch (err) {
+      console.error("Investor matching failed:", err);
+      setStartup({
+        name: p.companyName || "",
+        description: p.pitchSummary || p.description || "",
+        ask: p.amountRaising || "",
+      });
     }
-  } catch (err) {
-    console.error("Investor matching failed:", err);
-    setStartup({
-      name: p.companyName || "",
-      description: p.pitchSummary || p.description || "",
-      ask: p.amountRaising || "",
-    });
-  }
-  
-  setIsAnalyzing(false);
-  setMode("review");
-};
+    
+    setIsAnalyzing(false);
+    setMode("review");
+  };
+
   const toggleInvestor = (index) => {
     setSelectedIndices(prev => {
       if (prev.includes(index)) {
@@ -757,12 +684,57 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
 
   if (generating)
     return (
-      <div style={{ textAlign: "center", padding: "48px 0" }}> <div style={{ fontSize: 36, marginBottom: 16 }}>⚡</div> <h3 style={{ fontWeight: 700, color: "#f1f5f9", marginBottom: 6 }}> Crafting personalized pitches... </h3> <p style={{ color: "#475569", marginBottom: 28, fontSize: 13 }}> {progress} of {investors.length} done </p> <div style={{ background: "#1e293b", borderRadius: 99, height: 6, overflow: "hidden", maxWidth: 300, margin: "0 auto", }} > <div style={{ background: "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: (investors.length ? (progress / investors.length) * 100 : 0) + "%", transition: "width 0.4s ease", }} /> </div> </div>
+      <div style={{ textAlign: "center", padding: "48px 0" }}>
+        <div style={{ fontSize: 36, marginBottom: 16 }}>⚡</div>
+        <h3 style={{ fontWeight: 700, color: "#f1f5f9", marginBottom: 6 }}>Crafting personalized pitches...</h3>
+        <p style={{ color: "#475569", marginBottom: 28, fontSize: 13 }}>{progress} of {investors.length} done</p>
+        <div style={{ background: "#1e293b", borderRadius: 99, height: 6, overflow: "hidden", maxWidth: 300, margin: "0 auto" }}>
+          <div style={{ background: "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: (investors.length ? (progress / investors.length) * 100 : 0) + "%", transition: "width 0.4s ease" }} />
+        </div>
+      </div>
     );
 
   return (
-    <div> <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, }} > <h2 style={{ fontSize: 18, fontWeight: 700, color: "#f1f5f9", margin: 0 }} > Review pitches </h2> <span style={{ fontSize: 12, color: "#475569" }}> {selected.length}/{pitches.length} selected </span> </div> <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20, maxHeight: 400, overflowY: "auto", }} > {pitches.map((pitch, i) => ( <div key={i} style={{ border: "1px solid " + (selected.includes(i) ? "rgba(124,58,237,0.4)" : "#1e293b"), borderRadius: 10, padding: 14, background: selected.includes(i) ? "rgba(124,58,237,0.05)" : "#0a0f1e", }} > <div style={{ display: "flex", gap: 10 }}> <input type="checkbox" checked={selected.includes(i)} onChange={() => setSelected((prev) => prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i] ) } style={{ marginTop: 2, accentColor: "#7c3aed", flexShrink: 0 }} /> <div style={{ flex: 1 }}> <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4, }} > <div> <span style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 13, }} > {pitch.name} </span> <span style={{ color: "#475569", fontSize: 11, marginLeft: 6 }} > {pitch.firm || ""} </span> </div> <button onClick={() => handleRegenerate(i)} disabled={regenerating[i]} style={{ background: "none", border: "1px solid #334155", borderRadius: 5, padding: "2px 8px", fontSize: 10, color: "#64748b", cursor: "pointer", }} > {regenerating[i] ? "..." : "🔄 Redo"} </button> </div> <div style={{ fontSize: 10, color: "#475569", marginBottom: 8 }} > {pitch.email} </div> {pitch.error ? ( <div style={{ color: "#f87171", fontSize: 12 }}> ⚠ {pitch.error} </div> ) : ( <> <div style={{ fontSize: 11, color: "#818cf8", fontWeight: 600, marginBottom: 6, }} > Subject: {pitch.subject} </div> <div style={{ fontSize: 12, color: "#cbd5e1", whiteSpace: "pre-wrap", lineHeight: 1.6, background: "#060a14", borderRadius: 6, padding: 10, }} > {pitch.body} </div> </> )} </div> </div> </div> ))} </div>
-      <div style={{ display: "flex", gap: 10 }}> <button onClick={onBack} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "12px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer", }} > ← Back </button> <button onClick={() => onNext(pitches.filter((_, i) => selected.includes(i)))} disabled={selected.length === 0} style={{ flex: 1, background: selected.length > 0 ? "#7c3aed" : "#1e293b", color: selected.length > 0 ? "#fff" : "#475569", border: "none", borderRadius: 8, padding: "12px 28px", fontWeight: 700, fontSize: 14, cursor: selected.length > 0 ? "pointer" : "not-allowed", }} > Send {selected.length} Pitch{selected.length !== 1 ? "es" : ""} → </button> </div>
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: "#f1f5f9", margin: 0 }}>Review pitches</h2>
+        <span style={{ fontSize: 12, color: "#475569" }}>{selected.length}/{pitches.length} selected</span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20, maxHeight: 400, overflowY: "auto" }}>
+        {pitches.map((pitch, i) => (
+          <div key={i} style={{ border: "1px solid " + (selected.includes(i) ? "rgba(124,58,237,0.4)" : "#1e293b"), borderRadius: 10, padding: 14, background: selected.includes(i) ? "rgba(124,58,237,0.05)" : "#0a0f1e" }}>
+            <div style={{ display: "flex", gap: 10 }}>
+              <input type="checkbox" checked={selected.includes(i)} onChange={() => setSelected((prev) => prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i])} style={{ marginTop: 2, accentColor: "#7c3aed", flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                  <div>
+                    <span style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 13 }}>{pitch.name}</span>
+                    <span style={{ color: "#475569", fontSize: 11, marginLeft: 6 }}>{pitch.firm || ""}</span>
+                  </div>
+                  <button onClick={() => handleRegenerate(i)} disabled={regenerating[i]} style={{ background: "none", border: "1px solid #334155", borderRadius: 5, padding: "2px 8px", fontSize: 10, color: "#64748b", cursor: "pointer" }}>
+                    {regenerating[i] ? "..." : "🔄 Redo"}
+                  </button>
+                </div>
+                <div style={{ fontSize: 10, color: "#475569", marginBottom: 8 }}>{pitch.email}</div>
+                {pitch.error ? (
+                  <div style={{ color: "#f87171", fontSize: 12 }}>⚠ {pitch.error}</div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 11, color: "#818cf8", fontWeight: 600, marginBottom: 6 }}>Subject: {pitch.subject}</div>
+                    <div style={{ fontSize: 12, color: "#cbd5e1", whiteSpace: "pre-wrap", lineHeight: 1.6, background: "#060a14", borderRadius: 6, padding: 10 }}>{pitch.body}</div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={onBack} style={{ background: "#1e293b", color: "#94a3b8", border: "none", borderRadius: 8, padding: "12px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>← Back</button>
+        <button onClick={() => onNext(pitches.filter((_, i) => selected.includes(i)))} disabled={selected.length === 0} style={{ flex: 1, background: selected.length > 0 ? "#7c3aed" : "#1e293b", color: selected.length > 0 ? "#fff" : "#475569", border: "none", borderRadius: 8, padding: "12px 28px", fontWeight: 700, fontSize: 14, cursor: selected.length > 0 ? "pointer" : "not-allowed" }}>
+          Send {selected.length} Pitch{selected.length !== 1 ? "es" : ""} →
+        </button>
+      </div>
     </div>
   );
 }
@@ -794,12 +766,30 @@ function SendStep({ pitches, onRestart }) {
   if (done) {
     const succeeded = results.filter(r => r.success).length;
     return (
-      <div style={{ textAlign: "center", padding: "40px 0" }}> <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div> <h2 style={{ fontSize: 22, fontWeight: 800, color: "#f1f5f9", marginBottom: 8 }}> {succeeded} pitch{succeeded !== 1 ? "es" : ""} sent! </h2> <p style={{ color: "#475569", marginBottom: 32, fontSize: 14 }}> Now sit back and let the replies come in. </p> <button onClick={onRestart} style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "12px 32px", fontWeight: 700, fontSize: 14, cursor: "pointer" }} > Start new campaign </button> </div>
+      <div style={{ textAlign: "center", padding: "40px 0" }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#f1f5f9", marginBottom: 8 }}>{succeeded} pitch{succeeded !== 1 ? "es" : ""} sent!</h2>
+        <p style={{ color: "#475569", marginBottom: 32, fontSize: 14 }}>Now sit back and let the replies come in.</p>
+        <button onClick={onRestart} style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "12px 32px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Start new campaign</button>
+      </div>
     );
   }
 
   return (
-    <div> <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }} > Ready to launch </h2> <p style={{ color: "#64748b", marginBottom: 20, fontSize: 13 }}> Your name will appear as the sender. </p> <div style={{ marginBottom: 16 }}> <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px", }} > Your name </label> <input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="e.g. Samuel" style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 14, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0", }} /> </div> <div style={{ background: "#052e16", border: "1px solid #166534", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 13, color: "#4ade80", display: "flex", alignItems: "center", gap: 8 }} > <span>✓</span><span>{pitches.length} pitch{pitches.length !== 1 ? "es" : ""} queued and ready</span> </div> <button onClick={handleSend} disabled={sending || !senderName} style={{ width: "100%", background: (sending || !senderName) ? "#1e293b" : "linear-gradient(135deg,#7c3aed,#4f46e5)", color: (sending || !senderName) ? "#475569" : "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontWeight: 700, fontSize: 15, cursor: (sending || !senderName) ? "not-allowed" : "pointer" }} > {sending ? "Sending..." : "🚀 Send " + pitches.length + " Pitch" + (pitches.length !== 1 ? "es" : "")} </button> </div>
+    <div>
+      <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}>Ready to launch</h2>
+      <p style={{ color: "#64748b", marginBottom: 20, fontSize: 13 }}>Your name will appear as the sender.</p>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: "block", fontWeight: 600, fontSize: 11, color: "#94a3b8", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}>Your name</label>
+        <input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="e.g. Samuel" style={{ width: "100%", borderRadius: 8, border: "1px solid #1e293b", padding: "10px 12px", fontSize: 14, outline: "none", boxSizing: "border-box", background: "#0a0f1e", color: "#e2e8f0" }} />
+      </div>
+      <div style={{ background: "#052e16", border: "1px solid #166534", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 13, color: "#4ade80", display: "flex", alignItems: "center", gap: 8 }}>
+        <span>✓</span><span>{pitches.length} pitch{pitches.length !== 1 ? "es" : ""} queued and ready</span>
+      </div>
+      <button onClick={handleSend} disabled={sending || !senderName} style={{ width: "100%", background: (sending || !senderName) ? "#1e293b" : "linear-gradient(135deg,#7c3aed,#4f46e5)", color: (sending || !senderName) ? "#475569" : "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontWeight: 700, fontSize: 15, cursor: (sending || !senderName) ? "not-allowed" : "pointer" }}>
+        {sending ? "Sending..." : "🚀 Send " + pitches.length + " Pitch" + (pitches.length !== 1 ? "es" : "")}
+      </button>
+    </div>
   );
 }
 
@@ -825,80 +815,76 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
     localStorage.setItem("pitches_" + user.id, newCount.toString());
   };
 
-  const restart = () => { 
-    setStep("describe"); 
-    setInvestors([]); 
-    setStartup(null); 
-    setFinalPitches([]); 
+  const restart = () => {
+    setStep("describe");
+    setInvestors([]);
+    setStartup(null);
+    setFinalPitches([]);
   };
 
   return (
-    <div> 
-      <div style={{ marginBottom: 24 }}> 
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}> 
-          New Campaign 
-        </h1> 
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> 
-          Upload your documents and we'll match you with the right investors.
-        </p> 
-      </div> 
-      
+    <div>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}>New Campaign</h1>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>Upload your documents and we'll match you with the right investors.</p>
+      </div>
+
       {isAtLimit ? (
-        <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 14, padding: 32, textAlign: "center" }} >
+        <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 14, padding: 32, textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
-          <h3 style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: "-0.5px" }}> 
-            {plan === "starter" ? "You've hit your Starter limit." : "You've used all 10 free pitches."} 
+          <h3 style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: "-0.5px" }}>
+            {plan === "starter" ? "You've hit your Starter limit." : "You've used all 10 free pitches."}
           </h3>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", marginBottom: 24, lineHeight: 1.6, maxWidth: 400, margin: "0 auto 24px" }} > 
-            {plan === "starter" ? "Upgrade to Pro and unlock 500 pitches/month, Claude AI, deep investor research, and a full fundraising CRM." : "Upgrade to keep sending. Starter gives you 100 pitches/month. Pro gives you 500 plus Claude AI and deep investor research."} 
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", marginBottom: 24, lineHeight: 1.6, maxWidth: 400, margin: "0 auto 24px" }}>
+            {plan === "starter" ? "Upgrade to Pro and unlock 500 pitches/month, Claude AI, deep investor research, and a full fundraising CRM." : "Upgrade to keep sending. Starter gives you 100 pitches/month. Pro gives you 500 plus Claude AI and deep investor research."}
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             {plan === "free" && (
-              <a href="/upgrade?plan=starter" style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", border: "1px solid rgba(124,58,237,0.25)" }} >
-                Starter — $29/mo 
+              <a href="/upgrade?plan=starter" style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", border: "1px solid rgba(124,58,237,0.25)" }}>
+                Starter — $29/mo
               </a>
             )}
-          <a href="/upgrade?plan=pro" style={{ background: "#7c3aed", color: "#fff", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none" }} >
-  Upgrade to Pro — $79/mo → 
-</a>
+            <a href="/upgrade?plan=pro" style={{ background: "#7c3aed", color: "#fff", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+              Upgrade to Pro — $79/mo →
+            </a>
           </div>
         </div>
       ) : (
-        <div style={{ background: "#0f172a", borderRadius: 16, padding: 24, border: "1px solid #1e293b" }}> 
-          <StepIndicator current={step} /> 
-          
+        <div style={{ background: "#0f172a", borderRadius: 16, padding: 24, border: "1px solid #1e293b" }}>
+          <StepIndicator current={step} />
+
           {step === "describe" && (
-            <DescribeStep 
-              onNext={(data) => { 
-                setStartup(data.startup); 
-                setInvestors(data.selectedInvestors || []); 
-                setStep("review"); 
-              }} 
-              onBack={() => {}} 
+            <DescribeStep
+              onNext={(data) => {
+                setStartup(data.startup);
+                setInvestors(data.selectedInvestors || []);
+                setStep("review");
+              }}
+              onBack={() => {}}
               plan={plan}
               preloadedInvestors={investors}
               savedProfile={savedProfile}
               setSavedProfile={setSavedProfile}
             />
           )}
-          
+
           {step === "review" && (
-            <ReviewStep 
-              investors={investors} 
-              startup={startup} 
-              onNext={(p) => { 
-                setFinalPitches(p); 
-                setStep("send"); 
-              }} 
-              onBack={() => setStep("describe")} 
-              onPitchGenerated={incrementPitchCount} 
+            <ReviewStep
+              investors={investors}
+              startup={startup}
+              onNext={(p) => {
+                setFinalPitches(p);
+                setStep("send");
+              }}
+              onBack={() => setStep("describe")}
+              onPitchGenerated={incrementPitchCount}
             />
           )}
-          
+
           {step === "send" && (
-            <SendStep 
-              pitches={finalPitches} 
-              onRestart={restart} 
+            <SendStep
+              pitches={finalPitches}
+              onRestart={restart}
             />
           )}
         </div>
@@ -1121,8 +1107,7 @@ export default function App() {
       const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
       setPitchCount(count);
       setPlan(savedPlan);
-      
-      // Fetch existing startup profile
+
       try {
         const res = await fetch(`/api/get-startup-profile?userId=${session.user.id}`);
         const data = await res.json();
