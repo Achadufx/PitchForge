@@ -672,9 +672,9 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
                 Starter — $29/mo 
               </a>
             )}
-            <a href="/upgrade" style={{ background: "#7c3aed", color: "#fff", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none" }} >
-              Upgrade to Pro — $79/mo → 
-            </a>
+          <a href="/upgrade?plan=pro" style={{ background: "#7c3aed", color: "#fff", padding: "11px 24px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none" }} >
+  Upgrade to Pro — $79/mo → 
+</a>
           </div>
         </div>
       ) : (
