@@ -3,10 +3,41 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabase";
 
+const PLAN_DATA = {
+  starter: {
+    name: "Starter",
+    price: "29",
+    title: "Keep your outreach going.",
+    subtitle: "Upgrade to Starter and unlock 100 pitches a month — enough to run a real fundraising campaign without hitting a wall.",
+    features: [
+      ["100 pitches/month", "10x more than the free plan"],
+      ["Document upload", "Unlimited pitch decks, whitepapers, and business plans"],
+      ["No watermark", "Every pitch looks fully professional"],
+      ["Investor fit scoring", "Know exactly who to prioritize"],
+      ["Campaign tracking", "See what's working as you send"],
+    ],
+  },
+  pro: {
+    name: "Pro",
+    price: "79",
+    title: "You've hit your limit.",
+    subtitle: "Upgrade to Pro and keep your fundraising momentum going. Don't let your outreach stop right when it's working.",
+    features: [
+      ["500 pitches/month", "5x more outreach capacity"],
+      ["Claude AI", "Night and day better pitch quality"],
+      ["Deep investor research", "AI reads their thesis, portfolio, and statements"],
+      ["Full CRM pipeline", "Track every investor conversation"],
+      ["AI follow-up suggestions", "Never let a warm lead go cold"],
+      ["Unlimited investor matches", "Full database access"],
+    ],
+  },
+};
+
 export default function Upgrade() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("pro");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -15,6 +46,16 @@ export default function Upgrade() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!router.isReady) return;
+    const planParam = router.query.plan;
+    if (planParam === "starter" || planParam === "pro") {
+      setSelectedPlan(planParam);
+    }
+  }, [router.isReady, router.query.plan]);
+
+  const plan = PLAN_DATA[selectedPlan];
+
   const handleCheckout = async () => {
     if (!user) return;
     setLoading(true);
@@ -22,7 +63,7 @@ export default function Upgrade() {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: "pro", userId: user.id, userEmail: user.email }),
+        body: JSON.stringify({ plan: selectedPlan, userId: user.id, userEmail: user.email }),
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
@@ -33,7 +74,7 @@ export default function Upgrade() {
   return (
     <>
       <Head>
-        <title>Upgrade to Pro — PitchWire</title>
+        <title>Upgrade to {plan.name} — PitchWire</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
@@ -49,30 +90,39 @@ export default function Upgrade() {
             </div>
           </div>
 
+          {/* Plan switcher */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 20, background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: 4 }}>
+            <button
+              onClick={() => setSelectedPlan("starter")}
+              style={{ flex: 1, padding: "10px", borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: "pointer", border: "none", background: selectedPlan === "starter" ? "rgba(124,58,237,0.2)" : "transparent", color: selectedPlan === "starter" ? "#a78bfa" : "rgba(255,255,255,0.4)", fontFamily: "inherit", transition: "all 0.15s" }}
+            >
+              Starter — $29/mo
+            </button>
+            <button
+              onClick={() => setSelectedPlan("pro")}
+              style={{ flex: 1, padding: "10px", borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: "pointer", border: "none", background: selectedPlan === "pro" ? "rgba(124,58,237,0.2)" : "transparent", color: selectedPlan === "pro" ? "#a78bfa" : "rgba(255,255,255,0.4)", fontFamily: "inherit", transition: "all 0.15s" }}
+            >
+              Pro — $79/mo
+            </button>
+          </div>
+
           {/* Card */}
           <div style={{ background: "#0f0f0f", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 20, padding: "44px 40px", boxShadow: "0 0 80px rgba(124,58,237,0.08)" }}>
             <div style={{ textAlign: "center", marginBottom: 36 }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div>
               <h1 style={{ fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: "-1px", marginBottom: 10 }}>
-                You've hit your limit.
+                {plan.title}
               </h1>
               <p style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>
-                Upgrade to Pro and keep your fundraising momentum going. Don't let your outreach stop right when it's working.
+                {plan.subtitle}
               </p>
             </div>
 
             {/* What you unlock */}
             <div style={{ background: "#080808", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "24px", marginBottom: 28 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }}>What you unlock with Pro</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }}>What you unlock with {plan.name}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {[
-                  ["500 pitches/month", "5x more outreach capacity"],
-                  ["Claude AI", "Night and day better pitch quality"],
-                  ["Deep investor research", "AI reads their thesis, portfolio, and statements"],
-                  ["Full CRM pipeline", "Track every investor conversation"],
-                  ["AI follow-up suggestions", "Never let a warm lead go cold"],
-                  ["Unlimited investor matches", "Full database access"],
-                ].map(([title, desc], i) => (
+                {plan.features.map(([title, desc], i) => (
                   <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                     <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#a78bfa", flexShrink: 0, marginTop: 1 }}>✓</div>
                     <div>
@@ -87,13 +137,13 @@ export default function Upgrade() {
             {/* Price */}
             <div style={{ textAlign: "center", marginBottom: 24 }}>
               <div style={{ fontSize: 48, fontWeight: 900, letterSpacing: "-3px", color: "#fff", lineHeight: 1 }}>
-                $79<span style={{ fontSize: 16, fontWeight: 500, letterSpacing: 0, color: "rgba(255,255,255,0.3)" }}>/mo</span>
+                ${plan.price}<span style={{ fontSize: 16, fontWeight: 500, letterSpacing: 0, color: "rgba(255,255,255,0.3)" }}>/mo</span>
               </div>
               <div style={{ fontSize: 13, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>Cancel anytime</div>
             </div>
 
             <button onClick={handleCheckout} disabled={loading} style={{ width: "100%", padding: "15px", borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: loading ? "not-allowed" : "pointer", background: loading ? "#1a1a1a" : "linear-gradient(135deg,#7c3aed,#4f46e5)", color: loading ? "rgba(255,255,255,0.3)" : "#fff", border: "none", letterSpacing: "-0.3px", transition: "all 0.2s", boxShadow: loading ? "none" : "0 8px 32px rgba(124,58,237,0.4)" }}>
-              {loading ? "Loading..." : "Upgrade to Pro →"}
+              {loading ? "Loading..." : "Upgrade to " + plan.name + " →"}
             </button>
 
             <button onClick={() => router.push("/app")} style={{ width: "100%", padding: "12px", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", background: "transparent", color: "rgba(255,255,255,0.25)", border: "none", marginTop: 12, transition: "color 0.2s" }}>
