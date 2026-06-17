@@ -78,20 +78,33 @@ function DescribeStep({ onNext, onBack, plan }) {
 }
 
 async function generateSingle(inv, startup) {
-  const res = await fetch(API_URL + "/api/generate-pitch", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      investorName: inv.name,
-      firm: inv.firm || "",
-      startupName: startup.name,
-      description: startup.description,
-      ask: startup.ask,
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error);
-  return data;
+  console.log(`📧 Generating pitch for: ${inv.name} (${inv.email})`);
+  console.log(`📝 Startup data:`, startup);
+  
+  try {
+    const res = await fetch(API_URL + "/api/generate-pitch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        investorName: inv.name,
+        firm: inv.firm || "",
+        startupName: startup.name,
+        description: startup.description,
+        ask: startup.ask,
+      }),
+    });
+    
+    const data = await res.json();
+    console.log(`✅ Pitch generated for ${inv.name}:`, data);
+    
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to generate pitch");
+    }
+    return data;
+  } catch (err) {
+    console.error(`❌ Failed to generate pitch for ${inv.name}:`, err);
+    throw err;
+  }
 }
 
 function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
