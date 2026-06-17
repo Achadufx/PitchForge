@@ -101,6 +101,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
     if (preloadedInvestors && preloadedInvestors.length > 0) {
       const withScores = preloadedInvestors.map(inv => ({
         ...inv,
+        id: inv.id || `investor-${Math.random().toString(36).substr(2, 9)}`,
         score: 95,
         source: 'manual'
       }));
@@ -129,8 +130,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
       
       const data = await res.json();
       if (data.success) {
-        const scoredInvestors = (data.matchedInvestors || []).map(inv => ({
+        const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
           ...inv,
+          id: inv.id || `investor-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
           score: inv.score || Math.floor(Math.random() * 25) + 70,
           source: 'auto'
         }));
@@ -157,11 +159,14 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
   };
 
   const toggleInvestor = (investor) => {
-    setSelectedInvestors(prev => 
-      prev.some(i => i.id === investor.id || i.email === investor.email)
-        ? prev.filter(i => (i.id !== investor.id && i.email !== investor.email))
-        : [...prev, investor]
-    );
+    setSelectedInvestors(prev => {
+      const isAlreadySelected = prev.some(i => i.id === investor.id || i.email === investor.email);
+      if (isAlreadySelected) {
+        return prev.filter(i => i.id !== investor.id && i.email !== investor.email);
+      } else {
+        return [...prev, investor];
+      }
+    });
   };
 
   const isSelected = (investor) => {
@@ -329,7 +334,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
                 )}
                 {matchedInvestors.map((inv, i) => (
                   <div 
-                    key={i}
+                    key={inv.id || i}
                     onClick={() => toggleInvestor(inv)}
                     style={{ 
                       display: "flex", 
@@ -346,7 +351,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
                     <input 
                       type="checkbox" 
                       checked={isSelected(inv)} 
-                      onChange={() => {}} 
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleInvestor(inv);
+                      }}
                       style={{ accentColor: "#7c3aed", cursor: "pointer" }} 
                     />
                     <div style={{ flex: 1 }}>
@@ -359,14 +367,19 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
                         )}
                       </div>
                       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>
-                        {inv.email} {inv.hq && `· ${inv.hq}`}
+                        {inv.hq || inv.location || ""} {inv.email && `· ${inv.email}`}
                       </div>
+                      {inv.matchReasons && (
+                        <div style={{ fontSize: 9, color: "rgba(167,139,250,0.6)", marginTop: 2 }}>
+                          {inv.matchReasons}
+                        </div>
+                      )}
                     </div>
                     <div style={{ 
                       fontSize: 12, 
                       fontWeight: 700, 
-                      color: inv.score >= 90 ? "#4ade80" : inv.score >= 70 ? "#a78bfa" : "#64748b",
-                      background: inv.score >= 90 ? "rgba(74,222,128,0.1)" : inv.score >= 70 ? "rgba(124,58,237,0.1)" : "transparent",
+                      color: inv.score >= 90 ? "#4ade80" : inv.score >= 70 ? "#a78bfa" : inv.score >= 50 ? "#fbbf24" : "#64748b",
+                      background: inv.score >= 90 ? "rgba(74,222,128,0.1)" : inv.score >= 70 ? "rgba(124,58,237,0.1)" : "rgba(255,255,255,0.05)",
                       padding: "2px 8px",
                       borderRadius: 99
                     }}>
