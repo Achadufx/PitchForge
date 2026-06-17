@@ -254,9 +254,17 @@ function SendStep({ pitches, onRestart }) {
   );
 }
 
-function CampaignTab({ pitchCount, plan, setPitchCount, user }) {
-  const [step, setStep] = useState("upload");
-  const [investors, setInvestors] = useState([]);
+function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload }) {
+ const [step, setStep] = useState(preloadedInvestors ? "describe" : "upload");
+const [investors, setInvestors] = useState(preloadedInvestors || []);
+
+useEffect(() => {
+  if (preloadedInvestors) {
+    setInvestors(preloadedInvestors);
+    setStep("describe");
+    clearPreload();
+  }
+}, [preloadedInvestors]);
   const [startup, setStartup] = useState(null);
   const [finalPitches, setFinalPitches] = useState([]);
   const limit = PLAN_LIMITS[plan] || 10;
@@ -312,6 +320,7 @@ export default function App() {
   const [pitchCount, setPitchCount] = useState(0);
   const [plan, setPlan] = useState("free");
   const [activeTab, setActiveTab] = useState("campaign");
+  const [preloadedInvestors, setPreloadedInvestors] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -347,8 +356,8 @@ export default function App() {
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />
         <main style={{ marginLeft: 220, flex: 1, padding: "40px", overflowY: "auto", minHeight: "100vh" }}>
           <div style={{ maxWidth: 720, margin: "0 auto" }}>
-            {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} />}
-            {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setActiveTab("campaign"); /* will hook into campaign below */ }} />}
+            {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} preloadedInvestors={preloadedInvestors} clearPreload={() => setPreloadedInvestors(null)} />}
+            {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setPreloadedInvestors(invs); setActiveTab("campaign"); }} />}
             {activeTab === "account" && <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />}
           </div>
         </main>
