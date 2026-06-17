@@ -204,6 +204,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         // Save profile to Supabase
        // Save profile directly to Supabase (bypass API)
 // Save profile directly to Supabase
+// Save profile directly to Supabase
 try {
   const { data: { user } } = await supabase.auth.getUser();
   console.log("👤 Saving profile for user:", user?.id);
@@ -224,7 +225,7 @@ try {
       updated_at: new Date().toISOString()
     };
     
-    console.log("📝 Profile data being sent:", profileData);
+    console.log("📝 Profile data:", profileData);
     
     const { data: result, error } = await supabase
       .from('startup_profiles')
@@ -235,7 +236,6 @@ try {
       console.error("❌ Supabase error:", error);
     } else {
       console.log("✅ Profile saved to Supabase!", result);
-      // Update state with saved profile
       if (setSavedProfile) {
         setSavedProfile({
           company_name: profileData.company_name,
