@@ -213,78 +213,121 @@ try {
   console.error("❌ Failed to save profile:", saveErr);
 }
       
-      const data = await res.json();
-      if (data.success) {
-        const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
-          ...inv,
-          firm: inv.firm || inv.name || 'Unknown Investor',
-          name: inv.name || inv.firm || 'Unknown Investor',
-          score: inv.score || Math.floor(Math.random() * 25) + 70,
-          source: 'auto'
-        }));
-        scoredInvestors.sort((a, b) => b.score - a.score);
-        setMatchedInvestors(scoredInvestors);
-        setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
-        setStartup({
-          name: data.analysis?.companyName || p.companyName || "",
-          description: data.analysis?.description || p.pitchSummary || p.description || "",
-          ask: data.analysis?.amountRaising || p.amountRaising || "",
-        });
-
-        // Save profile directly to Supabase
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          console.log("👤 Saving profile for user:", user?.id);
-          
-          if (user) {
-            const profileData = {
-              user_id: user.id,
-              company_name: data.analysis?.companyName || p.companyName || "",
-              industry: data.analysis?.industry || p.sector || "",
-              stage: data.analysis?.stage || p.stage || "",
-              amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
-              country: p.country || "",
-              business_model: data.analysis?.businessModel || p.businessModel || "",
-              traction: data.analysis?.traction || p.traction || "",
-              revenue: data.analysis?.revenue || p.revenue || "",
-              users_count: data.analysis?.users || p.users || "",
-              pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
-              updated_at: new Date().toISOString()
-            };
-            
-            console.log("📝 Profile data to save:", profileData);
-            
-            const { error: saveError } = await supabase
-              .from('startup_profiles')
-              .upsert(profileData, { onConflict: 'user_id' });
-            
-            if (saveError) {
-              console.error("❌ Save error:", saveError);
-            } else {
-              console.log("✅ Profile saved to Supabase!");
-              // Update the savedProfile state
-              if (setSavedProfile) {
-                setSavedProfile(profileData);
-              }
-            }
-          }
-        } catch (saveErr) {
-          console.error("Failed to save profile:", saveErr);
-        }
-      }
-    } catch (err) {
-      console.error("Investor matching failed:", err);
-      setStartup({
-        name: p.companyName || "",
+const handleProfileComplete = async (p) => {
+  setProfile(p);
+  setIsAnalyzing(true);
+  
+  try {
+    const res = await fetch("/api/analyze-startup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companyName: p.companyName || "",
         description: p.pitchSummary || p.description || "",
-        ask: p.amountRaising || "",
-      });
-    }
+        amountRaising: p.amountRaising || "",
+        industry: p.sector || p.industry || "",
+        stage: p.stage || "",
+        sector: p.sector || "",
+      }),
+    });
     
-    setIsAnalyzing(false);
-    setMode("review");
-  };
+    const data = await res.json();
+    if (data.success) {
+      const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
+        ...inv,
+        firm: inv.firm || inv.name || 'Unknown Investor',
+        name: inv.name || inv.firm || 'Unknown Investor',
+        score: inv.score || Math.floor(Math.random() * 25) + 70,
+        source: 'auto'
+      }));
+      scoredInvestors.sort((a, b) => b.score - a.score);
+      setMatchedInvestors(scoredInvestors);
+      setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
+      setStartup({
+        name: data.analysis?.companyName || p.companyName || "",
+        description: data.analysis?.description || p.pitchSummary || p.description || "",
+        ask: data.analysis?.amountRaising || p.amountRaising || "",
+      });
 
+      // Save profile to Supabase using the API
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log("👤 Saving profile for user:", user?.id);
+        
+        if (user) {
+          const profileData = {
+            userId: user.id,
+            companyName: data.analysis?.companyName || p.companyName || "",
+            tagline: p.tagline || "",
+            industry: data.analysis?.industry || p.sector || "",
+            subIndustry: p.subSector || "",
+            businessModel: data.analysis?.businessModel || p.businessModel || "",
+            problem: p.problem || "",
+            solution: p.solution || "",
+            competitiveAdvantage: p.competitiveAdvantage || "",
+            stage: data.analysis?.stage || p.stage || "",
+            amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
+            useOfFunds: p.useOfFunds || "",
+            country: p.country || "",
+            region: p.region || "",
+            expansionPlans: p.expansionPlans || "",
+            revenue: data.analysis?.revenue || p.revenue || "",
+            usersCount: data.analysis?.users || p.users || "",
+            growthRate: p.growthRate || "",
+            traction: data.analysis?.traction || p.traction || "",
+            teamSummary: p.teamSummary || "",
+            pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || p.description || ""
+          };
+          
+          console.log("📝 Sending profile data:", profileData);
+          
+          const saveResponse = await fetch("/api/save-startup-profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(profileData)
+          });
+
+          const saveData = await saveResponse.json();
+          console.log("💾 Save response:", saveData);
+          
+          if (saveData.success) {
+            console.log("✅ Profile saved to Supabase!");
+            if (setSavedProfile) {
+              setSavedProfile({
+                company_name: data.analysis?.companyName || p.companyName || "",
+                industry: data.analysis?.industry || p.sector || "",
+                stage: data.analysis?.stage || p.stage || "",
+                amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
+                country: p.country || "",
+                business_model: data.analysis?.businessModel || p.businessModel || "",
+                traction: data.analysis?.traction || p.traction || "",
+                revenue: data.analysis?.revenue || p.revenue || "",
+                users_count: data.analysis?.users || p.users || "",
+                pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
+              });
+            }
+          } else {
+            console.error("❌ Save failed:", saveData.error);
+          }
+        } else {
+          console.error("❌ No user found");
+        }
+      } catch (saveErr) {
+        console.error("❌ Failed to save profile:", saveErr);
+      }
+    }
+  } catch (err) {
+    console.error("Investor matching failed:", err);
+    setStartup({
+      name: p.companyName || "",
+      description: p.pitchSummary || p.description || "",
+      ask: p.amountRaising || "",
+    });
+  }
+  
+  setIsAnalyzing(false);
+  setMode("review");
+};
   const toggleInvestor = (index) => {
     setSelectedIndices(prev => {
       if (prev.includes(index)) {
