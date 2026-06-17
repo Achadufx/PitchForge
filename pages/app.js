@@ -7,6 +7,7 @@ import AccountTab from "../components/AccountTab";
 import CrmTab from "../components/CrmTab";
 import FollowupsTab from "../components/FollowupsTab";
 import TemplatesTab from "../components/TemplatesTab";
+
 const API_URL = "";
 const PLAN_LIMITS = { free: 10, starter: 100, pro: 500 };
 const PLAN_DOC_LIMITS = { free: 3, starter: 999, pro: 999 };
@@ -31,13 +32,13 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, }
   const limit = PLAN_LIMITS[plan] || 10;
   const pct = Math.min((pitchCount / limit) * 100, 100);
   const tabs = [
-  { key: "campaign", icon: "⚡", label: "Campaign" },
-  { key: "investors", icon: "🎯", label: "Investors" },
-  { key: "crm", icon: "📊", label: "CRM" },
-  { key: "followups", icon: "🔔", label: "Follow-ups" },
-  { key: "templates", icon: "📝", label: "Templates" },
-  { key: "account", icon: "👤", label: "Account" },
-];
+    { key: "campaign", icon: "⚡", label: "Campaign" },
+    { key: "investors", icon: "🎯", label: "Investors" },
+    { key: "crm", icon: "📊", label: "CRM" },
+    { key: "followups", icon: "🔔", label: "Follow-ups" },
+    { key: "templates", icon: "📝", label: "Templates" },
+    { key: "account", icon: "👤", label: "Account" },
+  ];
   return (
     <div style={{ width: 220, background: "#080808", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", height: "100vh", position: "fixed", left: 0, top: 0, zIndex: 50, }} > <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.07)", }} > <div style={{ display: "flex", alignItems: "center", gap: 8 }}> <div style={{ width: 28, height: 28, background: "linear-gradient(135deg,#7c3aed,#4f46e5)", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, }} > ⚡ </div> <span style={{ fontSize: 16, fontWeight: 800, color: "#fff", letterSpacing: "-0.4px", }} > PitchWire </span> </div> </div> <nav style={{ padding: "12px 10px", flex: 1 }}> {tabs.map((tab) => ( <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: activeTab === tab.key ? "rgba(124,58,237,0.15)" : "transparent", color: activeTab === tab.key ? "#a78bfa" : "rgba(255,255,255,0.4)", fontFamily: "inherit", fontSize: 14, fontWeight: activeTab === tab.key ? 700 : 500, marginBottom: 2, transition: "all 0.15s", textAlign: "left", }} > <span style={{ fontSize: 16 }}>{tab.icon}</span> {tab.label} {activeTab === tab.key && ( <div style={{ marginLeft: "auto", width: 4, height: 4, borderRadius: "50%", background: "#a78bfa", }} /> )} </button> ))} </nav> <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.07)", }} > <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "14px", }} > <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, }} > <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", }} > {plan} plan </span> <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}> {pitchCount}/{limit} </span> </div> <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 99, height: 4, overflow: "hidden", marginBottom: 12, }} > <div style={{ background: pct >= 90 ? "#f87171" : "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: pct + "%", transition: "width 0.3s", }} /> </div> {plan === "free" && ( <button onClick={() => setActiveTab("account")} style={{ width: "100%", padding: "8px", borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: "pointer", background: "#7c3aed", color: "#fff", border: "none", }} > Upgrade → </button> )} {plan === "starter" && ( <button onClick={() => setActiveTab("account")} style={{ width: "100%", padding: "8px", borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: "pointer", background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.2)", }} > Upgrade to Pro → </button> )} {plan === "pro" && ( <div style={{ fontSize: 11, color: "#4ade80", fontWeight: 600, textAlign: "center", }} > ✓ Pro — Full access </div> )} </div> <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, padding: "8px 4px", }} > <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#fff", flexShrink: 0, }} > {user?.email?.[0]?.toUpperCase() || "U"} </div> <div style={{ flex: 1, minWidth: 0 }}> <div style={{ fontSize: 12, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", }} > {user?.user_metadata?.full_name || "Founder"} </div> <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", }} > {user?.email} </div> </div> <button onClick={onSignOut} title="Sign out" style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.2)", fontSize: 14, padding: 4, }} > → </button> </div> </div> </div>
   );
@@ -89,7 +90,7 @@ function StepIndicator({ current }) {
   );
 }
 
-function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
+function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile }) {
   const [mode, setMode] = useState("upload");
   const [startup, setStartup] = useState({
     name: "",
@@ -99,9 +100,33 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
   const [profile, setProfile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [matchedInvestors, setMatchedInvestors] = useState([]);
-  const [selectedIndices, setSelectedIndices] = useState([]); // Store indices instead of investor objects
+  const [selectedIndices, setSelectedIndices] = useState([]);
   const [showCsvUpload, setShowCsvUpload] = useState(false);
   const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
+
+  // Auto-load saved profile if it exists
+  useEffect(() => {
+    if (savedProfile) {
+      console.log("📋 Auto-loading saved profile:", savedProfile.company_name);
+      setStartup({
+        name: savedProfile.company_name || "",
+        description: savedProfile.pitch_summary || "",
+        ask: savedProfile.amount_raising || "",
+      });
+      setProfile({
+        companyName: savedProfile.company_name,
+        sector: savedProfile.industry,
+        stage: savedProfile.stage,
+        amountRaising: savedProfile.amount_raising,
+        country: savedProfile.country,
+        businessModel: savedProfile.business_model,
+        traction: savedProfile.traction,
+        revenue: savedProfile.revenue,
+        users: savedProfile.users_count,
+      });
+      setMode("review");
+    }
+  }, [savedProfile]);
 
   useEffect(() => {
     if (preloadedInvestors && preloadedInvestors.length > 0) {
@@ -112,7 +137,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
         source: 'manual'
       }));
       setMatchedInvestors(withScores);
-      setSelectedIndices(withScores.map((_, i) => i)); // Select all
+      setSelectedIndices(withScores.map((_, i) => i));
     }
   }, [preloadedInvestors]);
 
@@ -145,13 +170,49 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
         }));
         scoredInvestors.sort((a, b) => b.score - a.score);
         setMatchedInvestors(scoredInvestors);
-        // Auto-select top 5
         setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
         setStartup({
           name: data.analysis?.companyName || p.companyName || "",
           description: data.analysis?.description || p.pitchSummary || p.description || "",
           ask: data.analysis?.amountRaising || p.amountRaising || "",
         });
+
+        // Save profile to Supabase
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await fetch("/api/save-startup-profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userId: user.id,
+                companyName: data.analysis?.companyName || p.companyName || "",
+                tagline: p.tagline || "",
+                industry: data.analysis?.industry || p.sector || "",
+                subIndustry: p.subSector || "",
+                businessModel: data.analysis?.businessModel || p.businessModel || "",
+                problem: p.problem || "",
+                solution: p.solution || "",
+                competitiveAdvantage: p.competitiveAdvantage || "",
+                stage: data.analysis?.stage || p.stage || "",
+                amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
+                useOfFunds: p.useOfFunds || "",
+                country: p.country || "",
+                region: p.region || "",
+                expansionPlans: p.expansionPlans || "",
+                revenue: data.analysis?.revenue || p.revenue || "",
+                usersCount: data.analysis?.users || p.users || "",
+                growthRate: p.growthRate || "",
+                traction: data.analysis?.traction || p.traction || "",
+                teamSummary: p.teamSummary || "",
+                pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || ""
+              })
+            });
+            console.log("✅ Profile saved to Supabase");
+          }
+        } catch (saveErr) {
+          console.error("Failed to save profile:", saveErr);
+        }
       }
     } catch (err) {
       console.error("Investor matching failed:", err);
@@ -197,7 +258,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
           }));
           setMatchedInvestors(prev => {
             const newList = [...prev, ...csvInvestors];
-            // Auto-select new CSV investors
             const newIndices = csvInvestors.map((_, i) => prev.length + i);
             setSelectedIndices(prevIndices => [...prevIndices, ...newIndices]);
             return newList;
@@ -211,7 +271,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
     reader.readAsText(file);
   };
 
-  // Get selected investors from indices
   const getSelectedInvestors = () => {
     return selectedIndices.map(i => matchedInvestors[i]).filter(Boolean);
   };
@@ -220,7 +279,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
     return (
       <div>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}>
-          {isAnalyzing ? "🧠 AI is analyzing your documents..." : "✅ AI analyzed your startup"}
+          {isAnalyzing ? "🧠 AI is analyzing your documents..." : savedProfile ? "✅ Welcome back! Your startup profile is loaded" : "✅ AI analyzed your startup"}
         </h2>
         
         {isAnalyzing ? (
@@ -242,7 +301,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
         ) : (
           <>
             <p style={{ color: "#64748b", marginBottom: 16, fontSize: 13 }}>
-              Review your startup profile and select investors to pitch to.
+              {savedProfile ? "Your saved startup profile is ready. Review and select investors to pitch to." : "Review your startup profile and select investors to pitch to."}
               <span style={{ color: "#a78bfa", fontWeight: 600, display: "block", marginTop: 4 }}>
                 {matchedInvestors.length} investors found · {selectedIndices.length} selected
               </span>
@@ -441,20 +500,40 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors }) {
   return (
     <div>
       <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}>
-        Upload your documents
+        {savedProfile ? "Update your documents" : "Upload your documents"}
       </h2>
       <p style={{ color: "#64748b", marginBottom: 16, fontSize: 13 }}>
-        Upload your pitch deck, whitepaper, or executive summary. AI will analyze and match you with investors.
+        {savedProfile 
+          ? "Upload new documents to update your startup profile, or continue with your saved profile." 
+          : "Upload your pitch deck, whitepaper, or executive summary. AI will analyze and match you with investors."}
       </p>
       
       <DocumentUpload onComplete={handleProfileComplete} plan={plan} />
+      {savedProfile && (
+        <button 
+          onClick={() => setMode("review")} 
+          style={{ 
+            width: "100%", 
+            marginTop: 12, 
+            padding: "11px", 
+            borderRadius: 8, 
+            fontSize: 14, 
+            fontWeight: 700, 
+            cursor: "pointer", 
+            background: "#7c3aed", 
+            color: "#fff", 
+            border: "none" 
+          }}
+        >
+          Continue with saved profile →
+        </button>
+      )}
       <button onClick={onBack} style={{ background: "transparent", color: "#475569", border: "none", fontSize: 13, cursor: "pointer", marginTop: 12, padding: 0 }}>
         ← Back
       </button>
     </div>
   );
 }
-
 
 async function generateSingle(inv, startup) {
   console.log(`📧 Generating pitch for: ${inv.name}`);
@@ -623,7 +702,7 @@ function SendStep({ pitches, onRestart }) {
   );
 }
 
-function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload }) {
+function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload, savedProfile }) {
   const [step, setStep] = useState("describe");
   const [investors, setInvestors] = useState(preloadedInvestors || []);
   const [startup, setStartup] = useState(null);
@@ -697,6 +776,7 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
               onBack={() => {}} 
               plan={plan}
               preloadedInvestors={investors}
+              savedProfile={savedProfile}
             />
           )}
           
@@ -920,8 +1000,6 @@ function AddInvestorForm({ onClose, onAdded }) {
   );
 }
 
-
-
 export default function App() {
   const router = useRouter();
   const [user, setUser] = useState(null);
@@ -930,15 +1008,30 @@ export default function App() {
   const [plan, setPlan] = useState("free");
   const [activeTab, setActiveTab] = useState("campaign");
   const [preloadedInvestors, setPreloadedInvestors] = useState(null);
+  const [savedProfile, setSavedProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { router.push("/login"); return; }
       setUser(session.user);
       const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
       const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
       setPitchCount(count);
       setPlan(savedPlan);
+      
+      // Fetch existing startup profile
+      try {
+        const res = await fetch(`/api/get-startup-profile?userId=${session.user.id}`);
+        const data = await res.json();
+        if (data.success && data.profile) {
+          setSavedProfile(data.profile);
+          console.log("✅ Loaded saved profile:", data.profile.company_name);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+      setProfileLoading(false);
       setAuthChecking(false);
     });
   }, []);
@@ -965,13 +1058,13 @@ export default function App() {
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />
         <main style={{ marginLeft: 220, flex: 1, padding: "40px", overflowY: "auto", minHeight: "100vh" }}>
           <div style={{ maxWidth: 720, margin: "0 auto" }}>
-  {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} preloadedInvestors={preloadedInvestors} clearPreload={() => setPreloadedInvestors(null)} />}
-  {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setPreloadedInvestors(invs); setActiveTab("campaign"); }} />}
-  {activeTab === "crm" && <CrmTab />}
-  {activeTab === "followups" && <FollowupsTab />}
-  {activeTab === "templates" && <TemplatesTab />}
-  {activeTab === "account" && <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />}
-</div>
+            {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} preloadedInvestors={preloadedInvestors} clearPreload={() => setPreloadedInvestors(null)} savedProfile={savedProfile} />}
+            {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setPreloadedInvestors(invs); setActiveTab("campaign"); }} />}
+            {activeTab === "crm" && <CrmTab />}
+            {activeTab === "followups" && <FollowupsTab />}
+            {activeTab === "templates" && <TemplatesTab />}
+            {activeTab === "account" && <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />}
+          </div>
         </main>
       </div>
     </>
