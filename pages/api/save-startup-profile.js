@@ -10,37 +10,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  console.log("📥 Received save request");
-
-  const { 
+  const {
     userId,
     companyName,
-    tagline,
     industry,
-    subIndustry,
-    businessModel,
-    problem,
-    solution,
-    competitiveAdvantage,
     stage,
     amountRaising,
-    useOfFunds,
     country,
-    region,
-    expansionPlans,
+    businessModel,
+    traction,
     revenue,
     usersCount,
-    growthRate,
-    traction,
-    teamSummary,
     pitchSummary
   } = req.body;
 
-  console.log("👤 User ID:", userId);
-  console.log("🏢 Company:", companyName);
+  console.log("📥 Save profile request for user:", userId);
 
   if (!userId) {
-    console.error("❌ No userId provided");
     return res.status(400).json({ error: 'User ID is required' });
   }
 
@@ -53,7 +39,7 @@ export default async function handler(req, res) {
       .maybeSingle();
 
     if (checkError) {
-      console.error("❌ Check error:", checkError);
+      console.error("Check error:", checkError);
       return res.status(500).json({ error: checkError.message });
     }
 
@@ -61,91 +47,60 @@ export default async function handler(req, res) {
     let error;
 
     if (existing) {
-      console.log("🔄 Updating existing profile for user:", userId);
+      // Update
       const { data, error: updateError } = await supabase
         .from('startup_profiles')
         .update({
           company_name: companyName,
-          tagline: tagline,
           industry: industry,
-          sub_industry: subIndustry,
-          business_model: businessModel,
-          problem: problem,
-          solution: solution,
-          competitive_advantage: competitiveAdvantage,
           stage: stage,
           amount_raising: amountRaising,
-          use_of_funds: useOfFunds,
           country: country,
-          region: region,
-          expansion_plans: expansionPlans,
+          business_model: businessModel,
+          traction: traction,
           revenue: revenue,
           users_count: usersCount,
-          growth_rate: growthRate,
-          traction: traction,
-          team_summary: teamSummary,
           pitch_summary: pitchSummary,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId)
         .select();
 
-      if (updateError) {
-        console.error("❌ Update error:", updateError);
-        return res.status(500).json({ error: updateError.message });
-      }
       result = data;
       error = updateError;
     } else {
-      console.log("🆕 Creating new profile for user:", userId);
+      // Insert
       const { data, error: insertError } = await supabase
         .from('startup_profiles')
         .insert({
           user_id: userId,
           company_name: companyName,
-          tagline: tagline,
           industry: industry,
-          sub_industry: subIndustry,
-          business_model: businessModel,
-          problem: problem,
-          solution: solution,
-          competitive_advantage: competitiveAdvantage,
           stage: stage,
           amount_raising: amountRaising,
-          use_of_funds: useOfFunds,
           country: country,
-          region: region,
-          expansion_plans: expansionPlans,
+          business_model: businessModel,
+          traction: traction,
           revenue: revenue,
           users_count: usersCount,
-          growth_rate: growthRate,
-          traction: traction,
-          team_summary: teamSummary,
           pitch_summary: pitchSummary
         })
         .select();
 
-      if (insertError) {
-        console.error("❌ Insert error:", insertError);
-        return res.status(500).json({ error: insertError.message });
-      }
       result = data;
       error = insertError;
     }
 
     if (error) {
-      console.error("❌ Database error:", error);
+      console.error("Database error:", error);
       return res.status(500).json({ error: error.message });
     }
 
-    console.log("✅ Profile saved successfully:", result);
-    res.json({ 
-      success: true, 
-      profile: result 
-    });
+    console.log("✅ Profile saved:", result);
+    res.json({ success: true, profile: result });
 
   } catch (err) {
-    console.error("❌ Unexpected error:", err);
+    console.error("Unexpected error:", err);
     res.status(500).json({ error: err.message });
   }
 }
