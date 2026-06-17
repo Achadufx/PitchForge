@@ -35,7 +35,6 @@ function extractJSON(text) {
     jsonStr = jsonStr.replace(/,\s*}/g, '}');
     jsonStr = jsonStr.replace(/,\s*]/g, ']');
     
-
     try {
       return JSON.parse(jsonStr);
     } catch (e2) {
@@ -58,7 +57,7 @@ export default async function handler(req, res) {
   try {
     const parts = [
       {
-text: `You are an expert startup analyst. Analyze the following startup documents and extract key information.
+        text: `You are an expert startup analyst. Analyze the following startup documents and extract key information.
 
 IMPORTANT: Return ONLY a valid JSON object.
 
@@ -75,7 +74,6 @@ Every value must be a string.
 
 If you cannot determine a value, use "Not specified".
 
-The JSON must have these exact keys:
 The JSON must have these exact keys:
 - companyName (string)
 - tagline (string)
@@ -97,8 +95,6 @@ The JSON must have these exact keys:
 - traction (string)
 - teamSummary (string)
 - pitchSummary (string)
-
-If you cannot determine a value, use "Not specified".
 
 Example format:
 {"companyName":"Acme","tagline":"We fix X","industry":"Healthcare","subIndustry":"Health Data","businessModel":"SaaS","problem":"Patients cant access records","solution":"Secure patient data vault","competitiveAdvantage":"Cryptographic ownership","stage":"pre-seed","amountRaising":"$500K","useOfFunds":"Product and team","country":"Nigeria","region":"Lagos","expansionPlans":"Africa then global","revenue":"Pre-revenue","users":"0","growthRate":"N/A","traction":"MVP live, dual portals","teamSummary":"Technical founders with domain expertise","pitchSummary":"We give patients control over their medical records using end-to-end encryption and tamper-proof audit trails."}`
@@ -122,48 +118,50 @@ Example format:
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-  contents: [{ parts }],
-  generationConfig: {
-    temperature: 0.1,
-    maxOutputTokens: 8192,
-    responseMimeType: "application/json",
-  },
-}),
+          contents: [{ parts }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 8192,
+            responseMimeType: "application/json",
+          },
+        }),
+      }
+    );
 
     const data = await response.json();
 
-console.log("=== FULL GEMINI RESPONSE ===");
-console.log(JSON.stringify(data, null, 2));
+    console.log("=== FULL GEMINI RESPONSE ===");
+    console.log(JSON.stringify(data, null, 2));
 
-if (data.error) {
-  return res.status(500).json({
-    error: "Gemini error: " + data.error.message
-  });
-}
+    if (data.error) {
+      return res.status(500).json({
+        error: "Gemini error: " + data.error.message
+      });
+    }
 
-console.log(
-  "FINISH REASON:",
-  data.candidates?.[0]?.finishReason
-);
+    console.log(
+      "FINISH REASON:",
+      data.candidates?.[0]?.finishReason
+    );
 
-console.log(
-  "USAGE:",
-  JSON.stringify(data.usageMetadata, null, 2)
-);
+    console.log(
+      "USAGE:",
+      JSON.stringify(data.usageMetadata, null, 2)
+    );
 
-const text =
-  data.candidates?.[0]?.content?.parts
-    ?.map(part => part.text || "")
-    .join("") || "";
-    const finishReason =
-  data.candidates?.[0]?.finishReason;
+    const text =
+      data.candidates?.[0]?.content?.parts
+        ?.map(part => part.text || "")
+        .join("") || "";
+    
+    const finishReason = data.candidates?.[0]?.finishReason;
 
-if (finishReason === "MAX_TOKENS") {
-  return res.status(500).json({
-    error:
-      "Gemini output was truncated because it exceeded the token limit."
-  });
-}
+    if (finishReason === "MAX_TOKENS") {
+      return res.status(500).json({
+        error: "Gemini output was truncated because it exceeded the token limit."
+      });
+    }
+    
     if (!text) {
       return res.status(500).json({ error: "AI returned empty response. Try a different file." });
     }
