@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseAdmin = createClient(
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
@@ -9,6 +9,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  console.log("📥 Received save request");
 
   const { 
     userId,
@@ -34,26 +36,33 @@ export default async function handler(req, res) {
     pitchSummary
   } = req.body;
 
+  console.log("👤 User ID:", userId);
+  console.log("🏢 Company:", companyName);
+
   if (!userId) {
+    console.error("❌ No userId provided");
     return res.status(400).json({ error: 'User ID is required' });
   }
 
   try {
     // Check if profile exists
-    const { data: existing, error: checkError } = await supabaseAdmin
+    const { data: existing, error: checkError } = await supabase
       .from('startup_profiles')
       .select('id')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      throw checkError;
+    if (checkError) {
+      console.error("❌ Check error:", checkError);
+      return res.status(500).json({ error: checkError.message });
     }
 
     let result;
+    let error;
+
     if (existing) {
-      // Update existing profile
-      result = await supabaseAdmin
+      console.log("🔄 Updating existing profile for user:", userId);
+      const { data, error: updateError } = await supabase
         .from('startup_profiles')
         .update({
           company_name: companyName,
@@ -79,11 +88,17 @@ export default async function handler(req, res) {
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId)
-        .select()
-        .single();
+        .select();
+
+      if (updateError) {
+        console.error("❌ Update error:", updateError);
+        return res.status(500).json({ error: updateError.message });
+      }
+      result = data;
+      error = updateError;
     } else {
-      // Insert new profile
-      result = await supabaseAdmin
+      console.log("🆕 Creating new profile for user:", userId);
+      const { data, error: insertError } = await supabase
         .from('startup_profiles')
         .insert({
           user_id: userId,
@@ -108,18 +123,29 @@ export default async function handler(req, res) {
           team_summary: teamSummary,
           pitch_summary: pitchSummary
         })
-        .select()
-        .single();
+        .select();
+
+      if (insertError) {
+        console.error("❌ Insert error:", insertError);
+        return res.status(500).json({ error: insertError.message });
+      }
+      result = data;
+      error = insertError;
     }
 
-    if (result.error) throw result.error;
+    if (error) {
+      console.error("❌ Database error:", error);
+      return res.status(500).json({ error: error.message });
+    }
 
+    console.log("✅ Profile saved successfully:", result);
     res.json({ 
       success: true, 
-      profile: result.data 
+      profile: result 
     });
+
   } catch (err) {
-    console.error('Save profile error:', err);
+    console.error("❌ Unexpected error:", err);
     res.status(500).json({ error: err.message });
   }
 }
