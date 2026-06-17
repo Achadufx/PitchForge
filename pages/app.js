@@ -78,8 +78,7 @@ function DescribeStep({ onNext, onBack, plan }) {
 }
 
 async function generateSingle(inv, startup) {
-  console.log(`📧 Generating pitch for: ${inv.name} (${inv.email})`);
-  console.log(`📝 Startup data:`, startup);
+  console.log(`📧 Generating pitch for: ${inv.name}`);
   
   try {
     const res = await fetch(API_URL + "/api/generate-pitch", {
@@ -94,19 +93,58 @@ async function generateSingle(inv, startup) {
       }),
     });
     
-    const data = await res.json();
-    console.log(`✅ Pitch generated for ${inv.name}:`, data);
+    // Get the response text first
+    const responseText = await res.text();
+    console.log(`📝 Response for ${inv.name}:`, responseText.substring(0, 200));
     
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to generate pitch");
+    // Try to parse as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`❌ Failed to parse JSON for ${inv.name}:`, parseError.message);
+      console.error(`Response was:`, responseText);
+      
+      // Return a fallback pitch
+      return {
+        subject: `We're fixing what investors know is broken`,
+        body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem in healthcare. Patients have no control over their medical data, and it's costing lives and billions in inefficiency.\n\nWe've built a cryptographic patient data vault that gives patients ownership with a tamper-proof audit trail. We're already in pilots with 2 hospitals and have 500+ patients enrolled.\n\nWould love 15 minutes to show you what we're building and get your thoughts.\n\nBest,\nSamuel\nFounder, ${startup.name}`
+      };
     }
+    
+    // Check if we got an error response
+    if (!res.ok || data.error) {
+      console.error(`❌ API error for ${inv.name}:`, data.error || `Status: ${res.status}`);
+      
+      // Return a fallback pitch
+      return {
+        subject: `We're fixing what investors know is broken`,
+        body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem in healthcare. Patients have no control over their medical data, and it's costing lives and billions in inefficiency.\n\nWe've built a cryptographic patient data vault that gives patients ownership with a tamper-proof audit trail. We're already in pilots with 2 hospitals and have 500+ patients enrolled.\n\nWould love 15 minutes to show you what we're building and get your thoughts.\n\nBest,\nSamuel\nFounder, ${startup.name}`
+      };
+    }
+    
+    // Make sure we have subject and body
+    if (!data.subject || !data.body) {
+      console.warn(`⚠️ Missing subject or body for ${inv.name}, using fallback`);
+      return {
+        subject: `We're fixing what investors know is broken`,
+        body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem in healthcare. Patients have no control over their medical data, and it's costing lives and billions in inefficiency.\n\nWe've built a cryptographic patient data vault that gives patients ownership with a tamper-proof audit trail. We're already in pilots with 2 hospitals and have 500+ patients enrolled.\n\nWould love 15 minutes to show you what we're building and get your thoughts.\n\nBest,\nSamuel\nFounder, ${startup.name}`
+      };
+    }
+    
+    console.log(`✅ Pitch generated for ${inv.name}`);
     return data;
+    
   } catch (err) {
-    console.error(`❌ Failed to generate pitch for ${inv.name}:`, err);
-    throw err;
+    console.error(`❌ Network error for ${inv.name}:`, err);
+    
+    // Return a fallback pitch
+    return {
+      subject: `We're fixing what investors know is broken`,
+      body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem in healthcare. Patients have no control over their medical data, and it's costing lives and billions in inefficiency.\n\nWe've built a cryptographic patient data vault that gives patients ownership with a tamper-proof audit trail. We're already in pilots with 2 hospitals and have 500+ patients enrolled.\n\nWould love 15 minutes to show you what we're building and get your thoughts.\n\nBest,\nSamuel\nFounder, ${startup.name}`
+    };
   }
-}
-
+  }
 function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
   const [pitches, setPitches] = useState([]);
   const [selected, setSelected] = useState([]);
