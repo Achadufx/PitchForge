@@ -202,45 +202,59 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         });
 
         // Save profile to Supabase
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            await fetch("/api/save-startup-profile", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                userId: user.id,
-                companyName: data.analysis?.companyName || p.companyName || "",
-                industry: data.analysis?.industry || p.sector || "",
-                stage: data.analysis?.stage || p.stage || "",
-                amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
-                country: p.country || "",
-                businessModel: data.analysis?.businessModel || p.businessModel || "",
-                traction: data.analysis?.traction || p.traction || "",
-                revenue: data.analysis?.revenue || p.revenue || "",
-                usersCount: data.analysis?.users || p.users || "",
-                pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || p.description || ""
-              })
-            });
-            console.log("✅ Profile saved to Supabase");
-            if (setSavedProfile) {
-              setSavedProfile({
-                company_name: data.analysis?.companyName || p.companyName || "",
-                industry: data.analysis?.industry || p.sector || "",
-                stage: data.analysis?.stage || p.stage || "",
-                amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
-                country: p.country || "",
-                business_model: data.analysis?.businessModel || p.businessModel || "",
-                traction: data.analysis?.traction || p.traction || "",
-                revenue: data.analysis?.revenue || p.revenue || "",
-                users_count: data.analysis?.users || p.users || "",
-                pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
-              });
-            }
-          }
-        } catch (saveErr) {
-          console.error("Failed to save profile:", saveErr);
-        }
+       // Save profile directly to Supabase (bypass API)
+try {
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log("👤 Saving profile for user:", user?.id);
+  
+  if (user) {
+    const profileData = {
+      user_id: user.id,
+      company_name: data.analysis?.companyName || p.companyName || "",
+      industry: data.analysis?.industry || p.sector || "",
+      stage: data.analysis?.stage || p.stage || "",
+      amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
+      country: p.country || "",
+      business_model: data.analysis?.businessModel || p.businessModel || "",
+      traction: data.analysis?.traction || p.traction || "",
+      revenue: data.analysis?.revenue || p.revenue || "",
+      users_count: data.analysis?.users || p.users || "",
+      pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log("📝 Profile data:", profileData);
+    
+    // Try to insert directly
+    const { data: insertData, error: insertError } = await supabase
+      .from('startup_profiles')
+      .upsert(profileData, { onConflict: 'user_id' })
+      .select();
+    
+    if (insertError) {
+      console.error("❌ Supabase error:", insertError);
+    } else {
+      console.log("✅ Profile saved to Supabase!", insertData);
+      // Update the savedProfile state
+      if (setSavedProfile) {
+        setSavedProfile({
+          company_name: profileData.company_name,
+          industry: profileData.industry,
+          stage: profileData.stage,
+          amount_raising: profileData.amount_raising,
+          country: profileData.country,
+          business_model: profileData.business_model,
+          traction: profileData.traction,
+          revenue: profileData.revenue,
+          users_count: profileData.users_count,
+          pitch_summary: profileData.pitch_summary,
+        });
+      }
+    }
+  }
+} catch (saveErr) {
+  console.error("❌ Failed to save profile:", saveErr);
+}
       }
     } catch (err) {
       console.error("Investor matching failed:", err);
