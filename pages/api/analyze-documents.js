@@ -174,8 +174,10 @@ export default async function handler(req, res) {
       }
     }
     
+    // Build the parts array for Gemini
     const parts = [];
     
+    // Build the prompt text
     let promptText = `You are a world-class startup analyst and venture capital advisor with 15+ years of experience. You've helped over 100 startups raise more than $2B in funding. Your superpower is understanding a startup deeply and extracting the most compelling narrative for investors.
 
 YOUR MISSION:
@@ -337,8 +339,10 @@ Example 3 - E-commerce:
 Example 4 - HealthTech:
 {"companyName":"ForcepX","tagline":"Giving patients cryptographic ownership of their health data","sector":"HealthTech","subSector":"Health Data and Privacy","businessModel":"B2B2C SaaS","problem":"Patients cannot access, share, or verify who has seen their medical records. Data is fragmented across providers, with no transparency or control for patients.","solution":"Patient-controlled data vault with end-to-end encryption, seamless provider integration, and a tamper-proof blockchain audit trail.","competitiveAdvantage":"First-mover advantage in cryptographic patient data ownership in Africa. Proprietary blockchain audit trail technology with HIPAA-grade security.","stage":"Pre-seed","amountRaising":"$500K","useOfFunds":"Product development and pilot program scaling","country":"Nigeria","region":"Lagos","expansionPlans":"West Africa expansion followed by global partnerships","revenue":"Pre-revenue","users":"500+ patients enrolled","growthRate":"40 percent MoM patient enrollment","traction":"Working MVP with 2 hospital pilots, 500+ patients enrolled, 98 percent patient satisfaction","teamSummary":"CEO: 10 years healthcare software. CTO: 12 years cybersecurity, former Google engineer.","pitchSummary":"Patients are locked out of their own medical data. ForcepX gives patients ownership and control with cryptographic technology. We've proven demand with 500+ patients and 2 hospital pilots. With a world-class team, we're raising $500K to scale across West Africa."}`;
 
+    // Add text part
     parts.push({ text: promptText });
     
+    // Add images as inlineData
     for (const image of imageContent) {
       parts.push({
         inlineData: {
@@ -356,8 +360,11 @@ Example 4 - HealthTech:
       });
     }
 
+    // YOUR WORKING GEMINI CONFIGURATION
+    const MODEL = "gemini-2.5-flash";
+
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -365,8 +372,7 @@ Example 4 - HealthTech:
           contents: [{ parts }],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 8192,
-            responseMimeType: "application/json",
+            maxOutputTokens: 1500,
           },
         }),
       }
