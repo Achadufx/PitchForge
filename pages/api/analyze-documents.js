@@ -40,6 +40,111 @@ function extractJSON(text) {
   }
 }
 
+// Helper function to extract text from different file types
+async function extractTextFromFile(file) {
+  const buffer = Buffer.from(file.base64, "base64");
+  
+  console.log(`📄 Processing: ${file.name} (${file.mimeType})`);
+  
+  try {
+    let text = "";
+    
+    // ----- TEXT EXTRACTION FOR DOCUMENT TYPES -----
+    
+    if (file.mimeType === "application/pdf" || file.name.endsWith(".pdf")) {
+      try {
+        const pdf = require("pdf-parse");
+        const data = await pdf(buffer);
+        text = data.text;
+        console.log(`✅ Extracted ${text.length} chars from PDF: ${file.name}`);
+      } catch (pdfError) {
+        console.log(`⚠️ PDF parsing failed, trying text fallback: ${file.name}`);
+        text = buffer.toString("utf-8");
+      }
+    } 
+    else if (file.mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || file.name.endsWith(".docx")) {
+      try {
+        const mammoth = require("mammoth");
+        const result = await mammoth.extractRawText({ buffer });
+        text = result.value;
+        console.log(`✅ Extracted ${text.length} chars from DOCX: ${file.name}`);
+      } catch (docxError) {
+        console.log(`⚠️ DOCX parsing failed, trying text fallback: ${file.name}`);
+        text = buffer.toString("utf-8");
+      }
+    } 
+    else if (file.mimeType === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || file.name.endsWith(".pptx")) {
+      try {
+        const JSZip = require("jszip");
+        const zip = await JSZip.loadAsync(buffer);
+        let extractedText = [];
+        
+        for (const [path, fileData] of Object.entries(zip.files)) {
+          if (path.startsWith("ppt/slides/slide") && path.endsWith(".xml")) {
+            const content = await fileData.async("text");
+            const textContent = content.replace(/<[^>]*>/g, " ");
+            extractedText.push(textContent);
+          }
+        }
+        text = extractedText.join("\n\n");
+        console.log(`✅ Extracted ${text.length} chars from PPTX: ${file.name}`);
+      } catch (pptxError) {
+        console.log(`⚠️ PPTX parsing failed, trying text fallback: ${file.name}`);
+        text = buffer.toString("utf-8");
+      }
+    } 
+    else if (file.mimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.name.endsWith(".xlsx")) {
+      try {
+        const XLSX = require("xlsx");
+        const workbook = XLSX.read(buffer, { type: "buffer" });
+        let extractedText = [];
+        
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          extractedText.push(`Sheet: ${sheetName}`);
+          extractedText.push(JSON.stringify(jsonData, null, 2));
+        });
+        
+        text = extractedText.join("\n\n");
+        console.log(`✅ Extracted ${text.length} chars from XLSX: ${file.name}`);
+      } catch (xlsxError) {
+        console.log(`⚠️ XLSX parsing failed, trying text fallback: ${file.name}`);
+        text = buffer.toString("utf-8");
+      }
+    } 
+    else if (file.mimeType === "text/plain" || file.name.endsWith(".txt") || file.name.endsWith(".md") || file.name.endsWith(".csv")) {
+      text = buffer.toString("utf-8");
+      console.log(`✅ Extracted ${text.length} chars from text file: ${file.name}`);
+    } 
+    else if (file.mimeType.startsWith("image/")) {
+      console.log(`📸 Found image: ${file.name} (${file.mimeType})`);
+      return { type: "image", mimeType: file.mimeType, data: file.base64, name: file.name };
+    } 
+    else {
+      text = buffer.toString("utf-8");
+      if (text.length > 0 && !text.includes("\0")) {
+        console.log(`✅ Extracted ${text.length} chars from unknown type: ${file.name}`);
+      } else {
+        console.log(`⚠️ Could not extract readable text from: ${file.name}`);
+        return null;
+      }
+    }
+    
+    if (text && text.length > 0) {
+      text = text.replace(/\s+/g, " ").trim();
+      return { type: "text", text: text.slice(0, 20000), name: file.name };
+    } else {
+      console.log(`⚠️ No readable text found in: ${file.name}`);
+      return null;
+    }
+    
+  } catch (err) {
+    console.error(`❌ Failed to process ${file.name}:`, err.message);
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -50,8 +155,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Build the prompt as a separate string to avoid template literal issues
-    const promptText = `You are a world-class startup analyst and venture capital advisor with 15+ years of experience. You've helped over 100 startups raise more than $2B in funding. Your superpower is understanding a startup deeply and extracting the most compelling narrative for investors.
+    console.log(`📚 Processing ${files.length} files...`);
+    
+    const textContent = [];
+    const imageContent = [];
+    
+    for (const file of files) {
+      const result = await extractTextFromFile(file);
+      if (result) {
+        if (result.type === "text") {
+          textContent.push({
+            name: result.name,
+            text: result.text
+          });
+        } else if (result.type === "image") {
+          imageContent.push(result);
+        }
+      }
+    }
+    
+    const parts = [];
+    
+    let promptText = `You are a world-class startup analyst and venture capital advisor with 15+ years of experience. You've helped over 100 startups raise more than $2B in funding. Your superpower is understanding a startup deeply and extracting the most compelling narrative for investors.
 
 YOUR MISSION:
 Analyze the provided documents and extract comprehensive, accurate information that tells a compelling investment story.
@@ -147,6 +272,20 @@ EXTRACTION GUIDELINES:
 9. Note all key partnerships and customer relationships
 10. Document any validation, traction, or market proof
 
+`;
+    
+    if (textContent.length > 0) {
+      promptText += "TEXT DOCUMENTS:\n\n";
+      textContent.forEach(doc => {
+        promptText += `=== ${doc.name} ===\n${doc.text}\n\n`;
+      });
+    }
+    
+    if (imageContent.length > 0) {
+      promptText += `\nIMAGES: ${imageContent.length} image(s) attached. Please analyze them for visual information like charts, graphs, screenshots, or diagrams that may contain important startup information.\n\n`;
+    }
+    
+    promptText += `
 IMPORTANT: Return ONLY a valid JSON object.
 
 DO NOT:
@@ -184,7 +323,7 @@ The JSON must have these exact keys:
 - teamSummary (string) - Founding team expertise and backgrounds
 - pitchSummary (string) - A powerful 4-5 sentence investor pitch
 
-EXAMPLES:
+EXAMPLES BY SECTOR:
 
 Example 1 - Fintech:
 {"companyName":"PayFast Africa","tagline":"Making digital payments accessible to Africa's unbanked population","sector":"Fintech","subSector":"Mobile Payments","businessModel":"Transaction fees + B2B SaaS","problem":"60 percent of adults in Sub-Saharan Africa lack access to formal banking services. They rely on cash, which is risky and inefficient.","solution":"Mobile-first payment platform that allows users to send, receive, and store money using only a phone number.","competitiveAdvantage":"First mover in 3 African markets with 10,000+ agent network","stage":"Seed","amountRaising":"$2M","useOfFunds":"Market expansion and product development","country":"Nigeria","region":"Lagos","expansionPlans":"West Africa then East Africa","revenue":"$50K MRR","users":"100,000+ active users","growthRate":"40 percent MoM user growth","traction":"2.5M transactions processed, 10,000+ agents","teamSummary":"Ex-MTN and Paystack founders","pitchSummary":"60 percent of Africans are excluded from the digital economy. PayFast Africa is the payment platform for the unbanked, with 100,000+ users across 3 countries. We're raising $2M to expand into 5 new countries."}
@@ -193,27 +332,32 @@ Example 2 - AI/ML:
 {"companyName":"DataSense AI","tagline":"Predictive analytics that prevents customer churn","sector":"AI/ML","subSector":"Predictive Analytics","businessModel":"B2B SaaS Subscription","problem":"Companies lose 20-50 percent of customers annually due to churn. Current approaches are reactive.","solution":"AI platform that predicts customer churn 90 days in advance with actionable recommendations.","competitiveAdvantage":"Proprietary algorithm with 92 percent accuracy and 50+ integrations","stage":"Seed","amountRaising":"$3M","useOfFunds":"Sales team expansion and product development","country":"USA","region":"San Francisco","expansionPlans":"Europe and Asia Pacific","revenue":"$200K ARR","users":"50 enterprise customers","growthRate":"100 percent YoY growth","traction":"50 enterprise customers including 3 Fortune 500 companies","teamSummary":"AI researchers from Stanford and MIT","pitchSummary":"Companies are bleeding customers and don't know why until it's too late. DataSense AI predicts churn with 92 percent accuracy. With 50 enterprise customers, we're raising $3M to scale globally."}
 
 Example 3 - E-commerce:
-{"companyName":"EcoWear","tagline":"Sustainable fashion made affordable","sector":"E-commerce","subSector":"Sustainable Fashion DTC","businessModel":"Direct-to-consumer subscription","problem":"Fast fashion is the second largest polluter globally, yet sustainable fashion is expensive.","solution":"Affordable sustainable fashion using recycled materials with full supply chain transparency.","competitiveAdvantage":"20-30 percent lower prices through vertical integration","stage":"Seed","amountRaising":"$1.5M","useOfFunds":"Inventory and marketing","country":"UK","region":"London","expansionPlans":"European and US expansion","revenue":"$80K MRR","users":"5,000+ subscribers","growthRate":"35 percent MoM growth","traction":"5,000 subscribers, 300 percent YoY revenue growth","teamSummary":"Experienced fashion entrepreneurs","pitchSummary":"Fast fashion is destroying our planet. EcoWear makes sustainable fashion affordable. With 5,000 subscribers and 300 percent growth, we're raising $1.5M to expand globally."}`;
+{"companyName":"EcoWear","tagline":"Sustainable fashion made affordable","sector":"E-commerce","subSector":"Sustainable Fashion DTC","businessModel":"Direct-to-consumer subscription","problem":"Fast fashion is the second largest polluter globally, yet sustainable fashion is expensive.","solution":"Affordable sustainable fashion using recycled materials with full supply chain transparency.","competitiveAdvantage":"20-30 percent lower prices through vertical integration","stage":"Seed","amountRaising":"$1.5M","useOfFunds":"Inventory and marketing","country":"UK","region":"London","expansionPlans":"European and US expansion","revenue":"$80K MRR","users":"5,000+ subscribers","growthRate":"35 percent MoM growth","traction":"5,000 subscribers, 300 percent YoY revenue growth","teamSummary":"Experienced fashion entrepreneurs","pitchSummary":"Fast fashion is destroying our planet. EcoWear makes sustainable fashion affordable. With 5,000 subscribers and 300 percent growth, we're raising $1.5M to expand globally."}
 
-    const parts = [
-      {
-        text: promptText
-      }
-    ];
+Example 4 - HealthTech:
+{"companyName":"ForcepX","tagline":"Giving patients cryptographic ownership of their health data","sector":"HealthTech","subSector":"Health Data and Privacy","businessModel":"B2B2C SaaS","problem":"Patients cannot access, share, or verify who has seen their medical records. Data is fragmented across providers, with no transparency or control for patients.","solution":"Patient-controlled data vault with end-to-end encryption, seamless provider integration, and a tamper-proof blockchain audit trail.","competitiveAdvantage":"First-mover advantage in cryptographic patient data ownership in Africa. Proprietary blockchain audit trail technology with HIPAA-grade security.","stage":"Pre-seed","amountRaising":"$500K","useOfFunds":"Product development and pilot program scaling","country":"Nigeria","region":"Lagos","expansionPlans":"West Africa expansion followed by global partnerships","revenue":"Pre-revenue","users":"500+ patients enrolled","growthRate":"40 percent MoM patient enrollment","traction":"Working MVP with 2 hospital pilots, 500+ patients enrolled, 98 percent patient satisfaction","teamSummary":"CEO: 10 years healthcare software. CTO: 12 years cybersecurity, former Google engineer.","pitchSummary":"Patients are locked out of their own medical data. ForcepX gives patients ownership and control with cryptographic technology. We've proven demand with 500+ patients and 2 hospital pilots. With a world-class team, we're raising $500K to scale across West Africa."}`;
 
-    for (const file of files) {
+    parts.push({ text: promptText });
+    
+    for (const image of imageContent) {
       parts.push({
         inlineData: {
-          mimeType: file.mimeType || "application/pdf",
-          data: file.base64,
+          mimeType: image.mimeType,
+          data: image.data,
         }
       });
     }
-
-    const MODEL = "gemini-2.5-flash";
+    
+    console.log(`📤 Sending to Gemini: ${parts.length} parts (${textContent.length} text files, ${imageContent.length} images)`);
+    
+    if (textContent.length === 0 && imageContent.length === 0) {
+      return res.status(500).json({
+        error: "No readable content found in the uploaded files. Please try different files or use manual input."
+      });
+    }
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -231,6 +375,7 @@ Example 3 - E-commerce:
     const data = await response.json();
 
     if (data.error) {
+      console.error("Gemini API error:", data.error);
       return res.status(500).json({
         error: "Gemini error: " + data.error.message
       });
@@ -249,33 +394,22 @@ Example 3 - E-commerce:
     }
     
     if (!text) {
-      return res.status(500).json({ error: "AI returned empty response. Try a different file." });
+      return res.status(500).json({ error: "AI returned empty response." });
     }
 
+    console.log("📝 Parsing Gemini response...");
+    
     const parsed = extractJSON(text);
 
     if (!parsed) {
-      try {
-        const matches = text.match(/\{[^{]*\{[^}]*\}[^}]*\}/);
-        if (matches) {
-          const deepParsed = extractJSON(matches[0]);
-          if (deepParsed) {
-            return res.json({
-              profile: deepParsed,
-              success: true,
-            });
-          }
-        }
-      } catch (e) {
-        console.log("Deep extraction failed:", e.message);
-      }
-
       return res.status(500).json({
         error: "AI returned invalid JSON format. Please try again with fewer files or use manual input.",
         raw: text.substring(0, 500),
       });
     }
 
+    console.log("✅ Analysis complete:", parsed.companyName);
+    
     return res.json({
       profile: parsed,
       success: true,
