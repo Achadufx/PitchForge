@@ -3,6 +3,7 @@ import Head from "next/head";
 import { supabase } from "../lib/supabase";
 import DocumentUpload from "../components/DocumentUpload";
 import { useRouter } from "next/router";
+import AccountTab from "../components/AccountTab";
 
 const API_URL = "";
 const PLAN_LIMITS = { free: 10, starter: 100, pro: 500 };
@@ -914,28 +915,7 @@ function AddInvestorForm({ onClose, onAdded }) {
   );
 }
 
-function AccountTab({ user, plan, pitchCount, onSignOut }) {
-  const [checkoutLoading, setCheckoutLoading] = useState("");
-  const limit = PLAN_LIMITS[plan] || 10;
 
-  const handleCheckout = async (p) => {
-    setCheckoutLoading(p);
-    try {
-      const res = await fetch("/api/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: p, userId: user.id, userEmail: user.email }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (err) { console.error(err); }
-    setCheckoutLoading("");
-  };
-
-  return (
-    <div> <div style={{ marginBottom: 28 }}> <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}> Account </h1> <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> Manage your plan and account settings. </p> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 16 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Profile </div> <div style={{ display: "flex", alignItems: "center", gap: 14 }}> <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color: "#fff" }} > {user?.email?.[0]?.toUpperCase() || "F"} </div> <div> <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 2 }} > {user?.user_metadata?.full_name || "Founder"} </div> <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}> {user?.email} </div> </div> </div> </div> <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 16 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Current Plan </div> <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}> <div> <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 2, textTransform: "capitalize" }} > {plan} </div> <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }} > {pitchCount} of {limit} pitches used </div> </div> <div style={{ fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: plan === "pro" ? "rgba(74,222,128,0.1)" : plan === "starter" ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.06)", color: plan === "pro" ? "#4ade80" : plan === "starter" ? "#a78bfa" : "rgba(255,255,255,0.3)", textTransform: "uppercase" }} > {plan} </div> </div> <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 99, height: 6, overflow: "hidden" }}> <div style={{ background: pitchCount / limit >= 0.9 ? "#f87171" : "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: Math.min((pitchCount / limit) * 100, 100) + "%" }} /> </div> </div> {plan !== "pro" && ( <div style={{ background: "#0f0f0f", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 14, padding: 24, marginBottom: 16 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Upgrade </div> <div style={{ display: "flex", flexDirection: "column", gap: 10 }}> {plan === "free" && ( <button onClick={() => handleCheckout("starter")} disabled={checkoutLoading === "starter"} style={{ width: "100%", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)" }} > {checkoutLoading === "starter" ? "Loading..." : "Starter — $29/mo · 100 pitches/month →"} </button> )} <button onClick={() => handleCheckout("pro")} disabled={checkoutLoading === "pro"} style={{ width: "100%", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", background: "#7c3aed", color: "#fff", border: "none" }} > {checkoutLoading === "pro" ? "Loading..." : "Pro — $79/mo · 500 pitches + Claude AI + CRM →"} </button> </div> </div> )} <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24 }} > <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }} > Danger Zone </div> <button onClick={onSignOut} style={{ background: "transparent", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 8, padding: "10px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer" }} > Sign out </button> </div> </div>
-  );
-}
 
 export default function App() {
   const router = useRouter();
