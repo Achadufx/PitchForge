@@ -90,7 +90,7 @@ function StepIndicator({ current }) {
   );
 }
 
-function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile }) {
+function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, setSavedProfile }) {
   const [mode, setMode] = useState("upload");
   const [startup, setStartup] = useState({
     name: "",
@@ -177,38 +177,42 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile }
           ask: data.analysis?.amountRaising || p.amountRaising || "",
         });
 
-        // Save profile to Supabase
+        // Save profile directly to Supabase
         try {
           const { data: { user } } = await supabase.auth.getUser();
+          console.log("👤 Saving profile for user:", user?.id);
+          
           if (user) {
-            await fetch("/api/save-startup-profile", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                userId: user.id,
-                companyName: data.analysis?.companyName || p.companyName || "",
-                tagline: p.tagline || "",
-                industry: data.analysis?.industry || p.sector || "",
-                subIndustry: p.subSector || "",
-                businessModel: data.analysis?.businessModel || p.businessModel || "",
-                problem: p.problem || "",
-                solution: p.solution || "",
-                competitiveAdvantage: p.competitiveAdvantage || "",
-                stage: data.analysis?.stage || p.stage || "",
-                amountRaising: data.analysis?.amountRaising || p.amountRaising || "",
-                useOfFunds: p.useOfFunds || "",
-                country: p.country || "",
-                region: p.region || "",
-                expansionPlans: p.expansionPlans || "",
-                revenue: data.analysis?.revenue || p.revenue || "",
-                usersCount: data.analysis?.users || p.users || "",
-                growthRate: p.growthRate || "",
-                traction: data.analysis?.traction || p.traction || "",
-                teamSummary: p.teamSummary || "",
-                pitchSummary: data.analysis?.pitchSummary || p.pitchSummary || ""
-              })
-            });
-            console.log("✅ Profile saved to Supabase");
+            const profileData = {
+              user_id: user.id,
+              company_name: data.analysis?.companyName || p.companyName || "",
+              industry: data.analysis?.industry || p.sector || "",
+              stage: data.analysis?.stage || p.stage || "",
+              amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
+              country: p.country || "",
+              business_model: data.analysis?.businessModel || p.businessModel || "",
+              traction: data.analysis?.traction || p.traction || "",
+              revenue: data.analysis?.revenue || p.revenue || "",
+              users_count: data.analysis?.users || p.users || "",
+              pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
+              updated_at: new Date().toISOString()
+            };
+            
+            console.log("📝 Profile data to save:", profileData);
+            
+            const { error: saveError } = await supabase
+              .from('startup_profiles')
+              .upsert(profileData, { onConflict: 'user_id' });
+            
+            if (saveError) {
+              console.error("❌ Save error:", saveError);
+            } else {
+              console.log("✅ Profile saved to Supabase!");
+              // Update the savedProfile state
+              if (setSavedProfile) {
+                setSavedProfile(profileData);
+              }
+            }
           }
         } catch (saveErr) {
           console.error("Failed to save profile:", saveErr);
@@ -702,7 +706,7 @@ function SendStep({ pitches, onRestart }) {
   );
 }
 
-function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload, savedProfile }) {
+function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload, savedProfile, setSavedProfile }) {
   const [step, setStep] = useState("describe");
   const [investors, setInvestors] = useState(preloadedInvestors || []);
   const [startup, setStartup] = useState(null);
@@ -777,6 +781,7 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
               plan={plan}
               preloadedInvestors={investors}
               savedProfile={savedProfile}
+              setSavedProfile={setSavedProfile}
             />
           )}
           
@@ -1027,6 +1032,8 @@ export default function App() {
         if (data.success && data.profile) {
           setSavedProfile(data.profile);
           console.log("✅ Loaded saved profile:", data.profile.company_name);
+        } else {
+          console.log("ℹ️ No saved profile found");
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
@@ -1058,7 +1065,7 @@ export default function App() {
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />
         <main style={{ marginLeft: 220, flex: 1, padding: "40px", overflowY: "auto", minHeight: "100vh" }}>
           <div style={{ maxWidth: 720, margin: "0 auto" }}>
-            {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} preloadedInvestors={preloadedInvestors} clearPreload={() => setPreloadedInvestors(null)} savedProfile={savedProfile} />}
+            {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} preloadedInvestors={preloadedInvestors} clearPreload={() => setPreloadedInvestors(null)} savedProfile={savedProfile} setSavedProfile={setSavedProfile} />}
             {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setPreloadedInvestors(invs); setActiveTab("campaign"); }} />}
             {activeTab === "crm" && <CrmTab />}
             {activeTab === "followups" && <FollowupsTab />}
