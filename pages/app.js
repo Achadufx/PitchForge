@@ -348,7 +348,7 @@ export default function App() {
         <main style={{ marginLeft: 220, flex: 1, padding: "40px", overflowY: "auto", minHeight: "100vh" }}>
           <div style={{ maxWidth: 720, margin: "0 auto" }}>
             {activeTab === "campaign" && <CampaignTab pitchCount={pitchCount} plan={plan} setPitchCount={setPitchCount} user={user} />}
-            {activeTab === "investors" && <InvestorsTab plan={plan} />}
+            {activeTab === "investors" && <InvestorsTab plan={plan} onStartCampaign={(invs) => { setActiveTab("campaign"); /* will hook into campaign below */ }} />}
             {activeTab === "account" && <AccountTab user={user} plan={plan} pitchCount={pitchCount} onSignOut={handleSignOut} />}
           </div>
         </main>
