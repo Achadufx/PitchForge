@@ -1113,18 +1113,64 @@ export default function App() {
   const [savedProfile, setSavedProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  useEffect
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
-  if (authChecking) return (
-    <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 14, fontFamily: "Inter, system-ui" }}>Loading...</div>
-    </div>
-  );
+ useEffect(() => {
+  async function initializeApp() {
+    try {
+      console.log("🔄 Initializing app...");
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log("ℹ️ No session found, redirecting to login...");
+        router.push("/login");
+        setAuthChecking(false);
+        return;
+      }
+      
+      console.log("✅ Session found for user:", session.user.id);
+      setUser(session.user);
+      
+      const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
+      const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
+      setPitchCount(count);
+      setPlan(savedPlan);
+      
+      // Fetch existing startup profile directly from Supabase
+      try {
+        console.log("🔍 Fetching profile for user:", session.user.id);
+        
+        const { data, error } = await supabase
+          .from('startup_profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("❌ Supabase fetch error:", error);
+          setSavedProfile(null);
+        } else if (data) {
+          console.log("✅ Loaded saved profile:", data.company_name);
+          setSavedProfile(data);
+        } else {
+          console.log("ℹ️ No saved profile found");
+          setSavedProfile(null);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch profile:", err);
+        setSavedProfile(null);
+      }
+      
+    } catch (error) {
+      console.error("❌ Initialization error:", error);
+      router.push("/login");
+    } finally {
+      console.log("✅ App initialization complete, hiding loading screen");
+      setAuthChecking(false);
+    }
+  }
+  
+  initializeApp();
+}, []);
 
   return (
     <>
