@@ -17,5 +17,6 @@
     "stripe": "^14.21.0",
     "pdf-parse": "^1.1.1",
     "mammoth": "^1.6.0"
+    "apify-client": "^1.0.0"
   }
 }
