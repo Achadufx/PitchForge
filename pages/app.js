@@ -1163,7 +1163,7 @@ function InvestorsTab({ plan, onStartCampaign }) {
   const handleStartCampaign = () => {
     const chosen = investors.filter(inv => selected.includes(inv.id));
     const asInvestorList = chosen.map(inv => ({
-      name: inv.contact_name || inv.firm,
+      name: inv.contact_name || inv.firm || inv.name,
       email: inv.email || "",
       firm: inv.firm,
       id: inv.id,
@@ -1206,43 +1206,15 @@ function InvestorsTab({ plan, onStartCampaign }) {
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}>Investor Discovery</h1>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
-            {investors.length} verified investors. Filter by sector, stage, and region.
+            {investors.length} investors in database. Filter by sector, stage, and region.
             <span style={{ color: "#fbbf24", marginLeft: 8 }}>
               ⚠️ {investors.filter(i => !i.email).length} need email verification
             </span>
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button 
-            onClick={async () => {
-              setLoading(true);
-              try {
-                const res = await fetch('/api/fetch-pitchbook-investors', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ sector: filters.sector || '' }),
-                });
-                const data = await res.json();
-                if (data.success) {
-                  alert(`✅ Found ${data.count} investors from PitchBook!\n\nCheck the console (F12) to see the data.`);
-                  console.log("Investors found:", data.investors);
-                } else {
-                  alert('❌ Failed: ' + (data.error || data.details || 'Unknown error'));
-                }
-              } catch (err) {
-                alert('❌ Failed to fetch investors');
-                console.error(err);
-              }
-              setLoading(false);
-            }}
-            style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}
-          >
-            🔄 Fetch from PitchBook
-          </button>
-          <button onClick={() => setShowAddForm(!showAddForm)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
-            + Add Investor
-          </button>
-        </div>
+        <button onClick={() => setShowAddForm(!showAddForm)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
+          + Add Investor
+        </button>
       </div>
 
       {showAddForm && <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />}
@@ -1274,7 +1246,7 @@ function InvestorsTab({ plan, onStartCampaign }) {
       ) : investors.length === 0 ? (
         <div style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "40px 24px", textAlign: "center" }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🔍</div>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>No investors match these filters. Try widening your search.</p>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>No investors in database. Add investors manually or use the Campaign tab to discover them.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 80 }}>
@@ -1284,8 +1256,12 @@ function InvestorsTab({ plan, onStartCampaign }) {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>{inv.firm}</div>
-                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>{inv.hq}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>
+                      {inv.name || inv.firm}
+                    </div>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
+                      {inv.title ? inv.title + " @ " : ""}{inv.firm} {inv.hq && `· ${inv.hq}`}
+                    </div>
                   </div>
                   {!inv.email ? (
                     <span style={{ fontSize: 10, fontWeight: 700, color: "#fbbf24", background: "rgba(251,191,36,0.1)", padding: "3px 8px", borderRadius: 99, whiteSpace: "nowrap", flexShrink: 0 }}>
@@ -1298,9 +1274,9 @@ function InvestorsTab({ plan, onStartCampaign }) {
                   )}
                 </div>
                 
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
-                    {inv.contact_name || "No contact"} · {inv.email || "No email"}
+                    {inv.contact_name || inv.name || "No contact"} · {inv.email || "No email"}
                   </span>
                   <button onClick={() => handleEditClick(inv)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 4, padding: "2px 8px", fontSize: 9, cursor: "pointer", fontWeight: 600 }}>
                     ✏️ Edit
@@ -1327,13 +1303,29 @@ function InvestorsTab({ plan, onStartCampaign }) {
                   </div>
                 )}
 
-                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, marginBottom: 10 }}>{inv.notes}</p>
+                {inv.investment_focus && inv.investment_focus.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
+                    {inv.investment_focus.slice(0, 4).map((tag, i) => (
+                      <span key={i} style={{ fontSize: 9, fontWeight: 600, color: "#a78bfa", background: "rgba(124,58,237,0.1)", padding: "2px 8px", borderRadius: 99 }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, marginBottom: 10 }}>{inv.notes || inv.bio}</p>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {inv.sectors?.map((s, i) => (
                     <span key={i} style={{ fontSize: 10, fontWeight: 600, color: "#a78bfa", background: "rgba(124,58,237,0.1)", padding: "3px 8px", borderRadius: 99 }}>{s}</span>
                   ))}
                   {inv.stages?.map((s, i) => (
                     <span key={i} style={{ fontSize: 10, fontWeight: 600, color: "#64748b", background: "rgba(255,255,255,0.04)", padding: "3px 8px", borderRadius: 99 }}>{s}</span>
+                  ))}
+                  {inv.stage_preference?.map((s, i) => (
+                    <span key={i} style={{ fontSize: 10, fontWeight: 600, color: "#64748b", background: "rgba(255,255,255,0.04)", padding: "3px 8px", borderRadius: 99 }}>{s}</span>
+                  ))}
+                  {inv.geography?.map((g, i) => (
+                    <span key={i} style={{ fontSize: 10, fontWeight: 600, color: "#64748b", background: "rgba(255,255,255,0.04)", padding: "3px 8px", borderRadius: 99 }}>{g}</span>
                   ))}
                 </div>
               </div>
