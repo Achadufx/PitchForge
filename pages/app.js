@@ -1113,31 +1113,7 @@ export default function App() {
   const [savedProfile, setSavedProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) { router.push("/login"); return; }
-      setUser(session.user);
-      const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
-      const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
-      setPitchCount(count);
-      setPlan(savedPlan);
-
-      try {
-        const res = await fetch(`/api/get-startup-profile?userId=${session.user.id}`);
-        const data = await res.json();
-        if (data.success && data.profile) {
-          setSavedProfile(data.profile);
-          console.log("✅ Loaded saved profile:", data.profile.company_name);
-        } else {
-          console.log("ℹ️ No saved profile found");
-        }
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-      }
-      setProfileLoading(false);
-      setAuthChecking(false);
-    });
-  }, []);
+  useEffect
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
