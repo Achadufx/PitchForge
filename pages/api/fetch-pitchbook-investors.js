@@ -5,9 +5,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { sector, stage, region } = req.body;
+  const { sector } = req.body;
 
   try {
+    // Check if API token exists
+    if (!process.env.APIFY_API_TOKEN) {
+      console.error("❌ APIFY_API_TOKEN is not set in environment variables");
+      return res.status(500).json({ 
+        error: 'APIFY_API_TOKEN is not configured. Please add it to Vercel environment variables.' 
+      });
+    }
+
     // Initialize Apify client with your token from Vercel env
     const client = new ApifyClient({
       token: process.env.APIFY_API_TOKEN,
@@ -24,12 +32,16 @@ export default async function handler(req, res) {
 
     const input = {
       searchQuery: searchQuery,
-      maxItems: 50,
+      maxItems: 20, // Start small for testing
     };
 
     console.log("🚀 Fetching investors from PitchBook...");
+    console.log("🔍 Search query:", searchQuery);
 
+    // Run the Actor and wait for it to finish
     const run = await client.actor(actorId).call(input);
+    
+    // Fetch results from the dataset
     const { items } = await client.dataset(run.defaultDatasetId).listItems();
 
     console.log(`✅ Found ${items.length} investors`);
@@ -41,10 +53,10 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error("❌ Error fetching from PitchBook:", error);
     res.status(500).json({ 
       error: 'Failed to fetch investors from PitchBook',
-      details: error.message 
+      details: error.message || error.toString()
     });
   }
 }
