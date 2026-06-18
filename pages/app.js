@@ -124,13 +124,13 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   });
   const [profile, setProfile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const [matchedInvestors, setMatchedInvestors] = useState([]);
   const [selectedIndices, setSelectedIndices] = useState([]);
   const [showCsvUpload, setShowCsvUpload] = useState(false);
-  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
 
-  // Auto-load saved profile and fetch matches
+  // Auto-load saved profile if it exists
   useEffect(() => {
     if (savedProfile) {
       console.log("📋 Auto-loading saved profile:", savedProfile.company_name);
@@ -150,78 +150,17 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         revenue: savedProfile.revenue,
         users: savedProfile.users_count,
       });
-      
-      // Auto-fetch investors for the saved profile
-      fetchInvestorsForProfile(savedProfile);
       setMode("review");
+      // Auto-discover investors for saved profile
+      setTimeout(() => {
+        discoverInvestorsForProfile({
+          sector: savedProfile.industry,
+          stage: savedProfile.stage,
+          country: savedProfile.country,
+        });
+      }, 500);
     }
   }, [savedProfile]);
-
-  const fetchInvestorsForProfile = async (profileData) => {
-    setIsLoadingMatches(true);
-    try {
-      const res = await fetch("/api/analyze-startup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: profileData.company_name || "",
-          description: profileData.pitch_summary || "",
-          amountRaising: profileData.amount_raising || "",
-          industry: profileData.industry || "",
-          stage: profileData.stage || "",
-          sector: profileData.industry || "",
-        }),
-      });
-      
-      const data = await res.json();
-      if (data.success) {
-        const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
-          ...inv,
-          firm: inv.firm || inv.name || 'Unknown Investor',
-          name: inv.name || inv.firm || 'Unknown Investor',
-          score: inv.score || Math.floor(Math.random() * 25) + 70,
-          source: 'auto'
-        }));
-        scoredInvestors.sort((a, b) => b.score - a.score);
-        setMatchedInvestors(scoredInvestors);
-        setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
-        console.log(`✅ Found ${scoredInvestors.length} investors for saved profile`);
-      }
-    } catch (err) {
-      console.error("Failed to fetch investors for saved profile:", err);
-    }
-    setIsLoadingMatches(false);
-  };
-
-  const handleStartFresh = async () => {
-    // Clear the saved profile
-    if (setSavedProfile) {
-      setSavedProfile(null);
-    }
-    // Reset all state
-    setStartup({
-      name: "",
-      description: "",
-      ask: "",
-    });
-    setProfile(null);
-    setMatchedInvestors([]);
-    setSelectedIndices([]);
-    setMode("upload");
-    // Also clear from Supabase if you want
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('startup_profiles')
-          .delete()
-          .eq('user_id', user.id);
-        console.log("🗑️ Profile deleted from Supabase");
-      }
-    } catch (err) {
-      console.error("Failed to delete profile:", err);
-    }
-  };
 
   useEffect(() => {
     if (preloadedInvestors && preloadedInvestors.length > 0) {
@@ -235,6 +174,50 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
       setSelectedIndices(withScores.map((_, i) => i));
     }
   }, [preloadedInvestors]);
+
+  const discoverInvestorsForProfile = async (profileData) => {
+    setIsLoadingMatches(true);
+    try {
+      const startupProfile = {
+        sector: profileData.sector || "",
+        stage: profileData.stage || "",
+        geography: [profileData.country || "Global"],
+        tags: [profileData.sector || ""]
+      };
+
+      console.log("🔍 Discovering investors for:", startupProfile);
+
+      const res = await fetch("/api/discover-investors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ startupProfile })
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.investors.length > 0) {
+        console.log(`✅ Found ${data.count} matching investors`);
+        const scoredInvestors = data.investors.map((inv, index) => ({
+          ...inv,
+          id: inv.id || `investor-${index}-${Date.now()}`,
+          firm: inv.firm || inv.name || 'Unknown Investor',
+          name: inv.name || inv.firm || 'Unknown Investor',
+          score: inv.matchScore || Math.floor(Math.random() * 25) + 70,
+          source: 'discovered',
+          matchReasons: inv.matchReasons || "AI matched investor"
+        }));
+        setMatchedInvestors(prev => {
+          const existing = prev.filter(inv => inv.source !== 'discovered');
+          return [...existing, ...scoredInvestors];
+        });
+        // Auto-select top 5
+        setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
+      }
+    } catch (err) {
+      console.error("Investor discovery failed:", err);
+    }
+    setIsLoadingMatches(false);
+  };
 
   const handleProfileComplete = async (p) => {
     setProfile(p);
@@ -272,11 +255,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           ask: data.analysis?.amountRaising || p.amountRaising || "",
         });
 
-        // Save profile directly to Supabase
+        // Save profile to Supabase
         try {
           const { data: { user } } = await supabase.auth.getUser();
-          console.log("👤 Saving profile for user:", user?.id);
-          
           if (user) {
             const profileData = {
               user_id: user.id,
@@ -293,17 +274,14 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               updated_at: new Date().toISOString()
             };
             
-            console.log("📝 Profile data being sent:", profileData);
-            
-            const { data: result, error } = await supabase
+            const { error } = await supabase
               .from('startup_profiles')
-              .upsert(profileData, { onConflict: 'user_id' })
-              .select();
+              .upsert(profileData, { onConflict: 'user_id' });
             
             if (error) {
               console.error("❌ Supabase save error:", error);
             } else {
-              console.log("✅ Profile saved to Supabase!", result);
+              console.log("✅ Profile saved to Supabase!");
               if (setSavedProfile) {
                 setSavedProfile({
                   company_name: profileData.company_name,
@@ -322,6 +300,48 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           }
         } catch (saveErr) {
           console.error("❌ Failed to save profile:", saveErr);
+        }
+
+        // Auto-discover investors after analysis
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const startupProfile = {
+              sector: data.analysis?.industry || p.sector || "",
+              stage: data.analysis?.stage || p.stage || "",
+              geography: [p.country || "Global"],
+              tags: [data.analysis?.sector || p.sector || ""]
+            };
+
+            console.log("🔍 Discovering investors for:", startupProfile);
+
+            const discoverRes = await fetch("/api/discover-investors", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ startupProfile })
+            });
+
+            const discoverData = await discoverRes.json();
+
+            if (discoverData.success && discoverData.investors.length > 0) {
+              console.log(`✅ Found ${discoverData.count} matching investors`);
+              const discoveredInvestors = discoverData.investors.map((inv, index) => ({
+                ...inv,
+                id: inv.id || `investor-${index}-${Date.now()}`,
+                firm: inv.firm || inv.name || 'Unknown Investor',
+                name: inv.name || inv.firm || 'Unknown Investor',
+                score: inv.matchScore || Math.floor(Math.random() * 25) + 70,
+                source: 'discovered',
+                matchReasons: inv.matchReasons || "AI matched investor"
+              }));
+              setMatchedInvestors(prev => {
+                const existing = prev.filter(inv => inv.source !== 'discovered');
+                return [...existing, ...discoveredInvestors];
+              });
+            }
+          }
+        } catch (discoverErr) {
+          console.error("Investor discovery failed:", discoverErr);
         }
       }
     } catch (err) {
@@ -385,13 +405,59 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     return selectedIndices.map(i => matchedInvestors[i]).filter(Boolean);
   };
 
+  const handleDiscoverInvestors = async () => {
+    setIsLoadingMatches(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && profile) {
+        const startupProfile = {
+          sector: profile.sector || "",
+          stage: profile.stage || "",
+          geography: [profile.country || "Global"],
+          tags: [profile.sector || ""]
+        };
+        
+        const res = await fetch("/api/discover-investors", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ startupProfile })
+        });
+        
+        const data = await res.json();
+        if (data.success && data.investors.length > 0) {
+          const scoredInvestors = data.investors.map((inv, index) => ({
+            ...inv,
+            id: inv.id || `investor-${index}-${Date.now()}`,
+            firm: inv.firm || inv.name || 'Unknown Investor',
+            name: inv.name || inv.firm || 'Unknown Investor',
+            score: inv.matchScore || Math.floor(Math.random() * 25) + 70,
+            source: 'discovered',
+            matchReasons: inv.matchReasons || "AI matched investor"
+          }));
+          setMatchedInvestors(prev => {
+            const existing = prev.filter(inv => inv.source !== 'discovered');
+            return [...existing, ...scoredInvestors];
+          });
+          alert(`✅ Found ${data.count} matching investors!`);
+        } else {
+          alert('ℹ️ No matching investors found in the database.');
+        }
+      }
+    } catch (err) {
+      alert('❌ Failed to discover investors');
+      console.error(err);
+    }
+    setIsLoadingMatches(false);
+  };
+
   if (mode === "review" && profile) {
     return (
       <div>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}>
-          {isAnalyzing ? "🧠 AI is analyzing your documents..." : 
-           isLoadingMatches ? "🔍 Finding investors for your profile..." :
-           savedProfile ? "✅ Welcome back! Your startup profile is loaded" : "✅ AI analyzed your startup"}
+          {isAnalyzing || isLoadingMatches ? 
+            (isAnalyzing ? "🧠 AI is analyzing your documents..." : "🔍 Searching for investors...") : 
+            savedProfile ? "✅ Welcome back! Your startup profile is loaded" : "✅ AI analyzed your startup"
+          }
         </h2>
         
         {isAnalyzing || isLoadingMatches ? (
@@ -422,32 +488,32 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
             {savedProfile && (
               <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
                 <button 
-                  onClick={handleStartFresh}
-                  style={{ 
-                    background: "rgba(239,68,68,0.15)", 
-                    color: "#f87171", 
-                    border: "1px solid rgba(239,68,68,0.2)", 
-                    borderRadius: 8, 
-                    padding: "8px 16px", 
-                    fontSize: 12, 
-                    fontWeight: 600, 
-                    cursor: "pointer" 
+                  onClick={async () => {
+                    if (confirm("Delete your saved profile and start fresh?")) {
+                      try {
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (user) {
+                          await supabase.from('startup_profiles').delete().eq('user_id', user.id);
+                          setSavedProfile(null);
+                          setStartup({ name: "", description: "", ask: "" });
+                          setProfile(null);
+                          setMatchedInvestors([]);
+                          setSelectedIndices([]);
+                          setMode("upload");
+                          alert("✅ Profile deleted. Start a new campaign!");
+                        }
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }
                   }}
+                  style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
                 >
                   🗑️ Start Fresh Campaign
                 </button>
                 <button 
-                  onClick={() => fetchInvestorsForProfile(savedProfile)}
-                  style={{ 
-                    background: "rgba(124,58,237,0.15)", 
-                    color: "#a78bfa", 
-                    border: "1px solid rgba(124,58,237,0.25)", 
-                    borderRadius: 8, 
-                    padding: "8px 16px", 
-                    fontSize: 12, 
-                    fontWeight: 600, 
-                    cursor: "pointer" 
-                  }}
+                  onClick={handleDiscoverInvestors}
+                  style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
                 >
                   🔄 Refresh Investors
                 </button>
@@ -518,21 +584,38 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     {selectedIndices.length} selected
                   </span>
                 </div>
-                <button 
-                  onClick={() => setShowCsvUpload(!showCsvUpload)}
-                  style={{ 
-                    background: "rgba(124,58,237,0.15)", 
-                    color: "#a78bfa", 
-                    border: "1px solid rgba(124,58,237,0.25)", 
-                    borderRadius: 6, 
-                    padding: "4px 12px", 
-                    fontSize: 11, 
-                    fontWeight: 600, 
-                    cursor: "pointer" 
-                  }}
-                >
-                  + Upload CSV
-                </button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button 
+                    onClick={handleDiscoverInvestors}
+                    style={{ 
+                      background: "rgba(124,58,237,0.15)", 
+                      color: "#a78bfa", 
+                      border: "1px solid rgba(124,58,237,0.25)", 
+                      borderRadius: 6, 
+                      padding: "4px 12px", 
+                      fontSize: 11, 
+                      fontWeight: 600, 
+                      cursor: "pointer" 
+                    }}
+                  >
+                    🎯 Discover Investors
+                  </button>
+                  <button 
+                    onClick={() => setShowCsvUpload(!showCsvUpload)}
+                    style={{ 
+                      background: "rgba(124,58,237,0.15)", 
+                      color: "#a78bfa", 
+                      border: "1px solid rgba(124,58,237,0.25)", 
+                      borderRadius: 6, 
+                      padding: "4px 12px", 
+                      fontSize: 11, 
+                      fontWeight: 600, 
+                      cursor: "pointer" 
+                    }}
+                  >
+                    + Upload CSV
+                  </button>
+                </div>
               </div>
 
               {showCsvUpload && (
@@ -552,7 +635,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               <div style={{ maxHeight: 300, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
                 {matchedInvestors.length === 0 && (
                   <div style={{ textAlign: "center", padding: 20, color: "#475569", fontSize: 13 }}>
-                    No investors matched. Upload a CSV or try different documents.
+                    No investors matched. Click "Discover Investors" to find matches.
                   </div>
                 )}
                 {matchedInvestors.map((inv, index) => (
@@ -582,19 +665,38 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, color: "#f1f5f9", fontSize: 13 }}>
-                        {inv.firm || inv.name}
+                        {inv.name || inv.firm || 'Unknown Investor'}
                         {inv.source === 'csv' && (
                           <span style={{ fontSize: 9, color: "#fbbf24", marginLeft: 6, background: "rgba(251,191,36,0.1)", padding: "2px 6px", borderRadius: 99 }}>
                             CSV
                           </span>
                         )}
+                        {inv.source === 'discovered' && (
+                          <span style={{ fontSize: 9, color: "#4ade80", marginLeft: 6, background: "rgba(74,222,128,0.1)", padding: "2px 6px", borderRadius: 99 }}>
+                            🎯
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>
-                        {inv.hq || inv.location || ""} {inv.email && `· ${inv.email}`}
+                        {inv.title ? inv.title + (inv.firm ? " @ " : "") : ""} {inv.firm}
                       </div>
+                      {inv.investment_focus && inv.investment_focus.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 2 }}>
+                          {inv.investment_focus.slice(0, 3).map((tag, i) => (
+                            <span key={i} style={{ fontSize: 9, fontWeight: 600, color: "#a78bfa", background: "rgba(124,58,237,0.1)", padding: "2px 8px", borderRadius: 99 }}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {inv.matchReasons && (
                         <div style={{ fontSize: 9, color: "rgba(167,139,250,0.6)", marginTop: 2 }}>
                           {inv.matchReasons}
+                        </div>
+                      )}
+                      {inv.email && (
+                        <div style={{ fontSize: 10, color: "#4ade80", marginTop: 1 }}>
+                          📧 {inv.email}
                         </div>
                       )}
                     </div>
@@ -660,7 +762,11 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         <button 
           onClick={() => {
             setMode("review");
-            fetchInvestorsForProfile(savedProfile);
+            discoverInvestorsForProfile({
+              sector: savedProfile.industry,
+              stage: savedProfile.stage,
+              country: savedProfile.country,
+            });
           }} 
           style={{ 
             width: "100%", 
