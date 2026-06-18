@@ -1095,71 +1095,50 @@ function InvestorsTab({ plan, onStartCampaign }) {
   };
 
   return (
-  <div>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-      <div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}>Investor Discovery</h1>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
-          {investors.length} verified investors. Filter by sector, stage, and region.
-          <span style={{ color: "#fbbf24", marginLeft: 8 }}>
-            ⚠️ {investors.filter(i => !i.email).length} need email verification
-          </span>
-        </p>
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <button 
-          onClick={async () => {
-            setLoading(true);
-            try {
-              const res = await fetch('/api/fetch-pitchbook-investors', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                  sector: filters.sector || '',
-                }),
-              });
-              const data = await res.json();
-              if (data.success) {
-                alert(`✅ Found ${data.count} investors from PitchBook!\n\nCheck the console (F12) to see the data.`);
-                console.log("Investors found:", data.investors);
-              } else {
-                alert('❌ Failed: ' + (data.error || data.details || 'Unknown error'));
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}>Investor Discovery</h1>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
+            {investors.length} verified investors. Filter by sector, stage, and region.
+            <span style={{ color: "#fbbf24", marginLeft: 8 }}>
+              ⚠️ {investors.filter(i => !i.email).length} need email verification
+            </span>
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button 
+            onClick={async () => {
+              setLoading(true);
+              try {
+                const res = await fetch('/api/fetch-pitchbook-investors', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ sector: filters.sector || '' }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                  alert(`✅ Found ${data.count} investors from PitchBook!\n\nCheck the console (F12) to see the data.`);
+                  console.log("Investors found:", data.investors);
+                } else {
+                  alert('❌ Failed: ' + (data.error || data.details || 'Unknown error'));
+                }
+              } catch (err) {
+                alert('❌ Failed to fetch investors');
+                console.error(err);
               }
-            } catch (err) {
-              alert('❌ Failed to fetch investors');
-              console.error(err);
-            }
-            setLoading(false);
-          }}
-          style={{ 
-            background: "#7c3aed", 
-            color: "#fff", 
-            border: "none", 
-            borderRadius: 8, 
-            padding: "9px 16px", 
-            fontWeight: 700, 
-            fontSize: 12, 
-            cursor: "pointer", 
-            whiteSpace: "nowrap" 
-          }}
-        >
-          🔄 Fetch from PitchBook
-        </button>
-        <button onClick={() => setShowAddForm(!showAddForm)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
-          + Add Investor
-        </button>
+              setLoading(false);
+            }}
+            style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}
+          >
+            🔄 Fetch from PitchBook
+          </button>
+          <button onClick={() => setShowAddForm(!showAddForm)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
+            + Add Investor
+          </button>
+        </div>
       </div>
-    </div>
 
-    {showAddForm && <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />}
-
-    <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-      {/* ... rest of your filters ... */}
-    </div>
-
-    {/* ... rest of your InvestorsTab code ... */}
-  </div>
-);
       {showAddForm && <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />}
 
       <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
@@ -1213,115 +1192,30 @@ function InvestorsTab({ plan, onStartCampaign }) {
                   )}
                 </div>
                 
-                {/* Contact and Email info with Edit button */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
                     {inv.contact_name || "No contact"} · {inv.email || "No email"}
                   </span>
-                  <button 
-                    onClick={() => handleEditClick(inv)}
-                    style={{ 
-                      background: "rgba(124,58,237,0.15)", 
-                      color: "#a78bfa", 
-                      border: "1px solid rgba(124,58,237,0.2)", 
-                      borderRadius: 4, 
-                      padding: "2px 8px", 
-                      fontSize: 9, 
-                      cursor: "pointer",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <button onClick={() => handleEditClick(inv)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 4, padding: "2px 8px", fontSize: 9, cursor: "pointer", fontWeight: 600 }}>
                     ✏️ Edit
                   </button>
                 </div>
 
-                {/* Edit Form - shows when editing this investor */}
                 {editingInvestor && editingInvestor.id === inv.id && (
-                  <div style={{ 
-                    background: "#0a0f1e", 
-                    border: "1px solid rgba(124,58,237,0.3)", 
-                    borderRadius: 8, 
-                    padding: 12, 
-                    marginBottom: 10,
-                    marginTop: 4
-                  }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#a78bfa", marginBottom: 8 }}>
-                      ✏️ Edit Investor Details
-                    </div>
+                  <div style={{ background: "#0a0f1e", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 8, padding: 12, marginBottom: 10, marginTop: 4 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#a78bfa", marginBottom: 8 }}>✏️ Edit Investor Details</div>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                       <div style={{ flex: 1, minWidth: 150 }}>
-                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                          Contact Name
-                        </label>
-                        <input
-                          value={editContactName}
-                          onChange={(e) => setEditContactName(e.target.value)}
-                          placeholder="e.g. John Smith"
-                          style={{ 
-                            width: "100%", 
-                            borderRadius: 6, 
-                            border: "1px solid #1e293b", 
-                            padding: "6px 10px", 
-                            fontSize: 12, 
-                            outline: "none", 
-                            boxSizing: "border-box", 
-                            background: "#0f172a", 
-                            color: "#e2e8f0" 
-                          }}
-                        />
+                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.5px" }}>Contact Name</label>
+                        <input value={editContactName} onChange={(e) => setEditContactName(e.target.value)} placeholder="e.g. John Smith" style={{ width: "100%", borderRadius: 6, border: "1px solid #1e293b", padding: "6px 10px", fontSize: 12, outline: "none", boxSizing: "border-box", background: "#0f172a", color: "#e2e8f0" }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 150 }}>
-                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                          Email Address
-                        </label>
-                        <input
-                          value={editEmail}
-                          onChange={(e) => setEditEmail(e.target.value)}
-                          placeholder="e.g. john@vc.com"
-                          style={{ 
-                            width: "100%", 
-                            borderRadius: 6, 
-                            border: "1px solid #1e293b", 
-                            padding: "6px 10px", 
-                            fontSize: 12, 
-                            outline: "none", 
-                            boxSizing: "border-box", 
-                            background: "#0f172a", 
-                            color: "#e2e8f0" 
-                          }}
-                        />
+                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.5px" }}>Email Address</label>
+                        <input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="e.g. john@vc.com" style={{ width: "100%", borderRadius: 6, border: "1px solid #1e293b", padding: "6px 10px", fontSize: 12, outline: "none", boxSizing: "border-box", background: "#0f172a", color: "#e2e8f0" }} />
                       </div>
                       <div style={{ display: "flex", gap: 6, alignItems: "flex-end" }}>
-                        <button 
-                          onClick={handleSaveEdit}
-                          style={{ 
-                            background: "#7c3aed", 
-                            color: "#fff", 
-                            border: "none", 
-                            borderRadius: 6, 
-                            padding: "6px 14px", 
-                            fontSize: 11, 
-                            fontWeight: 600, 
-                            cursor: "pointer" 
-                          }}
-                        >
-                          Save
-                        </button>
-                        <button 
-                          onClick={() => setEditingInvestor(null)}
-                          style={{ 
-                            background: "transparent", 
-                            color: "#475569", 
-                            border: "1px solid #1e293b", 
-                            borderRadius: 6, 
-                            padding: "6px 14px", 
-                            fontSize: 11, 
-                            fontWeight: 600, 
-                            cursor: "pointer" 
-                          }}
-                        >
-                          Cancel
-                        </button>
+                        <button onClick={handleSaveEdit} style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Save</button>
+                        <button onClick={() => setEditingInvestor(null)} style={{ background: "transparent", color: "#475569", border: "1px solid #1e293b", borderRadius: 6, padding: "6px 14px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1345,9 +1239,7 @@ function InvestorsTab({ plan, onStartCampaign }) {
       {selected.length > 0 && (
         <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: "#0f0f0f", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "14px 20px", display: "flex", alignItems: "center", gap: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 40px rgba(124,58,237,0.15)", zIndex: 100 }}>
           <span style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>{selected.length} investor{selected.length !== 1 ? "s" : ""} selected</span>
-          <button onClick={handleStartCampaign} style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-            Start Campaign →
-          </button>
+          <button onClick={handleStartCampaign} style={{ background: "#7c3aed", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>Start Campaign →</button>
           <button onClick={() => setSelected([])} style={{ background: "transparent", color: "#475569", border: "none", fontSize: 18, cursor: "pointer", padding: 0 }}>×</button>
         </div>
       )}
