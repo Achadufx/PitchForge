@@ -1021,6 +1021,9 @@ function InvestorsTab({ plan, onStartCampaign }) {
   const [selected, setSelected] = useState([]);
   const [filters, setFilters] = useState({ sector: "", stage: "", region: "" });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingInvestor, setEditingInvestor] = useState(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editContactName, setEditContactName] = useState("");
 
   const SECTORS = ["fintech", "healthtech", "saas", "enterprise software", "climate tech", "b2b", "ai/ml", "edtech", "agritech"];
   const STAGES = ["pre-seed", "seed", "series-a", "growth"];
@@ -1057,8 +1060,39 @@ function InvestorsTab({ plan, onStartCampaign }) {
       name: inv.contact_name || inv.firm,
       email: inv.email || "",
       firm: inv.firm,
+      id: inv.id,
     }));
     onStartCampaign(asInvestorList);
+  };
+
+  const handleEditClick = (investor) => {
+    setEditingInvestor(investor);
+    setEditEmail(investor.email || "");
+    setEditContactName(investor.contact_name || "");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingInvestor) return;
+    try {
+      const res = await fetch("/api/update-investor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingInvestor.id,
+          email: editEmail,
+          contactName: editContactName,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      // Refresh investor list
+      fetchInvestors();
+      setEditingInvestor(null);
+      setEditEmail("");
+      setEditContactName("");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -1066,7 +1100,12 @@ function InvestorsTab({ plan, onStartCampaign }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}>Investor Discovery</h1>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>{investors.length} verified investors. Filter by sector, stage, and region.</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
+            {investors.length} verified investors. Filter by sector, stage, and region.
+            <span style={{ color: "#fbbf24", marginLeft: 8 }}>
+              ⚠️ {investors.filter(i => !i.email).length} need email verification
+            </span>
+          </p>
         </div>
         <button onClick={() => setShowAddForm(!showAddForm)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
           + Add Investor
@@ -1075,6 +1114,7 @@ function InvestorsTab({ plan, onStartCampaign }) {
 
       {showAddForm && <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />}
 
+      {/* Filters */}
       <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
         <select value={filters.sector} onChange={(e) => setFilters({ ...filters, sector: e.target.value })} style={{ background: "#0f172a", color: "#cbd5e1", border: "1px solid #1e293b", borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none", cursor: "pointer" }}>
           <option value="">All sectors</option>
@@ -1115,12 +1155,131 @@ function InvestorsTab({ plan, onStartCampaign }) {
                     <div style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>{inv.firm}</div>
                     <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>{inv.hq}</div>
                   </div>
-                  {!inv.email && (
+                  {!inv.email ? (
                     <span style={{ fontSize: 10, fontWeight: 700, color: "#fbbf24", background: "rgba(251,191,36,0.1)", padding: "3px 8px", borderRadius: 99, whiteSpace: "nowrap", flexShrink: 0 }}>
-                      Verify email
+                      ⚠️ Need email
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "#4ade80", background: "rgba(74,222,128,0.1)", padding: "3px 8px", borderRadius: 99, whiteSpace: "nowrap", flexShrink: 0 }}>
+                      ✓ Email verified
                     </span>
                   )}
                 </div>
+                
+                {/* Contact and Email info with Edit button */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
+                    {inv.contact_name || "No contact"} · {inv.email || "No email"}
+                  </span>
+                  <button 
+                    onClick={() => handleEditClick(inv)}
+                    style={{ 
+                      background: "rgba(124,58,237,0.15)", 
+                      color: "#a78bfa", 
+                      border: "1px solid rgba(124,58,237,0.2)", 
+                      borderRadius: 4, 
+                      padding: "2px 8px", 
+                      fontSize: 9, 
+                      cursor: "pointer",
+                      fontWeight: 600,
+                    }}
+                  >
+                    ✏️ Edit
+                  </button>
+                </div>
+
+                {/* Edit Form - shows when editing this investor */}
+                {editingInvestor && editingInvestor.id === inv.id && (
+                  <div style={{ 
+                    background: "#0a0f1e", 
+                    border: "1px solid rgba(124,58,237,0.3)", 
+                    borderRadius: 8, 
+                    padding: 12, 
+                    marginBottom: 10,
+                    marginTop: 4
+                  }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#a78bfa", marginBottom: 8 }}>
+                      ✏️ Edit Investor Details
+                    </div>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <div style={{ flex: 1, minWidth: 150 }}>
+                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                          Contact Name
+                        </label>
+                        <input
+                          value={editContactName}
+                          onChange={(e) => setEditContactName(e.target.value)}
+                          placeholder="e.g. John Smith"
+                          style={{ 
+                            width: "100%", 
+                            borderRadius: 6, 
+                            border: "1px solid #1e293b", 
+                            padding: "6px 10px", 
+                            fontSize: 12, 
+                            outline: "none", 
+                            boxSizing: "border-box", 
+                            background: "#0f172a", 
+                            color: "#e2e8f0" 
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 150 }}>
+                        <label style={{ display: "block", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                          Email Address
+                        </label>
+                        <input
+                          value={editEmail}
+                          onChange={(e) => setEditEmail(e.target.value)}
+                          placeholder="e.g. john@vc.com"
+                          style={{ 
+                            width: "100%", 
+                            borderRadius: 6, 
+                            border: "1px solid #1e293b", 
+                            padding: "6px 10px", 
+                            fontSize: 12, 
+                            outline: "none", 
+                            boxSizing: "border-box", 
+                            background: "#0f172a", 
+                            color: "#e2e8f0" 
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: "flex", gap: 6, alignItems: "flex-end" }}>
+                        <button 
+                          onClick={handleSaveEdit}
+                          style={{ 
+                            background: "#7c3aed", 
+                            color: "#fff", 
+                            border: "none", 
+                            borderRadius: 6, 
+                            padding: "6px 14px", 
+                            fontSize: 11, 
+                            fontWeight: 600, 
+                            cursor: "pointer" 
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button 
+                          onClick={() => setEditingInvestor(null)}
+                          style={{ 
+                            background: "transparent", 
+                            color: "#475569", 
+                            border: "1px solid #1e293b", 
+                            borderRadius: 6, 
+                            padding: "6px 14px", 
+                            fontSize: 11, 
+                            fontWeight: 600, 
+                            cursor: "pointer" 
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, marginBottom: 10 }}>{inv.notes}</p>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {inv.sectors?.map((s, i) => (
@@ -1148,7 +1307,6 @@ function InvestorsTab({ plan, onStartCampaign }) {
     </div>
   );
 }
-
 function AddInvestorForm({ onClose, onAdded }) {
   const [form, setForm] = useState({ firm: "", contactName: "", email: "", sectors: "", stages: "", region: "", hq: "", notes: "" });
   const [submitting, setSubmitting] = useState(false);
