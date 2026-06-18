@@ -201,60 +201,57 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           ask: data.analysis?.amountRaising || p.amountRaising || "",
         });
 
-        // Save profile to Supabase
-       // Save profile directly to Supabase (bypass API)
-// Save profile directly to Supabase
-// Save profile directly to Supabase
-try {
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log("👤 Saving profile for user:", user?.id);
-  
-  if (user) {
-    const profileData = {
-      user_id: user.id,
-      company_name: data.analysis?.companyName || p.companyName || "",
-      industry: data.analysis?.industry || p.sector || "",
-      stage: data.analysis?.stage || p.stage || "",
-      amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
-      country: p.country || "",
-      business_model: data.analysis?.businessModel || p.businessModel || "",
-      traction: data.analysis?.traction || p.traction || "",
-      revenue: data.analysis?.revenue || p.revenue || "",
-      users_count: data.analysis?.users || p.users || "",
-      pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
-      updated_at: new Date().toISOString()
-    };
-    
-    console.log("📝 Profile data:", profileData);
-    
-    const { data: result, error } = await supabase
-      .from('startup_profiles')
-      .upsert(profileData, { onConflict: 'user_id' })
-      .select();
-    
-    if (error) {
-      console.error("❌ Supabase error:", error);
-    } else {
-      console.log("✅ Profile saved to Supabase!", result);
-      if (setSavedProfile) {
-        setSavedProfile({
-          company_name: profileData.company_name,
-          industry: profileData.industry,
-          stage: profileData.stage,
-          amount_raising: profileData.amount_raising,
-          country: profileData.country,
-          business_model: profileData.business_model,
-          traction: profileData.traction,
-          revenue: profileData.revenue,
-          users_count: profileData.users_count,
-          pitch_summary: profileData.pitch_summary,
-        });
-      }
-    }
-  }
-} catch (saveErr) {
-  console.error("❌ Failed to save profile:", saveErr);
-}
+        // Save profile directly to Supabase
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          console.log("👤 Saving profile for user:", user?.id);
+          
+          if (user) {
+            const profileData = {
+              user_id: user.id,
+              company_name: data.analysis?.companyName || p.companyName || "",
+              industry: data.analysis?.industry || p.sector || "",
+              stage: data.analysis?.stage || p.stage || "",
+              amount_raising: data.analysis?.amountRaising || p.amountRaising || "",
+              country: p.country || "",
+              business_model: data.analysis?.businessModel || p.businessModel || "",
+              traction: data.analysis?.traction || p.traction || "",
+              revenue: data.analysis?.revenue || p.revenue || "",
+              users_count: data.analysis?.users || p.users || "",
+              pitch_summary: data.analysis?.pitchSummary || p.pitchSummary || p.description || "",
+              updated_at: new Date().toISOString()
+            };
+            
+            console.log("📝 Profile data being sent:", profileData);
+            
+            const { data: result, error } = await supabase
+              .from('startup_profiles')
+              .upsert(profileData, { onConflict: 'user_id' })
+              .select();
+            
+            if (error) {
+              console.error("❌ Supabase save error:", error);
+            } else {
+              console.log("✅ Profile saved to Supabase!", result);
+              if (setSavedProfile) {
+                setSavedProfile({
+                  company_name: profileData.company_name,
+                  industry: profileData.industry,
+                  stage: profileData.stage,
+                  amount_raising: profileData.amount_raising,
+                  country: profileData.country,
+                  business_model: profileData.business_model,
+                  traction: profileData.traction,
+                  revenue: profileData.revenue,
+                  users_count: profileData.users_count,
+                  pitch_summary: profileData.pitch_summary,
+                });
+              }
+            }
+          }
+        } catch (saveErr) {
+          console.error("❌ Failed to save profile:", saveErr);
+        }
       }
     } catch (err) {
       console.error("Investor matching failed:", err);
@@ -1113,64 +1110,74 @@ export default function App() {
   const [savedProfile, setSavedProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
- useEffect(() => {
-  async function initializeApp() {
-    try {
-      console.log("🔄 Initializing app...");
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        console.log("ℹ️ No session found, redirecting to login...");
-        router.push("/login");
-        setAuthChecking(false);
-        return;
-      }
-      
-      console.log("✅ Session found for user:", session.user.id);
-      setUser(session.user);
-      
-      const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
-      const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
-      setPitchCount(count);
-      setPlan(savedPlan);
-      
-      // Fetch existing startup profile directly from Supabase
+  useEffect(() => {
+    async function initializeApp() {
       try {
-        console.log("🔍 Fetching profile for user:", session.user.id);
+        // Get session
+        const { data: { session } } = await supabase.auth.getSession();
         
-        const { data, error } = await supabase
-          .from('startup_profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+        if (!session) {
+          router.push("/login");
+          setAuthChecking(false);
+          return;
+        }
         
-        if (error) {
-          console.error("❌ Supabase fetch error:", error);
-          setSavedProfile(null);
-        } else if (data) {
-          console.log("✅ Loaded saved profile:", data.company_name);
-          setSavedProfile(data);
-        } else {
-          console.log("ℹ️ No saved profile found");
+        // Set user
+        setUser(session.user);
+        
+        // Get pitch count and plan from localStorage
+        const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
+        const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
+        setPitchCount(count);
+        setPlan(savedPlan);
+
+        // Fetch existing startup profile directly from Supabase
+        try {
+          console.log("🔍 Fetching profile for user:", session.user.id);
+          
+          const { data, error } = await supabase
+            .from('startup_profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          
+          if (error) {
+            console.error("❌ Supabase fetch error:", error);
+            setSavedProfile(null);
+          } else if (data) {
+            console.log("✅ Loaded saved profile:", data);
+            setSavedProfile(data);
+          } else {
+            console.log("ℹ️ No saved profile found");
+            setSavedProfile(null);
+          }
+        } catch (err) {
+          console.error("❌ Failed to fetch profile:", err);
           setSavedProfile(null);
         }
-      } catch (err) {
-        console.error("❌ Failed to fetch profile:", err);
-        setSavedProfile(null);
+        
+      } catch (error) {
+        console.error("❌ Initialization error:", error);
+        router.push("/login");
+      } finally {
+        setAuthChecking(false);
+        console.log("✅ Auth checking complete, loading screen should disappear");
       }
-      
-    } catch (error) {
-      console.error("❌ Initialization error:", error);
-      router.push("/login");
-    } finally {
-      console.log("✅ App initialization complete, hiding loading screen");
-      setAuthChecking(false);
     }
-  }
-  
-  initializeApp();
-}, []);
+    
+    initializeApp();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  if (authChecking) return (
+    <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 14, fontFamily: "Inter, system-ui" }}>Loading...</div>
+    </div>
+  );
 
   return (
     <>
