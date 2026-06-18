@@ -1085,7 +1085,6 @@ function InvestorsTab({ plan, onStartCampaign }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      // Refresh investor list
       fetchInvestors();
       setEditingInvestor(null);
       setEditEmail("");
@@ -1114,7 +1113,6 @@ function InvestorsTab({ plan, onStartCampaign }) {
 
       {showAddForm && <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />}
 
-      {/* Filters */}
       <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
         <select value={filters.sector} onChange={(e) => setFilters({ ...filters, sector: e.target.value })} style={{ background: "#0f172a", color: "#cbd5e1", border: "1px solid #1e293b", borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none", cursor: "pointer" }}>
           <option value="">All sectors</option>
