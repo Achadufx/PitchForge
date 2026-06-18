@@ -140,7 +140,6 @@ const Icons = {
 // ============================================================
 
 const styles = {
-  // Page container
   page: {
     minHeight: '100vh',
     background: tokens.colors.bg.base,
@@ -149,16 +148,11 @@ const styles = {
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
   },
-  // Main content area
   main: {
     maxWidth: '720px',
     margin: '0 auto',
     padding: `${tokens.spacing[8]} ${tokens.spacing[4]}`,
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[4]} ${tokens.spacing[3]}`,
-    }
   },
-  // Cards
   card: {
     background: tokens.colors.bg.surface,
     border: `1px solid ${tokens.colors.border.default}`,
@@ -174,7 +168,6 @@ const styles = {
     padding: tokens.spacing[6],
     boxShadow: `0 0 0 1px ${tokens.colors.accent.glow}`,
   },
-  // Buttons
   btnPrimary: {
     background: tokens.colors.accent.primary,
     color: tokens.colors.text.inverse,
@@ -188,19 +181,6 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: tokens.spacing[2],
-    ':hover': {
-      background: tokens.colors.accent.hover,
-      transform: 'translateY(-1px)',
-      boxShadow: `0 4px 12px ${tokens.colors.accent.glowStrong}`,
-    },
-    ':active': {
-      transform: 'translateY(0)',
-    },
-    ':disabled': {
-      opacity: 0.5,
-      cursor: 'not-allowed',
-      transform: 'none',
-    }
   },
   btnSecondary: {
     background: 'transparent',
@@ -215,10 +195,6 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: tokens.spacing[2],
-    ':hover': {
-      borderColor: tokens.colors.border.hover,
-      color: tokens.colors.text.primary,
-    }
   },
   btnGhost: {
     background: 'transparent',
@@ -230,12 +206,7 @@ const styles = {
     fontWeight: 500,
     cursor: 'pointer',
     transition: `all ${tokens.transitions.fast}`,
-    ':hover': {
-      color: tokens.colors.text.primary,
-      background: 'rgba(255,255,255,0.03)',
-    }
   },
-  // Inputs
   input: {
     width: '100%',
     background: tokens.colors.bg.input,
@@ -247,13 +218,6 @@ const styles = {
     outline: 'none',
     transition: `all ${tokens.transitions.fast}`,
     boxSizing: 'border-box',
-    ':focus': {
-      borderColor: tokens.colors.accent.primary,
-      boxShadow: `0 0 0 3px ${tokens.colors.accent.glow}`,
-    },
-    '::placeholder': {
-      color: tokens.colors.text.muted,
-    }
   },
   textarea: {
     width: '100%',
@@ -268,15 +232,7 @@ const styles = {
     boxSizing: 'border-box',
     resize: 'vertical',
     fontFamily: 'inherit',
-    ':focus': {
-      borderColor: tokens.colors.accent.primary,
-      boxShadow: `0 0 0 3px ${tokens.colors.accent.glow}`,
-    },
-    '::placeholder': {
-      color: tokens.colors.text.muted,
-    }
   },
-  // Typography
   h1: {
     fontSize: '35px',
     fontWeight: 800,
@@ -314,7 +270,6 @@ const styles = {
     marginBottom: tokens.spacing[2],
     letterSpacing: '0.01em',
   },
-  // Tags/Badges
   tag: {
     display: 'inline-block',
     fontSize: '11px',
@@ -335,7 +290,6 @@ const styles = {
     color: tokens.colors.accent.light,
     border: `1px solid ${tokens.colors.accent.glowStrong}`,
   },
-  // Progress bar
   progress: {
     background: 'rgba(255,255,255,0.05)',
     borderRadius: tokens.radius.full,
@@ -348,7 +302,6 @@ const styles = {
     borderRadius: tokens.radius.full,
     transition: `width ${tokens.transitions.slow}`,
   },
-  // Drop zone
   dropzone: {
     border: `2px dashed ${tokens.colors.border.default}`,
     borderRadius: tokens.radius.lg,
@@ -357,31 +310,15 @@ const styles = {
     cursor: 'pointer',
     background: tokens.colors.bg.elevated,
     transition: `all ${tokens.transitions.base}`,
-    ':hover': {
-      borderColor: tokens.colors.accent.primary,
-      background: tokens.colors.accent.glow,
-    }
   },
-  // Investor card
-  investorCard: (selected) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing[3],
-    padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
-    borderRadius: tokens.radius.md,
-    border: `1px solid ${selected ? tokens.colors.accent.primary : tokens.colors.border.default}`,
-    background: selected ? `rgba(20,184,166,0.04)` : 'transparent',
-    cursor: 'pointer',
-    transition: `all ${tokens.transitions.fast}`,
-    ':hover': {
-      borderColor: selected ? tokens.colors.accent.primary : tokens.colors.border.hover,
-      background: selected ? `rgba(20,184,166,0.06)` : `rgba(255,255,255,0.02)`,
-    }
-  }),
 };
 
+const PLAN_LIMITS = { free: 10, starter: 100, pro: 500 };
+const PLAN_DOC_LIMITS = { free: 3, starter: 999, pro: 999 };
+const API_URL = "";
+
 // ============================================================
-// COMPONENTS
+// PARSE CSV
 // ============================================================
 
 function parseCsv(text) {
@@ -429,15 +366,10 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
     top: 0,
     zIndex: 50,
     transition: `transform ${tokens.transitions.base}`,
-    '@media (max-width: 768px)': {
-      transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-      width: '280px',
-    }
   };
 
   return (
     <div style={sidebarStyles}>
-      {/* Logo */}
       <div style={{ 
         padding: `${tokens.spacing[5]} ${tokens.spacing[6]}`, 
         borderBottom: `1px solid ${tokens.colors.border.default}`,
@@ -481,7 +413,6 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
         )}
       </div>
 
-      {/* Navigation */}
       <nav style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, flex: 1, overflowY: 'auto' }}>
         {tabs.map((tab) => {
           const active = activeTab === tab.key;
@@ -527,7 +458,6 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
         })}
       </nav>
 
-      {/* Plan & User */}
       <div style={{ 
         padding: tokens.spacing[4], 
         borderTop: `1px solid ${tokens.colors.border.default}`,
@@ -621,7 +551,6 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
           )}
         </div>
 
-        {/* User */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -778,11 +707,326 @@ function StepIndicator({ current }) {
 }
 
 // ============================================================
-// DESCRIBE STEP
+// GENERATE SINGLE
 // ============================================================
 
+async function generateSingle(inv, startup) {
+  console.log(`📧 Generating pitch for: ${inv.name}`);
+  
+  try {
+    const res = await fetch(API_URL + "/api/generate-pitch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        investorName: inv.name,
+        firm: inv.firm || "",
+        startupName: startup.name,
+        description: startup.description,
+        ask: startup.ask,
+      }),
+    });
+    
+    const responseText = await res.text();
+    console.log(`📝 Response for ${inv.name}:`, responseText.substring(0, 200));
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`❌ Failed to parse JSON for ${inv.name}:`, parseError.message);
+      return {
+        subject: `We're fixing what investors know is broken`,
+        body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem. ${startup.description}\n\nWe're raising ${startup.ask} to scale our solution.\n\nWould love 15 minutes to show you what we're building.\n\nBest,\nFounder, ${startup.name}`
+      };
+    }
+    
+    if (!res.ok || data.error) {
+      console.error(`❌ API error for ${inv.name}:`, data.error || `Status: ${res.status}`);
+      return {
+        subject: `We're fixing what investors know is broken`,
+        body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem. ${startup.description}\n\nWe're raising ${startup.ask} to scale our solution.\n\nWould love 15 minutes to show you what we're building.\n\nBest,\nFounder, ${startup.name}`
+      };
+    }
+    
+    if (!data.subject || !data.body) {
+      console.warn(`⚠️ Missing subject or body for ${inv.name}, using fallback`);
+      return {
+        subject: `Investment opportunity: ${startup.name}`,
+        body: `Hi ${inv.name},\n\nWe're building ${startup.name}. ${startup.description}\n\nWe're raising ${startup.ask}.\n\nWould love to connect.\n\nBest,\nFounder`
+      };
+    }
+    
+    console.log(`✅ Pitch generated for ${inv.name}`);
+    return data;
+    
+  } catch (err) {
+    console.error(`❌ Network error for ${inv.name}:`, err);
+    return {
+      subject: `Investment opportunity: ${startup.name}`,
+      body: `Hi ${inv.name},\n\nWe're building ${startup.name}. ${startup.description}\n\nWe're raising ${startup.ask}.\n\nWould love to connect.\n\nBest,\nFounder`
+    };
+  }
+}
+
 // ============================================================
-// DESCRIBE STEP - FIXED
+// REVIEW STEP
+// ============================================================
+
+function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
+  const [pitches, setPitches] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [generating, setGenerating] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [regenerating, setRegenerating] = useState({});
+
+  useEffect(() => {
+    const generate = async () => {
+      const results = [];
+      for (let i = 0; i < investors.length; i++) {
+        try {
+          const data = await generateSingle(investors[i], startup);
+          results.push({
+            ...investors[i],
+            subject: data.subject,
+            body: data.body,
+            error: false,
+          });
+          onPitchGenerated(1);
+        } catch (err) {
+          results.push({
+            ...investors[i],
+            subject: "",
+            body: "",
+            error: err.message,
+          });
+        }
+        setProgress(i + 1);
+      }
+      setPitches(results);
+      setSelected(results.map((_, i) => i));
+      setGenerating(false);
+    };
+    generate();
+  }, []);
+
+  const handleRegenerate = async (i) => {
+    setRegenerating((prev) => ({ ...prev, [i]: true }));
+    try {
+      const data = await generateSingle(pitches[i], startup);
+      setPitches((prev) => {
+        const u = [...prev];
+        u[i] = {
+          ...u[i],
+          subject: data.subject,
+          body: data.body,
+          error: false,
+        };
+        return u;
+      });
+    } catch (err) {
+      setPitches((prev) => {
+        const u = [...prev];
+        u[i] = { ...u[i], error: err.message };
+        return u;
+      });
+    }
+    setRegenerating((prev) => ({ ...prev, [i]: false }));
+  };
+
+  if (generating)
+    return (
+      <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
+        <div style={{ fontSize: 36, marginBottom: tokens.spacing[4] }}>⚡</div>
+        <h3 style={styles.h3}>Crafting personalized pitches...</h3>
+        <p style={{ color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[6] }}>
+          {progress} of {investors.length} done
+        </p>
+        <div style={{ maxWidth: 240, margin: '0 auto' }}>
+          <div style={styles.progress}>
+            <div style={{ ...styles.progressFill, width: (investors.length ? (progress / investors.length) * 100 : 0) + "%" }} />
+          </div>
+        </div>
+      </div>
+    );
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacing[4] }}>
+        <h2 style={styles.h2}>Review pitches</h2>
+        <span style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>
+          {selected.length}/{pitches.length} selected
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[3], marginBottom: tokens.spacing[4], maxHeight: 400, overflowY: 'auto' }}>
+        {pitches.map((pitch, i) => (
+          <div key={i} style={{
+            border: `1px solid ${selected.includes(i) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
+            borderRadius: tokens.radius.md,
+            padding: tokens.spacing[4],
+            background: selected.includes(i) ? tokens.colors.accent.glow : 'transparent',
+          }}>
+            <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
+              <input
+                type="checkbox"
+                checked={selected.includes(i)}
+                onChange={() => setSelected((prev) => prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i])}
+                style={{ marginTop: '2px', accentColor: tokens.colors.accent.primary, flexShrink: 0 }}
+              />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: tokens.spacing[2] }}>
+                  <div>
+                    <span style={{ fontWeight: 600, color: tokens.colors.text.primary, fontSize: '14px' }}>{pitch.name}</span>
+                    <span style={{ color: tokens.colors.text.muted, fontSize: '12px', marginLeft: tokens.spacing[2] }}>{pitch.firm || ""}</span>
+                  </div>
+                  <button
+                    onClick={() => handleRegenerate(i)}
+                    disabled={regenerating[i]}
+                    style={{
+                      background: 'transparent',
+                      border: `1px solid ${tokens.colors.border.default}`,
+                      borderRadius: tokens.radius.sm,
+                      padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                      fontSize: '10px',
+                      color: tokens.colors.text.muted,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {regenerating[i] ? "..." : "🔄 Redo"}
+                  </button>
+                </div>
+                <div style={{ fontSize: '11px', color: tokens.colors.text.muted, marginBottom: tokens.spacing[2] }}>{pitch.email}</div>
+                {pitch.error ? (
+                  <div style={{ color: tokens.colors.status.error, fontSize: '12px' }}>⚠ {pitch.error}</div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: '12px', color: tokens.colors.accent.light, fontWeight: 600, marginBottom: tokens.spacing[2] }}>
+                      Subject: {pitch.subject}
+                    </div>
+                    <div style={{
+                      fontSize: '13px',
+                      color: tokens.colors.text.secondary,
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: 1.6,
+                      background: tokens.colors.bg.elevated,
+                      borderRadius: tokens.radius.sm,
+                      padding: tokens.spacing[3],
+                    }}>
+                      {pitch.body}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
+        <button onClick={onBack} style={styles.btnSecondary}>← Back</button>
+        <button
+          onClick={() => onNext(pitches.filter((_, i) => selected.includes(i)))}
+          disabled={selected.length === 0}
+          style={{
+            ...styles.btnPrimary,
+            flex: 1,
+            justifyContent: 'center',
+            opacity: selected.length > 0 ? 1 : 0.4,
+            cursor: selected.length > 0 ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Send {selected.length} Pitch{selected.length !== 1 ? "es" : ""} →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// SEND STEP
+// ============================================================
+
+function SendStep({ pitches, onRestart }) {
+  const [senderName, setSenderName] = useState("");
+  const [sending, setSending] = useState(false);
+  const [results, setResults] = useState([]);
+  const [done, setDone] = useState(false);
+
+  const handleSend = async () => {
+    if (!senderName) return;
+    setSending(true);
+    try {
+      const res = await fetch(API_URL + "/api/send-pitches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitches, senderName }),
+      });
+      const data = await res.json();
+      setResults(data.results || []);
+    } catch (err) {
+      setResults(pitches.map(p => ({ ...p, success: false, error: err.message })));
+    }
+    setSending(false);
+    setDone(true);
+  };
+
+  if (done) {
+    const succeeded = results.filter(r => r.success).length;
+    return (
+      <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
+        <div style={{ fontSize: 48, marginBottom: tokens.spacing[4] }}>🚀</div>
+        <h2 style={styles.h2}>{succeeded} pitch{succeeded !== 1 ? "es" : ""} sent!</h2>
+        <p style={{ ...styles.body, marginBottom: tokens.spacing[6] }}>Now sit back and let the replies come in.</p>
+        <button onClick={onRestart} style={styles.btnPrimary}>Start new campaign</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2 style={styles.h2}>Ready to launch</h2>
+      <p style={styles.body}>Your name will appear as the sender.</p>
+      <div style={{ marginBottom: tokens.spacing[4] }}>
+        <label style={styles.label}>Your name</label>
+        <input
+          value={senderName}
+          onChange={(e) => setSenderName(e.target.value)}
+          placeholder="e.g. Samuel"
+          style={styles.input}
+        />
+      </div>
+      <div style={{
+        background: 'rgba(52, 211, 153, 0.08)',
+        border: `1px solid ${tokens.colors.status.success}`,
+        borderRadius: tokens.radius.md,
+        padding: tokens.spacing[3],
+        marginBottom: tokens.spacing[4],
+        fontSize: '13px',
+        color: tokens.colors.status.success,
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacing[2],
+      }}>
+        <Icons.Check size={16} />
+        <span>{pitches.length} pitch{pitches.length !== 1 ? "es" : ""} queued and ready</span>
+      </div>
+      <button
+        onClick={handleSend}
+        disabled={sending || !senderName}
+        style={{
+          ...styles.btnPrimary,
+          width: '100%',
+          justifyContent: 'center',
+          opacity: (sending || !senderName) ? 0.4 : 1,
+          cursor: (sending || !senderName) ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {sending ? "Sending..." : `🚀 Send ${pitches.length} Pitch${pitches.length !== 1 ? "es" : ""}`}
+      </button>
+    </div>
+  );
+}
+
+// ============================================================
+// DESCRIBE STEP
 // ============================================================
 
 function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, setSavedProfile }) {
@@ -800,7 +1044,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   const [showCsvUpload, setShowCsvUpload] = useState(false);
   const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
 
-  // Auto-load saved profile
   useEffect(() => {
     if (savedProfile) {
       setStartup({
@@ -916,7 +1159,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           ask: data.analysis?.amountRaising || p.amountRaising || "",
         });
 
-        // Save profile to Supabase
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -962,7 +1204,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           console.error("Failed to save profile:", saveErr);
         }
 
-        // Auto-discover investors
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -1527,21 +1768,364 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     </div>
   );
 }
+
 // ============================================================
-// REMAINING FUNCTIONS (Keep existing implementations)
+// CAMPAIGN TAB
 // ============================================================
 
-// generateSingle, ReviewStep, SendStep, CampaignTab, InvestorsTab, AddInvestorForm, App
-// These remain unchanged from your current version, but with styles updated to use the design system
+function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload, savedProfile, setSavedProfile }) {
+  const [step, setStep] = useState("describe");
+  const [investors, setInvestors] = useState(preloadedInvestors || []);
+  const [startup, setStartup] = useState(null);
+  const [finalPitches, setFinalPitches] = useState([]);
+  const limit = PLAN_LIMITS[plan] || 10;
+  const isAtLimit = pitchCount >= limit;
 
-// Note: Due to length constraints, I'm showing the key changes.
-// The full file continues with the remaining functions styled with the new design system.
+  useEffect(() => {
+    if (preloadedInvestors) {
+      setInvestors(preloadedInvestors);
+      clearPreload();
+    }
+  }, [preloadedInvestors]);
 
-const API_URL = "";
-const PLAN_LIMITS = { free: 10, starter: 100, pro: 500 };
-const PLAN_DOC_LIMITS = { free: 3, starter: 999, pro: 999 };
+  const incrementPitchCount = (n = 1) => {
+    if (!user) return;
+    const newCount = pitchCount + n;
+    setPitchCount(newCount);
+    localStorage.setItem("pitches_" + user.id, newCount.toString());
+  };
 
-// ... continue with generateSingle, ReviewStep, SendStep, etc. ...
+  const restart = () => {
+    setStep("describe");
+    setInvestors([]);
+    setStartup(null);
+    setFinalPitches([]);
+  };
+
+  return (
+    <div>
+      <div style={{ marginBottom: tokens.spacing[6] }}>
+        <h1 style={styles.h1}>New Campaign</h1>
+        <p style={styles.body}>Upload your documents and we'll match you with the right investors.</p>
+      </div>
+
+      {isAtLimit ? (
+        <div style={styles.card}>
+          <div style={{ textAlign: "center", padding: tokens.spacing[8] }}>
+            <div style={{ fontSize: 48, marginBottom: tokens.spacing[4] }}>🔒</div>
+            <h3 style={styles.h3}>
+              {plan === "starter" ? "You've hit your Starter limit." : "You've used all 10 free pitches."}
+            </h3>
+            <p style={{ ...styles.body, marginBottom: tokens.spacing[6] }}>
+              {plan === "starter" 
+                ? "Upgrade to Pro and unlock 500 pitches/month."
+                : "Upgrade to keep sending. Starter gives you 100 pitches/month."}
+            </p>
+            <a href="/upgrade" style={styles.btnPrimary}>
+              Upgrade →
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div style={styles.card}>
+          <StepIndicator current={step} />
+
+          {step === "describe" && (
+            <DescribeStep
+              onNext={(data) => {
+                setStartup(data.startup);
+                setInvestors(data.selectedInvestors || []);
+                setStep("review");
+              }}
+              onBack={() => {}}
+              plan={plan}
+              preloadedInvestors={investors}
+              savedProfile={savedProfile}
+              setSavedProfile={setSavedProfile}
+            />
+          )}
+
+          {step === "review" && (
+            <ReviewStep
+              investors={investors}
+              startup={startup}
+              onNext={(p) => {
+                setFinalPitches(p);
+                setStep("send");
+              }}
+              onBack={() => setStep("describe")}
+              onPitchGenerated={incrementPitchCount}
+            />
+          )}
+
+          {step === "send" && (
+            <SendStep
+              pitches={finalPitches}
+              onRestart={restart}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// INVESTORS TAB (Simplified placeholder)
+// ============================================================
+
+function InvestorsTab({ plan, onStartCampaign }) {
+  const [investors, setInvestors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selected, setSelected] = useState([]);
+  const [filters, setFilters] = useState({ sector: "", stage: "", region: "" });
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const SECTORS = ["fintech", "healthtech", "saas", "enterprise software", "climate tech", "b2b", "ai/ml", "edtech", "agritech"];
+  const STAGES = ["pre-seed", "seed", "series-a", "growth"];
+  const REGIONS = ["Africa", "USA", "Europe", "Global"];
+
+  const fetchInvestors = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams();
+      if (filters.sector) params.append("sector", filters.sector);
+      if (filters.stage) params.append("stage", filters.stage);
+      if (filters.region) params.append("region", filters.region);
+
+      const res = await fetch("/api/get-investors?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setInvestors(data.investors);
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchInvestors(); }, [filters]);
+
+  const toggleSelect = (id) => {
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleStartCampaign = () => {
+    const chosen = investors.filter(inv => selected.includes(inv.id));
+    const asInvestorList = chosen.map(inv => ({
+      name: inv.contact_name || inv.firm,
+      email: inv.email || "",
+      firm: inv.firm,
+    }));
+    onStartCampaign(asInvestorList);
+  };
+
+  return (
+    <div>
+      <div style={{ marginBottom: tokens.spacing[6] }}>
+        <h1 style={styles.h1}>Investor Discovery</h1>
+        <p style={styles.body}>
+          {investors.length} investors in database. 
+          <span style={{ color: tokens.colors.status.warning, marginLeft: tokens.spacing[2] }}>
+            ⚠️ {investors.filter(i => !i.email).length} need email verification
+          </span>
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: tokens.spacing[3], flexWrap: 'wrap', marginBottom: tokens.spacing[4] }}>
+        <button onClick={() => setShowAddForm(!showAddForm)} style={styles.btnPrimary}>+ Add Investor</button>
+      </div>
+
+      {showAddForm && (
+        <div style={{ ...styles.card, marginBottom: tokens.spacing[4] }}>
+          <p style={{ color: tokens.colors.text.tertiary, fontSize: '14px' }}>Add investor form coming soon</p>
+          <button onClick={() => setShowAddForm(false)} style={styles.btnSecondary}>Close</button>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: tokens.spacing[3], flexWrap: 'wrap', marginBottom: tokens.spacing[4] }}>
+        <select value={filters.sector} onChange={(e) => setFilters({ ...filters, sector: e.target.value })} style={styles.input}>
+          <option value="">All sectors</option>
+          {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} style={styles.input}>
+          <option value="">All stages</option>
+          {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={filters.region} onChange={(e) => setFilters({ ...filters, region: e.target.value })} style={styles.input}>
+          <option value="">All regions</option>
+          {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+        </select>
+        {(filters.sector || filters.stage || filters.region) && (
+          <button onClick={() => setFilters({ sector: "", stage: "", region: "" })} style={styles.btnGhost}>Clear filters ×</button>
+        )}
+      </div>
+
+      {error && <p style={{ color: tokens.colors.status.error, fontSize: '14px', marginBottom: tokens.spacing[4] }}>⚠ {error}</p>}
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: tokens.spacing[12], color: tokens.colors.text.muted }}>Loading investors...</div>
+      ) : investors.length === 0 ? (
+        <div style={{ ...styles.card, textAlign: 'center', padding: tokens.spacing[12] }}>
+          <div style={{ fontSize: 40, marginBottom: tokens.spacing[4] }}>🔍</div>
+          <p style={styles.body}>No investors match these filters. Try widening your search.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[3], marginBottom: tokens.spacing[10] }}>
+          {investors.map(inv => (
+            <div key={inv.id} style={{
+              ...styles.card,
+              borderColor: selected.includes(inv.id) ? tokens.colors.accent.primary : tokens.colors.border.default,
+              background: selected.includes(inv.id) ? tokens.colors.accent.glow : 'transparent',
+            }}>
+              <div style={{ display: 'flex', gap: tokens.spacing[3], alignItems: 'flex-start' }}>
+                <input
+                  type="checkbox"
+                  checked={selected.includes(inv.id)}
+                  onChange={() => toggleSelect(inv.id)}
+                  style={{ marginTop: '3px', accentColor: tokens.colors.accent.primary, width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: tokens.spacing[2] }}>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: tokens.colors.text.primary }}>{inv.firm}</div>
+                      <div style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>{inv.hq}</div>
+                    </div>
+                    {!inv.email && (
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        color: tokens.colors.status.warning,
+                        background: 'rgba(251, 191, 36, 0.1)',
+                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                        borderRadius: tokens.radius.full,
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                      }}>
+                        Need email
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: '13px', color: tokens.colors.text.secondary, lineHeight: 1.5, marginBottom: tokens.spacing[3] }}>{inv.notes}</p>
+                  <div style={{ display: 'flex', gap: tokens.spacing[1], flexWrap: 'wrap' }}>
+                    {inv.sectors?.map((s, i) => (
+                      <span key={i} style={styles.tagAccent}>{s}</span>
+                    ))}
+                    {inv.stages?.map((s, i) => (
+                      <span key={i} style={styles.tag}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {selected.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          bottom: tokens.spacing[6],
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: tokens.colors.bg.surface,
+          border: `1px solid ${tokens.colors.accent.primary}`,
+          borderRadius: tokens.radius.lg,
+          padding: `${tokens.spacing[4]} ${tokens.spacing[6]}`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: tokens.spacing[4],
+          boxShadow: tokens.shadows.xl,
+          zIndex: 100,
+        }}>
+          <span style={{ fontSize: '14px', color: tokens.colors.text.primary, fontWeight: 600 }}>
+            {selected.length} investor{selected.length !== 1 ? "s" : ""} selected
+          </span>
+          <button onClick={handleStartCampaign} style={styles.btnPrimary}>
+            Start Campaign →
+          </button>
+          <button onClick={() => setSelected([])} style={{
+            background: 'transparent',
+            border: 'none',
+            color: tokens.colors.text.muted,
+            fontSize: '20px',
+            cursor: 'pointer',
+            padding: 0,
+          }}>×</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// ADD INVESTOR FORM
+// ============================================================
+
+function AddInvestorForm({ onClose, onAdded }) {
+  const [form, setForm] = useState({ firm: "", contactName: "", email: "", sectors: "", stages: "", region: "", hq: "", notes: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async () => {
+    if (!form.firm) { setError("Firm name is required"); return; }
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/add-investor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firm: form.firm,
+          contactName: form.contactName,
+          email: form.email,
+          sectors: form.sectors.split(",").map(s => s.trim().toLowerCase()).filter(Boolean),
+          stages: form.stages.split(",").map(s => s.trim().toLowerCase()).filter(Boolean),
+          region: form.region,
+          hq: form.hq,
+          notes: form.notes,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      onAdded();
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    }
+    setSubmitting(false);
+  };
+
+  const inputStyle = styles.input;
+
+  return (
+    <div style={{ ...styles.card, marginBottom: tokens.spacing[4] }}>
+      <h3 style={{ ...styles.h3, marginBottom: tokens.spacing[4] }}>Add an investor to the database</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[3] }}>
+        <input placeholder="Firm name *" value={form.firm} onChange={(e) => setForm({ ...form, firm: e.target.value })} style={inputStyle} />
+        <input placeholder="Contact name" value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} style={inputStyle} />
+        <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={inputStyle} />
+        <input placeholder="HQ location" value={form.hq} onChange={(e) => setForm({ ...form, hq: e.target.value })} style={inputStyle} />
+        <input placeholder="Sectors (comma separated)" value={form.sectors} onChange={(e) => setForm({ ...form, sectors: e.target.value })} style={inputStyle} />
+        <input placeholder="Stages (comma separated)" value={form.stages} onChange={(e) => setForm({ ...form, stages: e.target.value })} style={inputStyle} />
+        <input placeholder="Region" value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} style={{ ...inputStyle, gridColumn: "1 / -1" }} />
+      </div>
+      <textarea placeholder="Notes (what do they look for?)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} style={{ ...inputStyle, width: '100%', resize: 'vertical', marginTop: tokens.spacing[3], boxSizing: 'border-box' }} />
+      {error && <p style={{ color: tokens.colors.status.error, fontSize: '13px', marginTop: tokens.spacing[3] }}>⚠ {error}</p>}
+      <div style={{ display: 'flex', gap: tokens.spacing[3], marginTop: tokens.spacing[4] }}>
+        <button onClick={onClose} style={styles.btnSecondary}>Cancel</button>
+        <button onClick={handleSubmit} disabled={submitting} style={{ ...styles.btnPrimary, opacity: submitting ? 0.4 : 1, cursor: submitting ? 'not-allowed' : 'pointer' }}>
+          {submitting ? "Adding..." : "Add Investor"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// APP
+// ============================================================
 
 export default function App() {
   const router = useRouter();
@@ -1612,9 +2196,7 @@ export default function App() {
           justifyContent: 'center',
           minHeight: '100vh',
         }}>
-          <div style={{ color: tokens.colors.text.muted, fontSize: '14px' }}>
-            Loading...
-          </div>
+          <div style={{ color: tokens.colors.text.muted, fontSize: '14px' }}>Loading...</div>
         </div>
       </div>
     );
