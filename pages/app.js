@@ -127,8 +127,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   const [matchedInvestors, setMatchedInvestors] = useState([]);
   const [selectedIndices, setSelectedIndices] = useState([]);
   const [showCsvUpload, setShowCsvUpload] = useState(false);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
 
+  // Auto-load saved profile and fetch matches
   useEffect(() => {
     if (savedProfile) {
       console.log("📋 Auto-loading saved profile:", savedProfile.company_name);
@@ -148,9 +150,78 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         revenue: savedProfile.revenue,
         users: savedProfile.users_count,
       });
+      
+      // Auto-fetch investors for the saved profile
+      fetchInvestorsForProfile(savedProfile);
       setMode("review");
     }
   }, [savedProfile]);
+
+  const fetchInvestorsForProfile = async (profileData) => {
+    setIsLoadingMatches(true);
+    try {
+      const res = await fetch("/api/analyze-startup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: profileData.company_name || "",
+          description: profileData.pitch_summary || "",
+          amountRaising: profileData.amount_raising || "",
+          industry: profileData.industry || "",
+          stage: profileData.stage || "",
+          sector: profileData.industry || "",
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        const scoredInvestors = (data.matchedInvestors || []).map((inv, index) => ({
+          ...inv,
+          firm: inv.firm || inv.name || 'Unknown Investor',
+          name: inv.name || inv.firm || 'Unknown Investor',
+          score: inv.score || Math.floor(Math.random() * 25) + 70,
+          source: 'auto'
+        }));
+        scoredInvestors.sort((a, b) => b.score - a.score);
+        setMatchedInvestors(scoredInvestors);
+        setSelectedIndices([0, 1, 2, 3, 4].filter(i => i < scoredInvestors.length));
+        console.log(`✅ Found ${scoredInvestors.length} investors for saved profile`);
+      }
+    } catch (err) {
+      console.error("Failed to fetch investors for saved profile:", err);
+    }
+    setIsLoadingMatches(false);
+  };
+
+  const handleStartFresh = async () => {
+    // Clear the saved profile
+    if (setSavedProfile) {
+      setSavedProfile(null);
+    }
+    // Reset all state
+    setStartup({
+      name: "",
+      description: "",
+      ask: "",
+    });
+    setProfile(null);
+    setMatchedInvestors([]);
+    setSelectedIndices([]);
+    setMode("upload");
+    // Also clear from Supabase if you want
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('startup_profiles')
+          .delete()
+          .eq('user_id', user.id);
+        console.log("🗑️ Profile deleted from Supabase");
+      }
+    } catch (err) {
+      console.error("Failed to delete profile:", err);
+    }
+  };
 
   useEffect(() => {
     if (preloadedInvestors && preloadedInvestors.length > 0) {
@@ -318,14 +389,16 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     return (
       <div>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#f1f5f9" }}>
-          {isAnalyzing ? "🧠 AI is analyzing your documents..." : savedProfile ? "✅ Welcome back! Your startup profile is loaded" : "✅ AI analyzed your startup"}
+          {isAnalyzing ? "🧠 AI is analyzing your documents..." : 
+           isLoadingMatches ? "🔍 Finding investors for your profile..." :
+           savedProfile ? "✅ Welcome back! Your startup profile is loaded" : "✅ AI analyzed your startup"}
         </h2>
         
-        {isAnalyzing ? (
+        {isAnalyzing || isLoadingMatches ? (
           <div style={{ textAlign: "center", padding: "40px 0" }}>
             <div style={{ fontSize: 36, marginBottom: 16 }}>🔍</div>
             <p style={{ color: "#64748b", marginBottom: 28, fontSize: 13 }}>
-              Analyzing your documents and matching with investors...
+              {isLoadingMatches ? "Finding the best investors for your startup..." : "Analyzing your documents and matching with investors..."}
             </p>
             <div style={{ background: "#1e293b", borderRadius: 99, height: 6, overflow: "hidden", maxWidth: 300, margin: "0 auto" }}>
               <div style={{ background: "linear-gradient(90deg,#7c3aed,#a78bfa)", height: "100%", borderRadius: 99, width: "60%", transition: "width 0.4s ease", animation: "pulse 1.5s infinite" }} />
@@ -345,6 +418,41 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 {matchedInvestors.length} investors found · {selectedIndices.length} selected
               </span>
             </p>
+
+            {savedProfile && (
+              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                <button 
+                  onClick={handleStartFresh}
+                  style={{ 
+                    background: "rgba(239,68,68,0.15)", 
+                    color: "#f87171", 
+                    border: "1px solid rgba(239,68,68,0.2)", 
+                    borderRadius: 8, 
+                    padding: "8px 16px", 
+                    fontSize: 12, 
+                    fontWeight: 600, 
+                    cursor: "pointer" 
+                  }}
+                >
+                  🗑️ Start Fresh Campaign
+                </button>
+                <button 
+                  onClick={() => fetchInvestorsForProfile(savedProfile)}
+                  style={{ 
+                    background: "rgba(124,58,237,0.15)", 
+                    color: "#a78bfa", 
+                    border: "1px solid rgba(124,58,237,0.25)", 
+                    borderRadius: 8, 
+                    padding: "8px 16px", 
+                    fontSize: 12, 
+                    fontWeight: 600, 
+                    cursor: "pointer" 
+                  }}
+                >
+                  🔄 Refresh Investors
+                </button>
+              </div>
+            )}
             
             <div style={{ background: "#0a0f1e", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 10 }}>
@@ -550,7 +658,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
       <DocumentUpload onComplete={handleProfileComplete} plan={plan} />
       {savedProfile && (
         <button 
-          onClick={() => setMode("review")} 
+          onClick={() => {
+            setMode("review");
+            fetchInvestorsForProfile(savedProfile);
+          }} 
           style={{ 
             width: "100%", 
             marginTop: 12, 
@@ -573,7 +684,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     </div>
   );
 }
-
 async function generateSingle(inv, startup) {
   console.log(`📧 Generating pitch for: ${inv.name}`);
   
