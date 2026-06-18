@@ -1095,60 +1095,71 @@ function InvestorsTab({ plan, onStartCampaign }) {
   };
 
   return (
-   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
   <div>
-    <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}>Investor Discovery</h1>
-    <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
-      {investors.length} verified investors. Filter by sector, stage, and region.
-      <span style={{ color: "#fbbf24", marginLeft: 8 }}>
-        ⚠️ {investors.filter(i => !i.email).length} need email verification
-      </span>
-    </p>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+      <div>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: 4 }}>Investor Discovery</h1>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>
+          {investors.length} verified investors. Filter by sector, stage, and region.
+          <span style={{ color: "#fbbf24", marginLeft: 8 }}>
+            ⚠️ {investors.filter(i => !i.email).length} need email verification
+          </span>
+        </p>
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button 
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const res = await fetch('/api/fetch-pitchbook-investors', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  sector: filters.sector || '',
+                }),
+              });
+              const data = await res.json();
+              if (data.success) {
+                alert(`✅ Found ${data.count} investors from PitchBook!\n\nCheck the console (F12) to see the data.`);
+                console.log("Investors found:", data.investors);
+              } else {
+                alert('❌ Failed: ' + (data.error || data.details || 'Unknown error'));
+              }
+            } catch (err) {
+              alert('❌ Failed to fetch investors');
+              console.error(err);
+            }
+            setLoading(false);
+          }}
+          style={{ 
+            background: "#7c3aed", 
+            color: "#fff", 
+            border: "none", 
+            borderRadius: 8, 
+            padding: "9px 16px", 
+            fontWeight: 700, 
+            fontSize: 12, 
+            cursor: "pointer", 
+            whiteSpace: "nowrap" 
+          }}
+        >
+          🔄 Fetch from PitchBook
+        </button>
+        <button onClick={() => setShowAddForm(!showAddForm)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
+          + Add Investor
+        </button>
+      </div>
+    </div>
+
+    {showAddForm && <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />}
+
+    <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+      {/* ... rest of your filters ... */}
+    </div>
+
+    {/* ... rest of your InvestorsTab code ... */}
   </div>
-  <div style={{ display: "flex", gap: 8 }}>
-    <button 
-      onClick={async () => {
-        setLoading(true);
-        try {
-          const res = await fetch('/api/fetch-pitchbook-investors', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              sector: filters.sector || '',
-            }),
-          });
-          const data = await res.json();
-          if (data.success) {
-            alert(`✅ Found ${data.count} investors from PitchBook!\n\nCheck the console (F12) to see the data.`);
-            console.log("Investors found:", data.investors);
-          } else {
-            alert('❌ Failed: ' + (data.error || data.details || 'Unknown error'));
-          }
-        } catch (err) {
-          alert('❌ Failed to fetch investors');
-          console.error(err);
-        }
-        setLoading(false);
-      }}
-      style={{ 
-        background: "#7c3aed", 
-        color: "#fff", 
-        border: "none", 
-        borderRadius: 8, 
-        padding: "9px 16px", 
-        fontWeight: 700, 
-        fontSize: 12, 
-        cursor: "pointer", 
-        whiteSpace: "nowrap" 
-      }}
-    >
-      🔄 Fetch from PitchBook
-    </button>
-    <button onClick={() => setShowAddForm(!showAddForm)} style={{ background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 8, padding: "9px 16px", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
-      + Add Investor
-    </button>
-  </div>
-</div>
+);
       {showAddForm && <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />}
 
       <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
