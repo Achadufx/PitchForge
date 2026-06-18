@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Use service role to bypass RLS for saving
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 export default async function handler(req, res) {
@@ -24,30 +25,31 @@ export default async function handler(req, res) {
     pitchSummary
   } = req.body;
 
-  console.log("📥 Save profile request for user:", userId);
+  console.log("📥 API: Saving profile for user:", userId);
 
   if (!userId) {
     return res.status(400).json({ error: 'User ID is required' });
   }
 
   try {
-    // Check if profile exists
+    // First check if profile exists
     const { data: existing, error: checkError } = await supabase
       .from('startup_profiles')
       .select('id')
-      .eq('user_id', userId)
-      .maybeSingle();
+      .eq('user_id', userId);
+
+    console.log("🔍 API: Check existing:", { existing, checkError });
 
     if (checkError) {
-      console.error("Check error:", checkError);
+      console.error("❌ API: Check error:", checkError);
       return res.status(500).json({ error: checkError.message });
     }
 
     let result;
-    let error;
 
-    if (existing) {
+    if (existing && existing.length > 0) {
       // Update
+      console.log("🔄 API: Updating existing profile");
       const { data, error: updateError } = await supabase
         .from('startup_profiles')
         .update({
@@ -66,10 +68,14 @@ export default async function handler(req, res) {
         .eq('user_id', userId)
         .select();
 
+      if (updateError) {
+        console.error("❌ API: Update error:", updateError);
+        return res.status(500).json({ error: updateError.message });
+      }
       result = data;
-      error = updateError;
     } else {
       // Insert
+      console.log("🆕 API: Creating new profile");
       const { data, error: insertError } = await supabase
         .from('startup_profiles')
         .insert({
@@ -87,20 +93,18 @@ export default async function handler(req, res) {
         })
         .select();
 
+      if (insertError) {
+        console.error("❌ API: Insert error:", insertError);
+        return res.status(500).json({ error: insertError.message });
+      }
       result = data;
-      error = insertError;
     }
 
-    if (error) {
-      console.error("Database error:", error);
-      return res.status(500).json({ error: error.message });
-    }
-
-    console.log("✅ Profile saved:", result);
+    console.log("✅ API: Profile saved:", result);
     res.json({ success: true, profile: result });
 
   } catch (err) {
-    console.error("Unexpected error:", err);
+    console.error("❌ API: Unexpected error:", err);
     res.status(500).json({ error: err.message });
   }
 }
