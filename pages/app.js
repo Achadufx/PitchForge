@@ -781,6 +781,10 @@ function StepIndicator({ current }) {
 // DESCRIBE STEP
 // ============================================================
 
+// ============================================================
+// DESCRIBE STEP - FIXED
+// ============================================================
+
 function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, setSavedProfile }) {
   const [mode, setMode] = useState("upload");
   const [startup, setStartup] = useState({
@@ -1105,7 +1109,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   if (mode === "review" && profile) {
     return (
       <div style={{ maxWidth: '100%' }}>
-        {/* Header */}
         <div style={{ marginBottom: tokens.spacing[4] }}>
           <h2 style={styles.h2}>
             {isAnalyzing || isLoadingMatches ? 
@@ -1143,7 +1146,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           </div>
         ) : (
           <>
-            {/* Profile Card */}
             <div style={styles.card}>
               <div style={{ 
                 fontSize: '11px', 
@@ -1159,9 +1161,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 display: 'grid', 
                 gridTemplateColumns: '1fr 1fr',
                 gap: tokens.spacing[4],
-                '@media (max-width: 480px)': {
-                  gridTemplateColumns: '1fr',
-                }
               }}>
                 {[
                   ["Company", profile.companyName],
@@ -1199,7 +1198,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               </div>
             </div>
 
-            {/* Editable Fields */}
             <div style={{ marginTop: tokens.spacing[4] }}>
               {[
                 { key: "name", label: "Company name" },
@@ -1226,7 +1224,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               ))}
             </div>
 
-            {/* Investors Section */}
             <div style={{ 
               borderTop: `1px solid ${tokens.colors.border.default}`,
               paddingTop: tokens.spacing[4],
@@ -1282,14 +1279,14 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                   padding: tokens.spacing[4],
                   marginBottom: tokens.spacing[4],
                 }}>
-                  <div style={{ fontSize: '13px', color: tokens.colors.text.tertiary', marginBottom: tokens.spacing[3] }}>
+                  <div style={{ fontSize: '13px', color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[3] }}>
                     CSV with columns: name, email, firm (optional)
                   </div>
                   <input
                     type="file"
                     accept=".csv"
                     onChange={handleCsvUpload}
-                    style={{ fontSize: '13px', color: tokens.colors.text.secondary' }}
+                    style={{ fontSize: '13px', color: tokens.colors.text.secondary }}
                   />
                 </div>
               )}
@@ -1438,7 +1435,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               </div>
             </div>
 
-            {/* Actions */}
             <div style={{
               display: 'flex',
               gap: tokens.spacing[3],
@@ -1480,7 +1476,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     );
   }
 
-  // Upload mode
   return (
     <div>
       <div style={{ marginBottom: tokens.spacing[4] }}>
@@ -1532,7 +1527,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     </div>
   );
 }
-
 // ============================================================
 // REMAINING FUNCTIONS (Keep existing implementations)
 // ============================================================
