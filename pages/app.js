@@ -1042,8 +1042,12 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   const [matchedInvestors, setMatchedInvestors] = useState([]);
   const [selectedIndices, setSelectedIndices] = useState([]);
   const [showCsvUpload, setShowCsvUpload] = useState(false);
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvInvestors, setCsvInvestors] = useState([]);
+  const [shareWithDatabase, setShareWithDatabase] = useState(false);
   const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
 
+  // Auto-load saved profile
   useEffect(() => {
     if (savedProfile) {
       setStartup({
@@ -1123,6 +1127,43 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     setIsLoadingMatches(false);
   };
 
+  const handleCsvFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setCsvFile(file);
+    
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = parseCsv(ev.target.result);
+        if (parsed[0]?.name && parsed[0]?.email) {
+          const formattedInvestors = parsed.map(inv => ({
+            ...inv,
+            firm: inv.firm || inv.name || 'Unknown Investor',
+            name: inv.name || inv.firm || 'Unknown Investor',
+            score: 100,
+            source: 'csv'
+          }));
+          setCsvInvestors(formattedInvestors);
+          setShowCsvUpload(false);
+          
+          // Auto-add to matched investors
+          setMatchedInvestors(prev => {
+            const newList = [...prev, ...formattedInvestors];
+            const newIndices = formattedInvestors.map((_, i) => prev.length + i);
+            setSelectedIndices(prevIndices => [...prevIndices, ...newIndices]);
+            return newList;
+          });
+          
+          alert(`✅ Added ${formattedInvestors.length} investors from CSV!`);
+        }
+      } catch(err) {
+        alert("Error parsing CSV. Make sure it has 'name' and 'email' columns.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleProfileComplete = async (p) => {
     setProfile(p);
     setIsAnalyzing(true);
@@ -1159,6 +1200,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           ask: data.analysis?.amountRaising || p.amountRaising || "",
         });
 
+        // Save profile to Supabase
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -1204,6 +1246,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           console.error("Failed to save profile:", saveErr);
         }
 
+        // Auto-discover investors
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -1266,36 +1309,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
 
   const isSelected = (index) => {
     return selectedIndices.includes(index);
-  };
-
-  const handleCsvUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const parsed = parseCsv(ev.target.result);
-        if (parsed[0]?.name && parsed[0]?.email) {
-          const csvInvestors = parsed.map(inv => ({
-            ...inv,
-            firm: inv.firm || inv.name || 'Unknown Investor',
-            name: inv.name || inv.firm || 'Unknown Investor',
-            score: 100,
-            source: 'csv'
-          }));
-          setMatchedInvestors(prev => {
-            const newList = [...prev, ...csvInvestors];
-            const newIndices = csvInvestors.map((_, i) => prev.length + i);
-            setSelectedIndices(prevIndices => [...prevIndices, ...newIndices]);
-            return newList;
-          });
-          setShowCsvUpload(false);
-        }
-      } catch(err) {
-        alert("Error parsing CSV. Make sure it has 'name' and 'email' columns.");
-      }
-    };
-    reader.readAsText(file);
   };
 
   const getSelectedInvestors = () => {
@@ -1497,40 +1510,136 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 <div style={{ display: 'flex', gap: tokens.spacing[2], flexWrap: 'wrap' }}>
                   <button
                     onClick={handleDiscoverInvestors}
-                    style={styles.btnGhost}
+                    style={styles.btnPrimary}
                   >
                     <Icons.Refresh size={14} />
                     Discover
                   </button>
-                  <button
-                    onClick={() => setShowCsvUpload(!showCsvUpload)}
-                    style={styles.btnGhost}
-                  >
-                    <Icons.Upload size={14} />
-                    CSV
-                  </button>
                 </div>
               </div>
 
-              {showCsvUpload && (
-                <div style={{
-                  background: tokens.colors.bg.elevated,
-                  border: `1px solid ${tokens.colors.border.default}`,
-                  borderRadius: tokens.radius.md,
-                  padding: tokens.spacing[4],
-                  marginBottom: tokens.spacing[4],
-                }}>
-                  <div style={{ fontSize: '13px', color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[3] }}>
-                    CSV with columns: name, email, firm (optional)
+              {/* CSV Upload Section - More Alive */}
+              <div style={{
+                background: tokens.colors.bg.elevated,
+                border: `2px dashed ${csvFile ? tokens.colors.accent.primary : tokens.colors.border.default}`,
+                borderRadius: tokens.radius.md,
+                padding: tokens.spacing[4],
+                marginBottom: tokens.spacing[4],
+                transition: `all ${tokens.transitions.base}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+              }}
+              onClick={() => document.getElementById('csv-upload-input').click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.currentTarget.style.borderColor = tokens.colors.accent.primary;
+                e.currentTarget.style.background = tokens.colors.accent.glow;
+              }}
+              onDragLeave={(e) => {
+                e.currentTarget.style.borderColor = tokens.colors.border.default;
+                e.currentTarget.style.background = 'transparent';
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                  const input = document.getElementById('csv-upload-input');
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  input.files = dt.files;
+                  input.dispatchEvent(new Event('change'));
+                }
+              }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: tokens.spacing[2] }}>
+                  <div style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    background: csvFile ? tokens.colors.accent.glow : 'rgba(255,255,255,0.04)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 24,
+                  }}>
+                    {csvFile ? '✅' : '📂'}
                   </div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: tokens.colors.text.primary }}>
+                    {csvFile ? csvFile.name : 'Upload your own investor CSV'}
+                  </div>
+                  <div style={{ fontSize: '12px', color: tokens.colors.text.muted }}>
+                    {csvFile 
+                      ? `${csvInvestors.length} investors loaded`
+                      : 'Drop your CSV here or click to browse'
+                    }
+                  </div>
+                  {csvFile && (
+                    <div style={{ display: 'flex', gap: tokens.spacing[2], marginTop: tokens.spacing[2] }}>
+                      <span style={{
+                        fontSize: '11px',
+                        color: tokens.colors.accent.light,
+                        background: tokens.colors.accent.glow,
+                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                        borderRadius: tokens.radius.full,
+                      }}>
+                        {csvInvestors.length} investors added
+                      </span>
+                    </div>
+                  )}
                   <input
+                    id="csv-upload-input"
                     type="file"
                     accept=".csv"
-                    onChange={handleCsvUpload}
-                    style={{ fontSize: '13px', color: tokens.colors.text.secondary }}
+                    style={{ display: 'none' }}
+                    onChange={handleCsvFileSelect}
                   />
                 </div>
-              )}
+              </div>
+
+              {/* Opt-in Checkbox - Explicit Action */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: tokens.spacing[3],
+                padding: tokens.spacing[3],
+                background: shareWithDatabase ? tokens.colors.accent.glow : 'transparent',
+                borderRadius: tokens.radius.md,
+                border: `1px solid ${shareWithDatabase ? tokens.colors.accent.primary : tokens.colors.border.default}`,
+                marginBottom: tokens.spacing[3],
+                transition: `all ${tokens.transitions.base}`,
+              }}>
+                <input
+                  type="checkbox"
+                  checked={shareWithDatabase}
+                  onChange={(e) => setShareWithDatabase(e.target.checked)}
+                  style={{
+                    accentColor: tokens.colors.accent.primary,
+                    width: 18,
+                    height: 18,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: tokens.colors.text.primary }}>
+                    Share with PitchWire's investor database
+                  </div>
+                  <div style={{ fontSize: '11px', color: tokens.colors.text.muted }}>
+                    Help other founders find the right investors. Your investors will be anonymized.
+                  </div>
+                </div>
+                {shareWithDatabase && (
+                  <div style={{
+                    fontSize: '11px',
+                    color: tokens.colors.accent.light,
+                    background: tokens.colors.accent.glow,
+                    padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                    borderRadius: tokens.radius.full,
+                  }}>
+                    ✓ Shared
+                  </div>
+                )}
+              </div>
 
               <div style={{
                 maxHeight: 320,
@@ -1605,6 +1714,18 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                                   borderRadius: tokens.radius.full,
                                 }}>
                                   🎯
+                                </span>
+                              )}
+                              {inv.source === 'csv' && (
+                                <span style={{
+                                  fontSize: '10px',
+                                  color: tokens.colors.status.warning,
+                                  marginLeft: tokens.spacing[2],
+                                  background: 'rgba(251, 191, 36, 0.1)',
+                                  padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+                                  borderRadius: tokens.radius.full,
+                                }}>
+                                  📄 CSV
                                 </span>
                               )}
                             </div>
