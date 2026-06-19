@@ -1620,6 +1620,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               marginTop: tokens.spacing[6],
               alignItems: 'center',
               width: '100%',
+              flexWrap: 'wrap',
             }}>
               <button
                 onClick={() => setMode("upload")}
@@ -1631,7 +1632,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 <Icons.ArrowLeft size={16} />
                 Re-upload
               </button>
-              <div style={{ flex: 1 }} />
+              <div style={{ flex: 1, minWidth: '16px' }} />
               <button
                 onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })}
                 disabled={!valid}
@@ -1642,6 +1643,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                   opacity: valid ? 1 : 0.4,
                   cursor: valid ? 'pointer' : 'not-allowed',
                   minWidth: '200px',
+                  flex: '1 1 auto',
                 }}
               >
                 Generate Pitches
@@ -2207,7 +2209,7 @@ export default function App() {
     <>
       <Head>
         <title>PitchWire — Dashboard</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
       <GlobalStyles />
