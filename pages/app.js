@@ -601,6 +601,9 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
   const [generating, setGenerating] = useState(true);
   const [progress, setProgress] = useState(0);
   const [regenerating, setRegenerating] = useState({});
+  const [editingPitch, setEditingPitch] = useState(null);
+  const [editedBody, setEditedBody] = useState("");
+  const [editedSubject, setEditedSubject] = useState("");
 
   useEffect(() => {
     const generate = async () => {
@@ -654,6 +657,27 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
       });
     }
     setRegenerating((prev) => ({ ...prev, [i]: false }));
+  };
+
+  const handleEdit = (index) => {
+    setEditingPitch(index);
+    setEditedBody(pitches[index].body);
+    setEditedSubject(pitches[index].subject);
+  };
+
+  const handleSaveEdit = (index) => {
+    setPitches((prev) => {
+      const u = [...prev];
+      u[index] = {
+        ...u[index],
+        subject: editedSubject,
+        body: editedBody,
+      };
+      return u;
+    });
+    setEditingPitch(null);
+    setEditedBody("");
+    setEditedSubject("");
   };
 
   if (generating) {
@@ -721,26 +745,74 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                     <span style={{ fontWeight: 600, color: tokens.colors.text.primary, fontSize: '14px' }}>{pitch.name}</span>
                     <span style={{ color: tokens.colors.text.muted, fontSize: '12px', marginLeft: tokens.spacing[2] }}>{pitch.firm || ""}</span>
                   </div>
-                  <button
-                    onClick={() => handleRegenerate(i)}
-                    disabled={regenerating[i]}
-                    style={{
-                      background: 'transparent',
-                      border: `1px solid ${tokens.colors.border.default}`,
-                      borderRadius: tokens.radius.sm,
-                      padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-                      fontSize: '10px',
-                      color: tokens.colors.text.muted,
-                      cursor: 'pointer',
-                      minHeight: '32px',
-                      minWidth: '44px',
-                    }}
-                  >
-                    {regenerating[i] ? "..." : "🔄 Redo"}
-                  </button>
+                  <div style={{ display: 'flex', gap: tokens.spacing[2] }}>
+                    <button
+                      onClick={() => handleEdit(i)}
+                      style={{
+                        background: tokens.colors.accent.glow,
+                        border: `1px solid ${tokens.colors.accent.glowStrong}`,
+                        borderRadius: tokens.radius.sm,
+                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                        fontSize: '10px',
+                        color: tokens.colors.accent.light,
+                        cursor: 'pointer',
+                        minHeight: '32px',
+                        minWidth: '44px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleRegenerate(i)}
+                      disabled={regenerating[i]}
+                      style={{
+                        background: 'transparent',
+                        border: `1px solid ${tokens.colors.border.default}`,
+                        borderRadius: tokens.radius.sm,
+                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                        fontSize: '10px',
+                        color: tokens.colors.text.muted,
+                        cursor: 'pointer',
+                        minHeight: '32px',
+                        minWidth: '44px',
+                      }}
+                    >
+                      {regenerating[i] ? "..." : "🔄 Redo"}
+                    </button>
+                  </div>
                 </div>
                 <div style={{ fontSize: '11px', color: tokens.colors.text.muted, marginBottom: tokens.spacing[2] }}>{pitch.email}</div>
-                {pitch.error ? (
+                {editingPitch === i ? (
+                  <div>
+                    <div style={{ marginBottom: tokens.spacing[2] }}>
+                      <label className="pw-label" style={{ fontSize: '11px' }}>Subject</label>
+                      <input
+                        value={editedSubject}
+                        onChange={(e) => setEditedSubject(e.target.value)}
+                        className="pw-input"
+                        style={{ fontSize: '13px', padding: tokens.spacing[2] }}
+                      />
+                    </div>
+                    <div style={{ marginBottom: tokens.spacing[2] }}>
+                      <label className="pw-label" style={{ fontSize: '11px' }}>Body</label>
+                      <textarea
+                        value={editedBody}
+                        onChange={(e) => setEditedBody(e.target.value)}
+                        rows={6}
+                        className="pw-textarea"
+                        style={{ fontSize: '13px', padding: tokens.spacing[2] }}
+                      />
+                    </div>
+                    <button
+                      onClick={() => handleSaveEdit(i)}
+                      className="pw-btn-primary"
+                      style={{ padding: `${tokens.spacing[1]} ${tokens.spacing[4]}`, fontSize: '12px' }}
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                ) : pitch.error ? (
                   <div style={{ color: tokens.colors.status.error, fontSize: '12px' }}>⚠ {pitch.error}</div>
                 ) : (
                   <>
@@ -748,13 +820,14 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       Subject: {pitch.subject}
                     </div>
                     <div style={{
-                      fontSize: '13px',
+                      fontSize: '14px',
                       color: tokens.colors.text.secondary,
                       whiteSpace: 'pre-wrap',
-                      lineHeight: 1.6,
+                      lineHeight: 1.8,
                       background: tokens.colors.bg.elevated,
-                      borderRadius: tokens.radius.sm,
-                      padding: tokens.spacing[3],
+                      borderRadius: tokens.radius.md,
+                      padding: tokens.spacing[4],
+                      minHeight: '120px',
                     }}>
                       {pitch.body}
                     </div>
