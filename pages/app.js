@@ -718,7 +718,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
             border: `1px solid ${selected.includes(i) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
             background: selected.includes(i) ? tokens.colors.accent.glow : 'transparent',
           }}>
-            <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
+            <div style={{ display: 'flex', gap: tokens.spacing[3], flex: 1, alignItems: 'stretch' }}>
               <input
                 type="checkbox"
                 checked={selected.includes(i)}
@@ -732,7 +732,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                   cursor: 'pointer',
                 }}
               />
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
@@ -834,9 +834,11 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       background: tokens.colors.bg.elevated,
                       borderRadius: tokens.radius.md,
                       padding: tokens.spacing[4],
-                      minHeight: '160px',
+                      minHeight: '200px',
                       width: '100%',
                       boxSizing: 'border-box',
+                      flex: 1,
+                      overflow: 'auto',
                     }}>
                       {pitch.body}
                     </div>
@@ -2354,14 +2356,7 @@ export default function App() {
           setMobileOpen={setMobileOpen}
         />
 
-        <main className="pw-main-content" style={{
-          marginLeft: '240px',
-          flex: 1,
-          padding: tokens.spacing[8],
-          overflowY: 'auto',
-          minHeight: '100vh',
-          background: tokens.colors.bg.base,
-        }}>
+        <main className="pw-main-content">
           <div style={styles.main}>
             {activeTab === "campaign" && (
               <CampaignTab
@@ -2401,3 +2396,4 @@ export default function App() {
     </>
   );
 }
+
