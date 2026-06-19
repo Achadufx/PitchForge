@@ -93,7 +93,6 @@ const Icon = ({ children, size = 20, color = 'currentColor' }) => (
 );
 
 const Icons = {
-  Zap: () => <Icon><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>,
   Check: () => <Icon><path d="M20 6L9 17l-5-5" /></Icon>,
   ArrowRight: () => <Icon size={18}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></Icon>,
 };
@@ -270,11 +269,15 @@ export default function Onboarding() {
         .onboarding-logo-icon {
           width: 32px;
           height: 32px;
-          background: linear-gradient(135deg, #14b8a6, #0d9488);
-          border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .onboarding-logo-icon img {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
         }
 
         .onboarding-logo-text {
@@ -470,10 +473,7 @@ export default function Onboarding() {
           z-index: 1;
         }
 
-        /* ============================================================
-           MOBILE RESPONSIVE
-           ============================================================ */
-
+        /* MOBILE RESPONSIVE */
         @media (max-width: 768px) {
           .onboarding-page {
             padding: 16px 12px;
@@ -513,6 +513,16 @@ export default function Onboarding() {
           .onboarding-user-email {
             font-size: 12px;
           }
+
+          .onboarding-logo-icon {
+            width: 28px;
+            height: 28px;
+          }
+
+          .onboarding-logo-icon img {
+            width: 28px;
+            height: 28px;
+          }
         }
 
         @media (min-width: 769px) and (max-width: 1024px) {
@@ -535,7 +545,7 @@ export default function Onboarding() {
         <div className="onboarding-nav">
           <div className="onboarding-logo">
             <div className="onboarding-logo-icon">
-              <Icons.Zap />
+              <img src="/logo.png" alt="PitchWire" />
             </div>
             <span className="onboarding-logo-text">PitchWire</span>
           </div>
