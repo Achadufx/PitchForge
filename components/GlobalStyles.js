@@ -18,16 +18,6 @@ export default function GlobalStyles() {
         box-sizing: border-box;
       }
 
-      .pw-card-accent {
-        background: #111827;
-        border: 1px solid #14b8a6;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 0 0 1px rgba(20,184,166,0.12);
-        width: 100%;
-        box-sizing: border-box;
-      }
-
       /* --- Typography --- */
       .pw-h1 {
         font-size: 35px;
@@ -296,17 +286,72 @@ export default function GlobalStyles() {
         z-index: 100;
       }
 
+      /* --- Sidebar Overlay --- */
+      .pw-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 49;
+        backdrop-filter: blur(4px);
+        display: none;
+      }
+
+      .pw-sidebar-overlay.open {
+        display: block;
+      }
+
+      /* --- Sidebar --- */
+      .pw-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        background: #070b14;
+        border-right: 1px solid #1e2a3a;
+        z-index: 50;
+        transform: translateX(-100%);
+        transition: transform 250ms ease;
+        box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+        overflow-y: auto;
+      }
+
+      .pw-sidebar.open {
+        transform: translateX(0);
+      }
+
+      /* --- Mobile Header --- */
+      .pw-mobile-header {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        border-bottom: 1px solid #1e2a3a;
+        background: #070b14;
+        position: sticky;
+        top: 0;
+        z-index: 40;
+      }
+
+      /* --- Main Content --- */
+      .pw-main-content {
+        margin-left: 240px;
+        flex: 1;
+        padding: 32px;
+        overflow-y: auto;
+        min-height: 100vh;
+        transition: margin-left 250ms ease;
+      }
+
       /* ============================================================
          MOBILE RESPONSIVE (<= 768px)
          ============================================================ */
 
       @media (max-width: 768px) {
         .pw-card {
-          padding: 16px;
-          border-radius: 12px;
-        }
-
-        .pw-card-accent {
           padding: 16px;
           border-radius: 12px;
         }
@@ -381,39 +426,32 @@ export default function GlobalStyles() {
           justify-content: center;
         }
 
-        /* Sidebar overlay fix */
-        .pw-sidebar-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.7);
-          z-index: 49;
-          backdrop-filter: blur(4px);
-        }
-
-        /* Mobile header */
-        .pw-mobile-header {
-          display: flex !important;
-          align-items: center;
-          justify-content: space-between;
-          padding: 16px;
-          border-bottom: 1px solid #1e2a3a;
-          background: #070b14;
-          position: sticky;
-          top: 0;
-          z-index: 40;
-        }
-
+        /* Sidebar - hidden by default on mobile */
         .pw-sidebar {
           transform: translateX(-100%);
-          width: 280px !important;
-          box-shadow: 0 12px 48px rgba(0,0,0,0.6) !important;
         }
 
-        .pw-sidebar-open {
-          transform: translateX(0) !important;
+        .pw-sidebar.open {
+          transform: translateX(0);
+        }
+
+        .pw-sidebar-overlay {
+          display: none;
+        }
+
+        .pw-sidebar-overlay.open {
+          display: block;
+        }
+
+        /* Mobile header - visible */
+        .pw-mobile-header {
+          display: flex !important;
+        }
+
+        /* Main content - no left margin on mobile */
+        .pw-main-content {
+          margin-left: 0 !important;
+          padding: 16px !important;
         }
 
         /* Step indicator mobile */
@@ -463,11 +501,6 @@ export default function GlobalStyles() {
           border-radius: 10px;
         }
 
-        .pw-card-accent {
-          padding: 12px;
-          border-radius: 10px;
-        }
-
         .pw-btn-primary,
         .pw-btn-secondary {
           font-size: 13px;
@@ -498,45 +531,6 @@ export default function GlobalStyles() {
         .pw-textarea {
           font-size: 13px;
           padding: 10px 12px;
-        }
-      }
-
-      /* ============================================================
-         SIDEBAR MOBILE SPECIFIC
-         ============================================================ */
-
-      @media (max-width: 768px) {
-        /* Hide sidebar by default, show via class */
-        .pw-sidebar-desktop {
-          transform: translateX(-100%);
-          width: 280px;
-          box-shadow: 0 12px 48px rgba(0,0,0,0.6);
-        }
-
-        .pw-sidebar-desktop.open {
-          transform: translateX(0);
-        }
-
-        /* Main content shifts */
-        .pw-main-content {
-          margin-left: 0 !important;
-          padding: 16px !important;
-        }
-
-        .pw-main-content-sm {
-          padding: 12px !important;
-        }
-      }
-
-      @media (min-width: 769px) {
-        .pw-mobile-only {
-          display: none !important;
-        }
-      }
-
-      @media (max-width: 768px) {
-        .pw-desktop-only {
-          display: none !important;
         }
       }
     `}</style>
