@@ -214,229 +214,371 @@ export default function Onboarding() {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
 
-      <div style={{
-        minHeight: "100vh",
-        background: tokens.colors.bg.base,
-        fontFamily: "'Inter', system-ui, sans-serif",
-        padding: `${tokens.spacing[6]} ${tokens.spacing[4]}`,
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        {/* Background Glow */}
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 700,
-          height: 400,
-          background: `radial-gradient(ellipse, ${tokens.colors.accent.glow} 0%, transparent 70%)`,
-          pointerEvents: "none",
-        }} />
+      <style>{`
+        /* Reset */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          background: #070b14;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Onboarding Container */
+        .onboarding-page {
+          min-height: 100vh;
+          background: #070b14;
+          font-family: 'Inter', system-ui, sans-serif;
+          padding: 24px 16px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        /* Background Glow */
+        .onboarding-glow {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 700px;
+          height: 400px;
+          background: radial-gradient(ellipse, rgba(20,184,166,0.12) 0%, transparent 70%);
+          pointer-events: none;
+        }
+
+        /* Nav */
+        .onboarding-nav {
+          max-width: 1060px;
+          margin: 0 auto 32px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: relative;
+          z-index: 1;
+        }
+
+        .onboarding-logo {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .onboarding-logo-icon {
+          width: 32px;
+          height: 32px;
+          background: linear-gradient(135deg, #14b8a6, #0d9488);
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .onboarding-logo-text {
+          font-size: 18px;
+          font-weight: 800;
+          color: #e8eaed;
+          letter-spacing: -0.02em;
+        }
+
+        .onboarding-user-email {
+          font-size: 13px;
+          color: #4a5166;
+        }
+
+        /* Header */
+        .onboarding-header {
+          text-align: center;
+          margin-bottom: 48px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .onboarding-welcome {
+          font-size: 13px;
+          font-weight: 600;
+          color: #5eead4;
+          margin-bottom: 16px;
+        }
+
+        .onboarding-title {
+          font-size: clamp(28px, 5vw, 52px);
+          font-weight: 900;
+          letter-spacing: -2px;
+          line-height: 1.05;
+          color: #e8eaed;
+          margin-bottom: 12px;
+        }
+
+        .onboarding-subtitle {
+          font-size: 16px;
+          color: #4a5166;
+          max-width: 420px;
+          margin: 0 auto;
+          line-height: 1.6;
+        }
+
+        /* Plans Grid */
+        .onboarding-plans {
+          max-width: 1060px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          position: relative;
+          z-index: 1;
+        }
+
+        /* Plan Card */
+        .onboarding-plan {
+          background: #0c1120;
+          border: 1px solid #1e2a3a;
+          border-radius: 16px;
+          padding: 32px 24px;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          transition: all 250ms ease;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .onboarding-plan.hot {
+          background: #111827;
+          border: 1px solid rgba(20,184,166,0.25);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        .onboarding-plan-badge {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #14b8a6;
+          color: #ffffff;
+          font-size: 10px;
+          font-weight: 700;
+          padding: 4px 14px;
+          border-radius: 0 0 10px 10px;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .onboarding-plan-name {
+          font-size: 11px;
+          font-weight: 700;
+          color: #4a5166;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin-bottom: 16px;
+        }
+
+        .onboarding-plan-price {
+          font-size: clamp(32px, 4vw, 40px);
+          font-weight: 900;
+          letter-spacing: -2px;
+          color: #e8eaed;
+          line-height: 1;
+          margin-bottom: 6px;
+        }
+
+        .onboarding-plan-price span {
+          font-size: 14px;
+          font-weight: 500;
+          letter-spacing: 0;
+          color: #4a5166;
+        }
+
+        .onboarding-plan-desc {
+          font-size: 13px;
+          color: #4a5166;
+          margin-bottom: 24px;
+          line-height: 1.5;
+        }
+
+        .onboarding-plan-features {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 32px;
+          flex: 1;
+        }
+
+        .onboarding-plan-features li {
+          font-size: clamp(12px, 1.2vw, 13px);
+          color: #b0b6c4;
+          display: flex;
+          gap: 8px;
+          line-height: 1.4;
+        }
+
+        .onboarding-plan-features li svg {
+          flex-shrink: 0;
+          color: #5eead4;
+        }
+
+        .onboarding-plan-btn {
+          width: 100%;
+          padding: 12px;
+          border-radius: 10px;
+          font-size: clamp(13px, 1.2vw, 14px);
+          font-weight: 700;
+          cursor: pointer;
+          min-height: 48px;
+          border: none;
+          transition: all 150ms ease;
+        }
+
+        .onboarding-plan-btn.primary {
+          background: #14b8a6;
+          color: #ffffff;
+        }
+
+        .onboarding-plan-btn.primary:hover {
+          background: #2dd4bf;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(20,184,166,0.25);
+        }
+
+        .onboarding-plan-btn.outline {
+          background: transparent;
+          color: #b0b6c4;
+          border: 1px solid #1e2a3a;
+        }
+
+        .onboarding-plan-btn.outline:hover {
+          border-color: #14b8a6;
+          color: #e8eaed;
+        }
+
+        .onboarding-plan-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .onboarding-footer {
+          text-align: center;
+          margin-top: 32px;
+          font-size: 12px;
+          color: #4a5166;
+          position: relative;
+          z-index: 1;
+        }
+
+        /* ============================================================
+           MOBILE RESPONSIVE
+           ============================================================ */
+
+        @media (max-width: 768px) {
+          .onboarding-page {
+            padding: 16px 12px;
+          }
+
+          .onboarding-plans {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+
+          .onboarding-plan {
+            padding: 24px 20px;
+          }
+
+          .onboarding-plan-features li {
+            font-size: 13px;
+          }
+
+          .onboarding-plan-btn {
+            font-size: 14px;
+          }
+
+          .onboarding-title {
+            font-size: 28px;
+          }
+
+          .onboarding-subtitle {
+            font-size: 14px;
+          }
+
+          .onboarding-nav {
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+          }
+
+          .onboarding-user-email {
+            font-size: 12px;
+          }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .onboarding-plans {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+
+        @media (min-width: 1025px) {
+          .onboarding-plans {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+      `}</style>
+
+      <div className="onboarding-page">
+        <div className="onboarding-glow" />
 
         {/* Nav */}
-        <div style={{
-          maxWidth: 1060,
-          margin: `0 auto ${tokens.spacing[8]}`,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          position: "relative",
-          zIndex: 1,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: tokens.spacing[2] }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              background: `linear-gradient(135deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
-              borderRadius: tokens.radius.sm,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
+        <div className="onboarding-nav">
+          <div className="onboarding-logo">
+            <div className="onboarding-logo-icon">
               <Icons.Zap />
             </div>
-            <span style={{
-              fontSize: 18,
-              fontWeight: 800,
-              color: tokens.colors.text.primary,
-              letterSpacing: "-0.02em",
-            }}>
-              PitchWire
-            </span>
+            <span className="onboarding-logo-text">PitchWire</span>
           </div>
           {user && (
-            <span style={{
-              fontSize: 13,
-              color: tokens.colors.text.muted,
-            }}>
-              {user.email}
-            </span>
+            <span className="onboarding-user-email">{user.email}</span>
           )}
         </div>
 
         {/* Header */}
-        <div style={{
-          textAlign: "center",
-          marginBottom: tokens.spacing[10],
-          position: "relative",
-          zIndex: 1,
-        }}>
-          <div style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: tokens.colors.accent.light,
-            marginBottom: tokens.spacing[4],
-          }}>
+        <div className="onboarding-header">
+          <div className="onboarding-welcome">
             {user?.user_metadata?.full_name
               ? `Welcome, ${user.user_metadata.full_name.split(" ")[0]}! 👋`
               : "Welcome! 👋"}
           </div>
-          <h1 style={{
-            fontSize: "clamp(28px, 5vw, 52px)",
-            fontWeight: 900,
-            letterSpacing: "-2px",
-            lineHeight: 1.05,
-            color: tokens.colors.text.primary,
-            marginBottom: tokens.spacing[3],
-          }}>
+          <h1 className="onboarding-title">
             Choose your plan<br />and start pitching.
           </h1>
-          <p style={{
-            fontSize: 16,
-            color: tokens.colors.text.muted,
-            maxWidth: 420,
-            margin: "0 auto",
-            lineHeight: 1.6,
-          }}>
+          <p className="onboarding-subtitle">
             You can start free and upgrade anytime. No pressure.
           </p>
         </div>
 
-        {/* Plans - Mobile Responsive Grid */}
-        <div style={{
-          maxWidth: 1060,
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: tokens.spacing[4],
-          position: "relative",
-          zIndex: 1,
-          // Mobile: 1 column on small screens
-          "@media (max-width: 768px)": {
-            gridTemplateColumns: "1fr",
-            gap: tokens.spacing[6],
-          },
-          // Tablet: 2 columns on medium screens
-          "@media (min-width: 769px) and (max-width: 1024px)": {
-            gridTemplateColumns: "1fr 1fr",
-          },
-        }}>
+        {/* Plans */}
+        <div className="onboarding-plans">
           {plans.map((plan) => (
             <div
               key={plan.key}
-              style={{
-                background: plan.hot
-                  ? tokens.colors.bg.surface
-                  : tokens.colors.bg.elevated,
-                border: `1px solid ${
-                  plan.hot
-                    ? tokens.colors.accent.glowStrong
-                    : tokens.colors.border.default
-                }`,
-                borderRadius: tokens.radius.lg,
-                padding: `${tokens.spacing[6]} ${tokens.spacing[5]}`,
-                display: "flex",
-                flexDirection: "column",
-                position: "relative",
-                boxShadow: plan.hot ? tokens.shadows.lg : "none",
-                transition: `all ${tokens.transitions.base}`,
-                // Mobile: full width
-                width: "100%",
-                boxSizing: "border-box",
-              }}
+              className={`onboarding-plan ${plan.hot ? 'hot' : ''}`}
             >
               {plan.hot && (
-                <div style={{
-                  position: "absolute",
-                  top: 0,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  background: tokens.colors.accent.primary,
-                  color: tokens.colors.text.inverse,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  padding: `${tokens.spacing[1]} ${tokens.spacing[4]}`,
-                  borderRadius: `0 0 ${tokens.radius.md} ${tokens.radius.md}`,
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                  whiteSpace: "nowrap",
-                }}>
-                  Most Popular
-                </div>
+                <div className="onboarding-plan-badge">Most Popular</div>
               )}
-              <div style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: tokens.colors.text.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1.5px",
-                marginBottom: tokens.spacing[4],
-              }}>
-                {plan.name}
-              </div>
-              <div style={{
-                fontSize: "clamp(32px, 4vw, 40px)",
-                fontWeight: 900,
-                letterSpacing: "-2px",
-                color: tokens.colors.text.primary,
-                lineHeight: 1,
-                marginBottom: tokens.spacing[2],
-              }}>
+              <div className="onboarding-plan-name">{plan.name}</div>
+              <div className="onboarding-plan-price">
                 {plan.price}
-                <span style={{
-                  fontSize: 14,
-                  fontWeight: 500,
-                  letterSpacing: 0,
-                  color: tokens.colors.text.muted,
-                }}>
-                  {plan.period}
-                </span>
+                <span>{plan.period}</span>
               </div>
-              <div style={{
-                fontSize: 13,
-                color: tokens.colors.text.muted,
-                marginBottom: tokens.spacing[6],
-                lineHeight: 1.5,
-              }}>
-                {plan.desc}
-              </div>
-              <ul style={{
-                listStyle: "none",
-                display: "flex",
-                flexDirection: "column",
-                gap: tokens.spacing[3],
-                marginBottom: tokens.spacing[8],
-                flex: 1,
-              }}>
+              <div className="onboarding-plan-desc">{plan.desc}</div>
+              <ul className="onboarding-plan-features">
                 {plan.features.map((f, i) => (
-                  <li
-                    key={i}
-                    style={{
-                      fontSize: "clamp(12px, 1.2vw, 13px)",
-                      color: tokens.colors.text.secondary,
-                      display: "flex",
-                      gap: tokens.spacing[2],
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    <span style={{
-                      color: tokens.colors.accent.light,
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}>
-                      <Icons.Check />
-                    </span>
+                  <li key={i}>
+                    <Icons.Check />
                     {f}
                   </li>
                 ))}
@@ -444,38 +586,7 @@ export default function Onboarding() {
               <button
                 onClick={plan.action}
                 disabled={loading[plan.key]}
-                style={{
-                  width: "100%",
-                  padding: tokens.spacing[3],
-                  borderRadius: tokens.radius.md,
-                  fontSize: "clamp(13px, 1.2vw, 14px)",
-                  fontWeight: 700,
-                  cursor: loading[plan.key] ? "not-allowed" : "pointer",
-                  background: plan.hot
-                    ? tokens.colors.accent.primary
-                    : "transparent",
-                  color: plan.hot
-                    ? tokens.colors.text.inverse
-                    : tokens.colors.text.secondary,
-                  border: plan.hot
-                    ? "none"
-                    : `1px solid ${tokens.colors.border.default}`,
-                  opacity: loading[plan.key] ? 0.6 : 1,
-                  transition: `all ${tokens.transitions.fast}`,
-                  minHeight: "48px",
-                }}
-                onMouseEnter={(e) => {
-                  if (!plan.hot) {
-                    e.currentTarget.style.borderColor = tokens.colors.accent.primary;
-                    e.currentTarget.style.color = tokens.colors.text.primary;
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!plan.hot) {
-                    e.currentTarget.style.borderColor = tokens.colors.border.default;
-                    e.currentTarget.style.color = tokens.colors.text.secondary;
-                  }
-                }}
+                className={`onboarding-plan-btn ${plan.hot ? 'primary' : 'outline'}`}
               >
                 {loading[plan.key] ? "Loading..." : plan.cta + (plan.key !== "free" ? " →" : "")}
               </button>
@@ -483,14 +594,7 @@ export default function Onboarding() {
           ))}
         </div>
 
-        <p style={{
-          textAlign: "center",
-          marginTop: tokens.spacing[8],
-          fontSize: 12,
-          color: tokens.colors.text.muted,
-          position: "relative",
-          zIndex: 1,
-        }}>
+        <p className="onboarding-footer">
           No contracts · Cancel anytime · Secure payments via Stripe
         </p>
       </div>
