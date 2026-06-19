@@ -2494,57 +2494,58 @@ export default function PitchWireLanding() {
       </section>
 
       {/* PRICING */}
-      <section className="pricing-section" id="pricing">
-        <div className="pricing-inner">
-          <div className="pricing-header reveal">
-            <div className="eyebrow" style={{ justifyContent: 'center' }}>Pricing</div>
-            <div className="section-title" style={{ textAlign: 'center' }}>Start free.<br /><em>Scale when it works.</em></div>
-            <p className="section-sub">One good investor meeting pays for this a thousand times over.</p>
-          </div>
-          <div className="pricing-grid reveal">
-            <div className="pricing-card">
-              <div className="price-tier">Free</div>
-              <div className="price-amount">$0</div>
-              <div className="price-desc">10 pitches to test the waters</div>
-              <ul className="price-features">
-                <li><span className="price-check">✓</span> 10 pitches total</li>
-                <li><span className="price-check">✓</span> Investor discovery</li>
-                <li><span className="price-check">✓</span> AI pitch generation</li>
-                <li><span className="price-check">✓</span> CSV upload</li>
-                <li><span className="price-check">✓</span> PitchWire watermark</li>
-              </ul>
-              <a href="/login" className="price-btn price-btn-outline">Get started free</a>
-            </div>
-            <div className="pricing-card hot">
-              <div className="price-tier">Starter</div>
-              <div className="price-amount"><sup>$</sup>29<sub>/mo</sub></div>
-              <div className="price-desc">100 pitches per month</div>
-              <ul className="price-features">
-                <li><span className="price-check">✓</span> 100 pitches per month</li>
-                <li><span className="price-check">✓</span> Document upload</li>
-                <li><span className="price-check">✓</span> No watermark</li>
-                <li><span className="price-check">✓</span> Investor fit scoring</li>
-                <li><span className="price-check">✓</span> Campaign tracking</li>
-              </ul>
-              <a href="/login" className="price-btn price-btn-solid">Get Starter →</a>
-            </div>
-            <div className="pricing-card">
-              <div className="price-tier">Pro</div>
-              <div className="price-amount"><sup>$</sup>79<sub>/mo</sub></div>
-              <div className="price-desc">Unlimited — for serious rounds</div>
-              <ul className="price-features">
-                <li><span className="price-check">✓</span> Unlimited pitches</li>
-                <li><span className="price-check">✓</span> Full document upload</li>
-                <li><span className="price-check">✓</span> Full CRM pipeline</li>
-                <li><span className="price-check">✓</span> AI follow-up suggestions</li>
-                <li><span className="price-check">✓</span> Open &amp; reply tracking</li>
-                <li><span className="price-check">✓</span> Priority support</li>
-              </ul>
-              <a href="/login" className="price-btn price-btn-outline">Get Pro →</a>
-            </div>
-          </div>
-        </div>
-      </section>
+     {/* PRICING */}
+<section className="pricing-section" id="pricing">
+  <div className="pricing-inner">
+    <div className="pricing-header reveal">
+      <div className="eyebrow" style={{ justifyContent: 'center' }}>Pricing</div>
+      <div className="section-title" style={{ textAlign: 'center' }}>Start free.<br /><em>Scale when it works.</em></div>
+      <p className="section-sub">One good investor meeting pays for this a thousand times over.</p>
+    </div>
+    <div className="pricing-grid reveal">
+      <div className="pricing-card">
+        <div className="price-tier">Free</div>
+        <div className="price-amount">$0</div>
+        <div className="price-desc">10 pitches to test the waters</div>
+        <ul className="price-features">
+          <li><span className="price-check">✓</span> 10 pitches total</li>
+          <li><span className="price-check">✓</span> Investor discovery</li>
+          <li><span className="price-check">✓</span> AI pitch generation</li>
+          <li><span className="price-check">✓</span> CSV upload</li>
+          <li><span className="price-check">✓</span> PitchWire watermark</li>
+        </ul>
+        <a href="/login" className="price-btn price-btn-outline">Get started free</a>
+      </div>
+      <div className="pricing-card hot">
+        <div className="price-tier">Starter</div>
+        <div className="price-amount"><sup>$</sup>29<sub>/mo</sub></div>
+        <div className="price-desc">100 pitches per month</div>
+        <ul className="price-features">
+          <li><span className="price-check">✓</span> 100 pitches per month</li>
+          <li><span className="price-check">✓</span> Document upload</li>
+          <li><span className="price-check">✓</span> No watermark</li>
+          <li><span className="price-check">✓</span> Investor fit scoring</li>
+          <li><span className="price-check">✓</span> Campaign tracking</li>
+        </ul>
+        <a href="/login" className="price-btn price-btn-solid">Get Starter →</a>
+      </div>
+      <div className="pricing-card">
+        <div className="price-tier">Pro</div>
+        <div className="price-amount"><sup>$</sup>79<sub>/mo</sub></div>
+        <div className="price-desc">Unlimited — for serious rounds</div>
+        <ul className="price-features">
+          <li><span className="price-check">✓</span> Unlimited pitches</li>
+          <li><span className="price-check">✓</span> Full document upload</li>
+          <li><span className="price-check">✓</span> Full CRM pipeline</li>
+          <li><span className="price-check">✓</span> AI follow-up suggestions</li>
+          <li><span className="price-check">✓</span> Open &amp; reply tracking</li>
+          <li><span className="price-check">✓</span> Priority support</li>
+        </ul>
+        <a href="/login" className="price-btn price-btn-outline">Get Pro →</a>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* FINAL CTA */}
       <section className="cta-section">
