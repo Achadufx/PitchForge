@@ -1777,20 +1777,19 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         </button>
       )}
 
-      <button
-        onClick={onBack}
-        className="pw-btn-ghost"
-        style={{
-          marginTop: tokens.spacing[3],
-          width: '100%',
-          justifyContent: 'center',
-        }}
-      >
-        ← Back
-      </button>
-    </div>
-  );
-}
+      {onBack && (
+  <button
+    onClick={onBack}
+    className="pw-btn-ghost"
+    style={{
+      marginTop: tokens.spacing[3],
+      width: '100%',
+      justifyContent: 'center',
+    }}
+  >
+    ← Back
+  </button>
+)}
 
 // ============================================================
 // CAMPAIGN TAB
