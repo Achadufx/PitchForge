@@ -132,7 +132,6 @@ const Icons = {
   Sparkles: (p) => <Icon {...p}><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" /><path d="M12 14l1.5 4.5L18 20l-4.5-1.5L12 14z" /></Icon>,
   Building: (p) => <Icon {...p}><rect x="4" y="8" width="16" height="14" rx="1" /><path d="M12 22v-4" /><path d="M8 12h8" /><path d="M8 16h8" /></Icon>,
   Mail: (p) => <Icon {...p}><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M22 7L12 13 2 7" /></Icon>,
-  Phone: (p) => <Icon {...p}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z" /></Icon>,
 };
 
 // ============================================================
@@ -152,6 +151,8 @@ const styles = {
     maxWidth: '720px',
     margin: '0 auto',
     padding: `${tokens.spacing[8]} ${tokens.spacing[4]}`,
+    width: '100%',
+    boxSizing: 'border-box',
   },
   card: {
     background: tokens.colors.bg.surface,
@@ -160,6 +161,8 @@ const styles = {
     padding: tokens.spacing[6],
     boxShadow: tokens.shadows.sm,
     transition: `all ${tokens.transitions.base}`,
+    width: '100%',
+    boxSizing: 'border-box',
   },
   cardAccent: {
     background: tokens.colors.bg.surface,
@@ -167,6 +170,8 @@ const styles = {
     borderRadius: tokens.radius.lg,
     padding: tokens.spacing[6],
     boxShadow: `0 0 0 1px ${tokens.colors.accent.glow}`,
+    width: '100%',
+    boxSizing: 'border-box',
   },
   btnPrimary: {
     background: tokens.colors.accent.primary,
@@ -181,6 +186,7 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: tokens.spacing[2],
+    whiteSpace: 'nowrap',
   },
   btnSecondary: {
     background: 'transparent',
@@ -195,6 +201,7 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: tokens.spacing[2],
+    whiteSpace: 'nowrap',
   },
   btnGhost: {
     background: 'transparent',
@@ -206,6 +213,7 @@ const styles = {
     fontWeight: 500,
     cursor: 'pointer',
     transition: `all ${tokens.transitions.fast}`,
+    whiteSpace: 'nowrap',
   },
   input: {
     width: '100%',
@@ -310,6 +318,8 @@ const styles = {
     cursor: 'pointer',
     background: tokens.colors.bg.elevated,
     transition: `all ${tokens.transitions.base}`,
+    width: '100%',
+    boxSizing: 'border-box',
   },
 };
 
@@ -354,22 +364,20 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
     { key: "account", icon: Icons.User, label: "Account" },
   ];
 
-  const sidebarStyles = {
-    width: '240px',
-    background: tokens.colors.bg.base,
-    borderRight: `1px solid ${tokens.colors.border.default}`,
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    position: 'fixed',
-    left: 0,
-    top: 0,
-    zIndex: 50,
-    transition: `transform ${tokens.transitions.base}`,
-  };
-
   return (
-    <div style={sidebarStyles}>
+    <div style={{
+      width: '240px',
+      background: tokens.colors.bg.base,
+      borderRight: `1px solid ${tokens.colors.border.default}`,
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      position: 'fixed',
+      left: 0,
+      top: 0,
+      zIndex: 50,
+      transition: `transform ${tokens.transitions.base}`,
+    }}>
       <div style={{ 
         padding: `${tokens.spacing[5]} ${tokens.spacing[6]}`, 
         borderBottom: `1px solid ${tokens.colors.border.default}`,
@@ -630,6 +638,7 @@ function StepIndicator({ current }) {
       alignItems: 'center',
       marginBottom: tokens.spacing[6],
       gap: tokens.spacing[3],
+      width: '100%',
     }}>
       {labels.map((label, i) => {
         const active = i === currentIndex;
@@ -833,7 +842,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
     setRegenerating((prev) => ({ ...prev, [i]: false }));
   };
 
-  if (generating)
+  if (generating) {
     return (
       <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
         <div style={{ fontSize: 36, marginBottom: tokens.spacing[4] }}>⚡</div>
@@ -848,9 +857,10 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
         </div>
       </div>
     );
+  }
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacing[4] }}>
         <h2 style={styles.h2}>Review pitches</h2>
         <span style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>
@@ -864,6 +874,8 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
             borderRadius: tokens.radius.md,
             padding: tokens.spacing[4],
             background: selected.includes(i) ? tokens.colors.accent.glow : 'transparent',
+            width: '100%',
+            boxSizing: 'border-box',
           }}>
             <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
               <input
@@ -981,7 +993,7 @@ function SendStep({ pitches, onRestart }) {
   }
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
       <h2 style={styles.h2}>Ready to launch</h2>
       <p style={styles.body}>Your name will appear as the sender.</p>
       <div style={{ marginBottom: tokens.spacing[4] }}>
@@ -1047,7 +1059,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   const [shareWithDatabase, setShareWithDatabase] = useState(false);
   const valid = startup.name && startup.description && startup.ask && selectedIndices.length > 0;
 
-  // Auto-load saved profile
   useEffect(() => {
     if (savedProfile) {
       setStartup({
@@ -1359,7 +1370,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
 
   if (mode === "review" && profile) {
     return (
-      <div style={{ maxWidth: '100%' }}>
+      <div style={{ maxWidth: '100%', width: '100%', boxSizing: 'border-box' }}>
         <div style={{ marginBottom: tokens.spacing[4] }}>
           <h2 style={styles.h2}>
             {isAnalyzing || isLoadingMatches ? 
@@ -1515,7 +1526,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 </div>
               </div>
 
-              {/* CSV Upload Section */}
               <div style={{
                 background: tokens.colors.bg.elevated,
                 border: `2px dashed ${csvFile ? tokens.colors.accent.primary : tokens.colors.border.default}`,
@@ -1525,6 +1535,8 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 transition: `all ${tokens.transitions.base}`,
                 cursor: 'pointer',
                 textAlign: 'center',
+                width: '100%',
+                boxSizing: 'border-box',
               }}
               onClick={() => document.getElementById('csv-upload-input').click()}
               onDragOver={(e) => {
@@ -1593,7 +1605,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 </div>
               </div>
 
-              {/* Opt-in Checkbox */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1604,6 +1615,8 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 border: `1px solid ${shareWithDatabase ? tokens.colors.accent.primary : tokens.colors.border.default}`,
                 marginBottom: tokens.spacing[3],
                 transition: `all ${tokens.transitions.base}`,
+                width: '100%',
+                boxSizing: 'border-box',
               }}>
                 <input
                   type="checkbox"
@@ -1669,6 +1682,8 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                         background: isSelected(index) ? tokens.colors.accent.glow : 'transparent',
                         cursor: 'pointer',
                         transition: `all ${tokens.transitions.fast}`,
+                        width: '100%',
+                        boxSizing: 'border-box',
                       }}
                     >
                       <input
@@ -1799,6 +1814,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               gap: tokens.spacing[3],
               marginTop: tokens.spacing[6],
               alignItems: 'center',
+              width: '100%',
             }}>
               <button
                 onClick={() => setMode("upload")}
@@ -1834,7 +1850,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   }
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
       <div style={{ marginBottom: tokens.spacing[4] }}>
         <h2 style={styles.h2}>
           {savedProfile ? "Update your documents" : "Upload your documents"}
@@ -1884,6 +1900,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     </div>
   );
 }
+
 // ============================================================
 // CAMPAIGN TAB
 // ============================================================
@@ -1918,7 +1935,7 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
   };
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div style={{ marginBottom: tokens.spacing[6] }}>
         <h1 style={styles.h1}>New Campaign</h1>
         <p style={styles.body}>Upload your documents and we'll match you with the right investors.</p>
@@ -1986,7 +2003,7 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
 }
 
 // ============================================================
-// INVESTORS TAB (Simplified placeholder)
+// INVESTORS TAB
 // ============================================================
 
 function InvestorsTab({ plan, onStartCampaign }) {
@@ -1996,6 +2013,9 @@ function InvestorsTab({ plan, onStartCampaign }) {
   const [selected, setSelected] = useState([]);
   const [filters, setFilters] = useState({ sector: "", stage: "", region: "" });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingInvestor, setEditingInvestor] = useState(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editContactName, setEditContactName] = useState("");
 
   const SECTORS = ["fintech", "healthtech", "saas", "enterprise software", "climate tech", "b2b", "ai/ml", "edtech", "agritech"];
   const STAGES = ["pre-seed", "seed", "series-a", "growth"];
@@ -2036,8 +2056,37 @@ function InvestorsTab({ plan, onStartCampaign }) {
     onStartCampaign(asInvestorList);
   };
 
+  const handleEditClick = (investor) => {
+    setEditingInvestor(investor);
+    setEditEmail(investor.email || "");
+    setEditContactName(investor.contact_name || "");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingInvestor) return;
+    try {
+      const res = await fetch("/api/update-investor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingInvestor.id,
+          email: editEmail,
+          contactName: editContactName,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      fetchInvestors();
+      setEditingInvestor(null);
+      setEditEmail("");
+      setEditContactName("");
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div style={{ marginBottom: tokens.spacing[6] }}>
         <h1 style={styles.h1}>Investor Discovery</h1>
         <p style={styles.body}>
@@ -2049,13 +2098,14 @@ function InvestorsTab({ plan, onStartCampaign }) {
       </div>
 
       <div style={{ display: 'flex', gap: tokens.spacing[3], flexWrap: 'wrap', marginBottom: tokens.spacing[4] }}>
-        <button onClick={() => setShowAddForm(!showAddForm)} style={styles.btnPrimary}>+ Add Investor</button>
+        <button onClick={() => setShowAddForm(!showAddForm)} style={styles.btnPrimary}>
+          + Add Investor
+        </button>
       </div>
 
       {showAddForm && (
         <div style={{ ...styles.card, marginBottom: tokens.spacing[4] }}>
-          <p style={{ color: tokens.colors.text.tertiary, fontSize: '14px' }}>Add investor form coming soon</p>
-          <button onClick={() => setShowAddForm(false)} style={styles.btnSecondary}>Close</button>
+          <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />
         </div>
       )}
 
@@ -2073,7 +2123,9 @@ function InvestorsTab({ plan, onStartCampaign }) {
           {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         {(filters.sector || filters.stage || filters.region) && (
-          <button onClick={() => setFilters({ sector: "", stage: "", region: "" })} style={styles.btnGhost}>Clear filters ×</button>
+          <button onClick={() => setFilters({ sector: "", stage: "", region: "" })} style={styles.btnGhost}>
+            Clear filters ×
+          </button>
         )}
       </div>
 
@@ -2215,7 +2267,7 @@ function AddInvestorForm({ onClose, onAdded }) {
   const inputStyle = styles.input;
 
   return (
-    <div style={{ ...styles.card, marginBottom: tokens.spacing[4] }}>
+    <div>
       <h3 style={{ ...styles.h3, marginBottom: tokens.spacing[4] }}>Add an investor to the database</h3>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[3] }}>
         <input placeholder="Firm name *" value={form.firm} onChange={(e) => setForm({ ...form, firm: e.target.value })} style={inputStyle} />
