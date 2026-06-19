@@ -87,7 +87,6 @@ const Icon = ({ children, size = 20, color = 'currentColor' }) => (
 );
 
 const Icons = {
-  Zap: () => <Icon><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>,
   Google: () => (
     <svg width="20" height="20" viewBox="0 0 18 18">
       <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
@@ -202,11 +201,15 @@ export default function Login() {
         .login-logo-icon {
           width: 40px;
           height: 40px;
-          background: linear-gradient(135deg, #14b8a6, #0d9488);
-          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .login-logo-icon img {
+          width: 40px;
+          height: 40px;
+          object-fit: contain;
         }
 
         .login-logo-text {
@@ -306,10 +309,7 @@ export default function Login() {
           color: #7a8194;
         }
 
-        /* ============================================================
-           MOBILE RESPONSIVE
-           ============================================================ */
-
+        /* MOBILE RESPONSIVE */
         @media (max-width: 480px) {
           .login-card {
             padding: 28px 20px;
@@ -335,6 +335,11 @@ export default function Login() {
           }
 
           .login-logo-icon {
+            width: 36px;
+            height: 36px;
+          }
+
+          .login-logo-icon img {
             width: 36px;
             height: 36px;
           }
@@ -369,7 +374,7 @@ export default function Login() {
           <div className="login-logo">
             <a href="/" className="login-logo-link">
               <div className="login-logo-icon">
-                <Icons.Zap />
+                <img src="/logo.png" alt="PitchWire" />
               </div>
               <span className="login-logo-text">PitchWire</span>
             </a>
