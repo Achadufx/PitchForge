@@ -105,7 +105,6 @@ const Icon = ({ children, size = 20, color = 'currentColor', className = '', ...
 );
 
 const Icons = {
-  Zap: (p) => <Icon {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>,
   Target: (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></Icon>,
   User: (p) => <Icon {...p}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></Icon>,
   File: (p) => <Icon {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></Icon>,
@@ -141,6 +140,7 @@ const styles = {
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
+    paddingTop: '72px', // Space for fixed nav
   },
   main: {
     maxWidth: '720px',
@@ -175,6 +175,23 @@ function parseCsv(text) {
 }
 
 // ============================================================
+// LOGO COMPONENT
+// ============================================================
+
+const Logo = ({ size = 28, alt = "PitchWire" }) => (
+  <img 
+    src="/logo.png" 
+    alt={alt} 
+    style={{ 
+      width: `${size}px`, 
+      height: `${size}px`, 
+      objectFit: 'contain',
+      display: 'block',
+    }} 
+  />
+);
+
+// ============================================================
 // SIDEBAR
 // ============================================================
 
@@ -183,7 +200,7 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
   const pct = Math.min((pitchCount / limit) * 100, 100);
   
   const tabs = [
-    { key: "campaign", icon: Icons.Zap, label: "Campaign" },
+    { key: "campaign", icon: Icons.Rocket, label: "Campaign" },
     { key: "investors", icon: Icons.Target, label: "Investors" },
     { key: "crm", icon: Icons.Building, label: "CRM" },
     { key: "followups", icon: Icons.Mail, label: "Follow-ups" },
@@ -203,18 +220,7 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
           alignItems: 'center',
           gap: tokens.spacing[3],
         }}>
-          <div style={{
-            width: 32,
-            height: 32,
-            background: `linear-gradient(135deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
-            borderRadius: tokens.radius.sm,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <Icons.Zap size={16} color="#fff" />
-          </div>
+          <Logo size={32} />
           <span style={{
             fontSize: '18px',
             fontWeight: 800,
@@ -592,7 +598,7 @@ async function generateSingle(inv, startup) {
 }
 
 // ============================================================
-// REVIEW STEP - FIXED
+// REVIEW STEP - FIXED (Pitch body fills the box)
 // ============================================================
 
 function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
@@ -834,11 +840,11 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       background: tokens.colors.bg.elevated,
                       borderRadius: tokens.radius.md,
                       padding: tokens.spacing[4],
-                      minHeight: '200px',
                       width: '100%',
                       boxSizing: 'border-box',
                       flex: 1,
                       overflow: 'auto',
+                      minHeight: '250px',
                     }}>
                       {pitch.body}
                     </div>
@@ -1776,21 +1782,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           <Icons.ArrowRight size={16} />
         </button>
       )}
-
-      {/* Only show Back button if onBack is provided */}
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="pw-btn-ghost"
-          style={{
-            marginTop: tokens.spacing[3],
-            width: '100%',
-            justifyContent: 'center',
-          }}
-        >
-          ← Back
-        </button>
-      )}
     </div>
   );
 }
@@ -2213,7 +2204,7 @@ function AddInvestorForm({ onClose, onAdded }) {
 }
 
 // ============================================================
-// APP
+// APP (Fixed navigation with persistent hamburger menu)
 // ============================================================
 
 export default function App() {
@@ -2301,8 +2292,21 @@ export default function App() {
       </Head>
       <GlobalStyles />
       <div style={styles.page}>
-        {/* Mobile Header */}
-        <div className="pw-mobile-header">
+        {/* Fixed Mobile Header */}
+        <div className="pw-mobile-header" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 200,
+          background: tokens.colors.bg.base,
+          borderBottom: `1px solid ${tokens.colors.border.default}`,
+          padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: '72px',
+        }}>
           <button
             onClick={() => setMobileOpen(true)}
             style={{
@@ -2325,17 +2329,7 @@ export default function App() {
             alignItems: 'center',
             gap: tokens.spacing[3],
           }}>
-            <div style={{
-              width: 28,
-              height: 28,
-              background: `linear-gradient(135deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
-              borderRadius: tokens.radius.sm,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Icons.Zap size={14} color="#fff" />
-            </div>
+            <Logo size={28} />
             <span style={{
               fontSize: '16px',
               fontWeight: 800,
@@ -2396,6 +2390,58 @@ export default function App() {
           </div>
         </main>
       </div>
+
+      <style jsx>{`
+        .pw-mobile-header {
+          display: none;
+        }
+        
+        @media (max-width: 768px) {
+          .pw-mobile-header {
+            display: flex !important;
+          }
+          
+          .pw-main-content {
+            padding-top: 72px;
+          }
+          
+          .pw-sidebar {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            bottom: 0;
+            width: 300px;
+            background: ${tokens.colors.bg.base};
+            border-right: 1px solid ${tokens.colors.border.default};
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 199;
+            overflow-y: auto;
+          }
+          
+          .pw-sidebar.open {
+            transform: translateX(0);
+          }
+          
+          .pw-sidebar-overlay {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 198;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+          }
+          
+          .pw-sidebar-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+          }
+        }
+      `}</style>
     </>
   );
 }
