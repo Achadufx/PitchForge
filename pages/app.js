@@ -130,7 +130,7 @@ const Icons = {
 };
 
 // ============================================================
-// STYLES (without @media)
+// STYLES
 // ============================================================
 
 const styles = {
@@ -152,7 +152,6 @@ const styles = {
 };
 
 const PLAN_LIMITS = { free: 10, starter: 100, pro: 500 };
-const PLAN_DOC_LIMITS = { free: 3, starter: 999, pro: 999 };
 const API_URL = "";
 
 // ============================================================
@@ -194,21 +193,9 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
 
   return (
     <>
-      {mobileOpen && <div className="pw-sidebar-overlay" onClick={() => setMobileOpen(false)} />}
+      {mobileOpen && <div className="pw-sidebar-overlay open" onClick={() => setMobileOpen(false)} />}
 
-      <div className={mobileOpen ? "pw-sidebar-open" : ""} style={{
-        width: '240px',
-        background: tokens.colors.bg.base,
-        borderRight: `1px solid ${tokens.colors.border.default}`,
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        zIndex: 50,
-        transition: `transform ${tokens.transitions.base}`,
-      }}>
+      <div className={`pw-sidebar ${mobileOpen ? 'open' : ''}`}>
         <div style={{ 
           padding: `${tokens.spacing[5]} ${tokens.spacing[6]}`, 
           borderBottom: `1px solid ${tokens.colors.border.default}`,
@@ -2101,20 +2088,6 @@ function AddInvestorForm({ onClose, onAdded }) {
     setSubmitting(false);
   };
 
-  const inputStyle = styles.input || {
-    width: '100%',
-    background: '#0f1625',
-    border: '1px solid #1e2a3a',
-    borderRadius: '10px',
-    padding: '12px 16px',
-    color: '#e8eaed',
-    fontSize: '14px',
-    outline: 'none',
-    transition: 'all 150ms ease',
-    boxSizing: 'border-box',
-    minHeight: '44px',
-  };
-
   return (
     <div>
       <h3 className="pw-h3" style={{ marginBottom: tokens.spacing[4] }}>Add an investor to the database</h3>
@@ -2240,9 +2213,7 @@ export default function App() {
       <GlobalStyles />
       <div style={styles.page}>
         {/* Mobile Header */}
-        <div className="pw-mobile-header" style={{
-          display: 'none',
-        }}>
+        <div className="pw-mobile-header">
           <button
             onClick={() => setMobileOpen(true)}
             style={{
@@ -2299,13 +2270,7 @@ export default function App() {
           setMobileOpen={setMobileOpen}
         />
 
-        <main className="pw-main-content" style={{
-          marginLeft: '240px',
-          flex: 1,
-          padding: tokens.spacing[8],
-          overflowY: 'auto',
-          minHeight: '100vh',
-        }}>
+        <main className="pw-main-content">
           <div style={styles.main}>
             {activeTab === "campaign" && (
               <CampaignTab
