@@ -40,6 +40,7 @@ const tokens = {
     }
   },
   spacing: {
+    1: '4px',
     2: '8px',
     3: '12px',
     4: '16px',
@@ -63,6 +64,7 @@ const tokens = {
   transitions: {
     fast: '150ms ease',
     base: '250ms ease',
+    slow: '500ms ease',
   },
 };
 
@@ -460,7 +462,7 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
             borderRadius: tokens.radius.md,
             padding: `${tokens.spacing[2]} ${tokens.spacing[5]}`,
             fontWeight: 600,
-            fontSize: 'clamp(12px, 1.2vw, 13px)`,
+            fontSize: `clamp(12px, 1.2vw, 13px)`,
             cursor: 'pointer',
             transition: `all ${tokens.transitions.fast}`,
             minHeight: '44px',
