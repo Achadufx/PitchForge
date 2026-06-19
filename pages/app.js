@@ -141,6 +141,7 @@ const styles = {
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
+    overflow: 'hidden',
   },
   main: {
     maxWidth: '720px',
@@ -732,7 +733,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                   cursor: 'pointer',
                 }}
               />
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
@@ -745,7 +746,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                     <span style={{ fontWeight: 600, color: tokens.colors.text.primary, fontSize: '14px' }}>{pitch.name}</span>
                     <span style={{ color: tokens.colors.text.muted, fontSize: '12px', marginLeft: tokens.spacing[2] }}>{pitch.firm || ""}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: tokens.spacing[2] }}>
+                  <div style={{ display: 'flex', gap: tokens.spacing[2], flexWrap: 'wrap' }}>
                     <button
                       onClick={() => handleEdit(i)}
                       style={{
@@ -799,9 +800,14 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       <textarea
                         value={editedBody}
                         onChange={(e) => setEditedBody(e.target.value)}
-                        rows={6}
+                        rows={8}
                         className="pw-textarea"
-                        style={{ fontSize: '13px', padding: tokens.spacing[2] }}
+                        style={{ 
+                          fontSize: '14px', 
+                          padding: tokens.spacing[3],
+                          minHeight: '180px',
+                          lineHeight: 1.8,
+                        }}
                       />
                     </div>
                     <button
@@ -820,14 +826,17 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       Subject: {pitch.subject}
                     </div>
                     <div style={{
-                      fontSize: '14px',
+                      fontSize: '15px',
                       color: tokens.colors.text.secondary,
                       whiteSpace: 'pre-wrap',
                       lineHeight: 1.8,
                       background: tokens.colors.bg.elevated,
                       borderRadius: tokens.radius.md,
                       padding: tokens.spacing[4],
-                      minHeight: '120px',
+                      minHeight: '140px',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      overflow: 'auto',
                     }}>
                       {pitch.body}
                     </div>
@@ -1766,17 +1775,20 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         </button>
       )}
 
-      <button
-        onClick={onBack}
-        className="pw-btn-ghost"
-        style={{
-          marginTop: tokens.spacing[3],
-          width: '100%',
-          justifyContent: 'center',
-        }}
-      >
-        ← Back
-      </button>
+      {/* Only show Back button if there's a previous step */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="pw-btn-ghost"
+          style={{
+            marginTop: tokens.spacing[3],
+            width: '100%',
+            justifyContent: 'center',
+          }}
+        >
+          ← Back
+        </button>
+      )}
     </div>
   );
 }
@@ -1849,7 +1861,7 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
                 setInvestors(data.selectedInvestors || []);
                 setStep("review");
               }}
-              onBack={() => {}}
+              onBack={null}
               plan={plan}
               preloadedInvestors={investors}
               savedProfile={savedProfile}
