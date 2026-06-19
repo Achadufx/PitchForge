@@ -1147,7 +1147,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           setCsvInvestors(formattedInvestors);
           setShowCsvUpload(false);
           
-          // Auto-add to matched investors
           setMatchedInvestors(prev => {
             const newList = [...prev, ...formattedInvestors];
             const newIndices = formattedInvestors.map((_, i) => prev.length + i);
@@ -1200,7 +1199,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           ask: data.analysis?.amountRaising || p.amountRaising || "",
         });
 
-        // Save profile to Supabase
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -1246,7 +1244,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           console.error("Failed to save profile:", saveErr);
         }
 
-        // Auto-discover investors
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -1518,7 +1515,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 </div>
               </div>
 
-              {/* CSV Upload Section - More Alive */}
+              {/* CSV Upload Section */}
               <div style={{
                 background: tokens.colors.bg.elevated,
                 border: `2px dashed ${csvFile ? tokens.colors.accent.primary : tokens.colors.border.default}`,
@@ -1596,7 +1593,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 </div>
               </div>
 
-              {/* Opt-in Checkbox - Explicit Action */}
+              {/* Opt-in Checkbox */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1797,39 +1794,42 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               </div>
             </div>
 
-           <div style={{
-  display: 'flex',
-  gap: tokens.spacing[3],
-  marginTop: tokens.spacing[6],
-  alignItems: 'center',
-}}>
-  <button
-    onClick={() => setMode("upload")}
-    style={{
-      ...styles.btnSecondary,
-      whiteSpace: 'nowrap',
-    }}
-  >
-    <Icons.ArrowLeft size={16} />
-    Re-upload
-  </button>
-  <div style={{ flex: 1 }} />
-  <button
-    onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })}
-    disabled={!valid}
-    style={{
-      ...styles.btnPrimary,
-      padding: `${tokens.spacing[3]} ${tokens.spacing[8]}`,
-      justifyContent: 'center',
-      opacity: valid ? 1 : 0.4,
-      cursor: valid ? 'pointer' : 'not-allowed',
-      minWidth: '200px',
-    }}
-  >
-    Generate Pitches
-    <Icons.ArrowRight size={16} />
-  </button>
-</div>
+            <div style={{
+              display: 'flex',
+              gap: tokens.spacing[3],
+              marginTop: tokens.spacing[6],
+              alignItems: 'center',
+            }}>
+              <button
+                onClick={() => setMode("upload")}
+                style={{
+                  ...styles.btnSecondary,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <Icons.ArrowLeft size={16} />
+                Re-upload
+              </button>
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })}
+                disabled={!valid}
+                style={{
+                  ...styles.btnPrimary,
+                  padding: `${tokens.spacing[3]} ${tokens.spacing[8]}`,
+                  justifyContent: 'center',
+                  opacity: valid ? 1 : 0.4,
+                  cursor: valid ? 'pointer' : 'not-allowed',
+                  minWidth: '200px',
+                }}
+              >
+                Generate Pitches
+                <Icons.ArrowRight size={16} />
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     );
   }
 
@@ -1884,7 +1884,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     </div>
   );
 }
-
 // ============================================================
 // CAMPAIGN TAB
 // ============================================================
