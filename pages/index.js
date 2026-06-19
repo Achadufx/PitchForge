@@ -84,12 +84,6 @@ export default function PitchWireLanding() {
   }, []);
 
   // SVG Icons
-  const IconLightning = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-    </svg>
-  );
-
   const IconDocument = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -277,12 +271,9 @@ export default function PitchWireLanding() {
         .nav-logo .logo-icon {
           width: 28px;
           height: 28px;
-          background: linear-gradient(135deg, var(--teal), #0d9488);
-          border-radius: 7px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
           flex-shrink: 0;
         }
         
@@ -2208,7 +2199,7 @@ export default function PitchWireLanding() {
       <nav className="pw-nav" ref={navRef}>
         <a href="#" className="nav-logo">
           <div className="logo-icon">
-            <IconLightning />
+            <img src="/logo.png" alt="PitchWire" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
           </div>
           PitchWire
         </a>
@@ -2277,7 +2268,6 @@ export default function PitchWireLanding() {
         </div>
       </section>
 
-      {/* Rest of the sections remain the same as previous version */}
       {/* PRODUCT PREVIEW */}
       <section className="preview-section">
         <div className="preview-glow"></div>
@@ -2494,58 +2484,57 @@ export default function PitchWireLanding() {
       </section>
 
       {/* PRICING */}
-     {/* PRICING */}
-<section className="pricing-section" id="pricing">
-  <div className="pricing-inner">
-    <div className="pricing-header reveal">
-      <div className="eyebrow" style={{ justifyContent: 'center' }}>Pricing</div>
-      <div className="section-title" style={{ textAlign: 'center' }}>Start free.<br /><em>Scale when it works.</em></div>
-      <p className="section-sub">One good investor meeting pays for this a thousand times over.</p>
-    </div>
-    <div className="pricing-grid reveal">
-      <div className="pricing-card">
-        <div className="price-tier">Free</div>
-        <div className="price-amount">$0</div>
-        <div className="price-desc">10 pitches to test the waters</div>
-        <ul className="price-features">
-          <li><span className="price-check">✓</span> 10 pitches total</li>
-          <li><span className="price-check">✓</span> Investor discovery</li>
-          <li><span className="price-check">✓</span> AI pitch generation</li>
-          <li><span className="price-check">✓</span> CSV upload</li>
-          <li><span className="price-check">✓</span> PitchWire watermark</li>
-        </ul>
-        <a href="/login" className="price-btn price-btn-outline">Get started free</a>
-      </div>
-      <div className="pricing-card hot">
-        <div className="price-tier">Starter</div>
-        <div className="price-amount"><sup>$</sup>29<sub>/mo</sub></div>
-        <div className="price-desc">100 pitches per month</div>
-        <ul className="price-features">
-          <li><span className="price-check">✓</span> 100 pitches per month</li>
-          <li><span className="price-check">✓</span> Document upload</li>
-          <li><span className="price-check">✓</span> No watermark</li>
-          <li><span className="price-check">✓</span> Investor fit scoring</li>
-          <li><span className="price-check">✓</span> Campaign tracking</li>
-        </ul>
-        <a href="/login" className="price-btn price-btn-solid">Get Starter →</a>
-      </div>
-      <div className="pricing-card">
-        <div className="price-tier">Pro</div>
-        <div className="price-amount"><sup>$</sup>79<sub>/mo</sub></div>
-        <div className="price-desc">Unlimited — for serious rounds</div>
-        <ul className="price-features">
-          <li><span className="price-check">✓</span> Unlimited pitches</li>
-          <li><span className="price-check">✓</span> Full document upload</li>
-          <li><span className="price-check">✓</span> Full CRM pipeline</li>
-          <li><span className="price-check">✓</span> AI follow-up suggestions</li>
-          <li><span className="price-check">✓</span> Open &amp; reply tracking</li>
-          <li><span className="price-check">✓</span> Priority support</li>
-        </ul>
-        <a href="/login" className="price-btn price-btn-outline">Get Pro →</a>
-      </div>
-    </div>
-  </div>
-</section>
+      <section className="pricing-section" id="pricing">
+        <div className="pricing-inner">
+          <div className="pricing-header reveal">
+            <div className="eyebrow" style={{ justifyContent: 'center' }}>Pricing</div>
+            <div className="section-title" style={{ textAlign: 'center' }}>Start free.<br /><em>Scale when it works.</em></div>
+            <p className="section-sub">One good investor meeting pays for this a thousand times over.</p>
+          </div>
+          <div className="pricing-grid reveal">
+            <div className="pricing-card">
+              <div className="price-tier">Free</div>
+              <div className="price-amount">$0</div>
+              <div className="price-desc">10 pitches to test the waters</div>
+              <ul className="price-features">
+                <li><span className="price-check">✓</span> 10 pitches total</li>
+                <li><span className="price-check">✓</span> Investor discovery</li>
+                <li><span className="price-check">✓</span> AI pitch generation</li>
+                <li><span className="price-check">✓</span> CSV upload</li>
+                <li><span className="price-check">✓</span> PitchWire watermark</li>
+              </ul>
+              <a href="/login" className="price-btn price-btn-outline">Get started free</a>
+            </div>
+            <div className="pricing-card hot">
+              <div className="price-tier">Starter</div>
+              <div className="price-amount"><sup>$</sup>29<sub>/mo</sub></div>
+              <div className="price-desc">100 pitches per month</div>
+              <ul className="price-features">
+                <li><span className="price-check">✓</span> 100 pitches per month</li>
+                <li><span className="price-check">✓</span> Document upload</li>
+                <li><span className="price-check">✓</span> No watermark</li>
+                <li><span className="price-check">✓</span> Investor fit scoring</li>
+                <li><span className="price-check">✓</span> Campaign tracking</li>
+              </ul>
+              <a href="/login" className="price-btn price-btn-solid">Get Starter →</a>
+            </div>
+            <div className="pricing-card">
+              <div className="price-tier">Pro</div>
+              <div className="price-amount"><sup>$</sup>79<sub>/mo</sub></div>
+              <div className="price-desc">Unlimited — for serious rounds</div>
+              <ul className="price-features">
+                <li><span className="price-check">✓</span> Unlimited pitches</li>
+                <li><span className="price-check">✓</span> Full document upload</li>
+                <li><span className="price-check">✓</span> Full CRM pipeline</li>
+                <li><span className="price-check">✓</span> AI follow-up suggestions</li>
+                <li><span className="price-check">✓</span> Open &amp; reply tracking</li>
+                <li><span className="price-check">✓</span> Priority support</li>
+              </ul>
+              <a href="/login" className="price-btn price-btn-outline">Get Pro →</a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* FINAL CTA */}
       <section className="cta-section">
@@ -2566,7 +2555,7 @@ export default function PitchWireLanding() {
       <footer className="pw-footer">
         <div className="footer-inner">
           <a href="/" className="footer-logo">
-            <IconLightning />
+            <img src="/logo.png" alt="PitchWire" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
             PitchWire
           </a>
           <ul className="footer-links">
