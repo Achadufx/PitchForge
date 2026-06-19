@@ -818,6 +818,229 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                     >
                       Save Changes
                     </button>
+function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
+  const [pitches, setPitches] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [generating, setGenerating] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [regenerating, setRegenerating] = useState({});
+  const [editingPitch, setEditingPitch] = useState(null);
+  const [editedBody, setEditedBody] = useState("");
+  const [editedSubject, setEditedSubject] = useState("");
+
+  useEffect(() => {
+    const generate = async () => {
+      const results = [];
+      for (let i = 0; i < investors.length; i++) {
+        try {
+          const data = await generateSingle(investors[i], startup);
+          results.push({
+            ...investors[i],
+            subject: data.subject,
+            body: data.body,
+            error: false,
+          });
+          onPitchGenerated(1);
+        } catch (err) {
+          results.push({
+            ...investors[i],
+            subject: "",
+            body: "",
+            error: err.message,
+          });
+        }
+        setProgress(i + 1);
+      }
+      setPitches(results);
+      setSelected(results.map((_, i) => i));
+      setGenerating(false);
+    };
+    generate();
+  }, []);
+
+  const handleRegenerate = async (i) => {
+    setRegenerating((prev) => ({ ...prev, [i]: true }));
+    try {
+      const data = await generateSingle(pitches[i], startup);
+      setPitches((prev) => {
+        const u = [...prev];
+        u[i] = {
+          ...u[i],
+          subject: data.subject,
+          body: data.body,
+          error: false,
+        };
+        return u;
+      });
+    } catch (err) {
+      setPitches((prev) => {
+        const u = [...prev];
+        u[i] = { ...u[i], error: err.message };
+        return u;
+      });
+    }
+    setRegenerating((prev) => ({ ...prev, [i]: false }));
+  };
+
+  const handleEdit = (index) => {
+    setEditingPitch(index);
+    setEditedBody(pitches[index].body);
+    setEditedSubject(pitches[index].subject);
+  };
+
+  const handleSaveEdit = (index) => {
+    setPitches((prev) => {
+      const u = [...prev];
+      u[index] = {
+        ...u[index],
+        subject: editedSubject,
+        body: editedBody,
+      };
+      return u;
+    });
+    setEditingPitch(null);
+    setEditedBody("");
+    setEditedSubject("");
+  };
+
+  if (generating) {
+    return (
+      <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
+        <div style={{ fontSize: 36, marginBottom: tokens.spacing[4] }}>⚡</div>
+        <h3 className="pw-h3">Crafting personalized pitches...</h3>
+        <p style={{ color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[6] }}>
+          {progress} of {investors.length} done
+        </p>
+        <div style={{ maxWidth: 240, margin: '0 auto' }}>
+          <div className="pw-progress">
+            <div className="pw-progress-fill" style={{ width: (investors.length ? (progress / investors.length) * 100 : 0) + "%" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: tokens.spacing[4],
+        flexWrap: 'wrap',
+        gap: tokens.spacing[2],
+      }}>
+        <h2 className="pw-h2">Review pitches</h2>
+        <span style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>
+          {selected.length}/{pitches.length} selected
+        </span>
+      </div>
+      <div className="pw-scroll-pitches">
+        {pitches.map((pitch, i) => (
+          <div key={i} className="pw-card" style={{
+            border: `1px solid ${selected.includes(i) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
+            background: selected.includes(i) ? tokens.colors.accent.glow : 'transparent',
+          }}>
+            <div style={{ display: 'flex', gap: tokens.spacing[3], flex: 1, alignItems: 'stretch' }}>
+              <input
+                type="checkbox"
+                checked={selected.includes(i)}
+                onChange={() => setSelected((prev) => prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i])}
+                style={{ 
+                  marginTop: '2px', 
+                  accentColor: tokens.colors.accent.primary, 
+                  flexShrink: 0,
+                  width: 18,
+                  height: 18,
+                  cursor: 'pointer',
+                }}
+              />
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start', 
+                  marginBottom: tokens.spacing[2],
+                  flexWrap: 'wrap',
+                  gap: tokens.spacing[2],
+                }}>
+                  <div>
+                    <span style={{ fontWeight: 600, color: tokens.colors.text.primary, fontSize: '14px' }}>{pitch.name}</span>
+                    <span style={{ color: tokens.colors.text.muted, fontSize: '12px', marginLeft: tokens.spacing[2] }}>{pitch.firm || ""}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: tokens.spacing[2], flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => handleEdit(i)}
+                      style={{
+                        background: tokens.colors.accent.glow,
+                        border: `1px solid ${tokens.colors.accent.glowStrong}`,
+                        borderRadius: tokens.radius.sm,
+                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                        fontSize: '10px',
+                        color: tokens.colors.accent.light,
+                        cursor: 'pointer',
+                        minHeight: '32px',
+                        minWidth: '44px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleRegenerate(i)}
+                      disabled={regenerating[i]}
+                      style={{
+                        background: 'transparent',
+                        border: `1px solid ${tokens.colors.border.default}`,
+                        borderRadius: tokens.radius.sm,
+                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                        fontSize: '10px',
+                        color: tokens.colors.text.muted,
+                        cursor: 'pointer',
+                        minHeight: '32px',
+                        minWidth: '44px',
+                      }}
+                    >
+                      {regenerating[i] ? "..." : "🔄 Redo"}
+                    </button>
+                  </div>
+                </div>
+                <div style={{ fontSize: '11px', color: tokens.colors.text.muted, marginBottom: tokens.spacing[2] }}>{pitch.email}</div>
+                {editingPitch === i ? (
+                  <div>
+                    <div style={{ marginBottom: tokens.spacing[2] }}>
+                      <label className="pw-label" style={{ fontSize: '11px' }}>Subject</label>
+                      <input
+                        value={editedSubject}
+                        onChange={(e) => setEditedSubject(e.target.value)}
+                        className="pw-input"
+                        style={{ fontSize: '13px', padding: tokens.spacing[2] }}
+                      />
+                    </div>
+                    <div style={{ marginBottom: tokens.spacing[2] }}>
+                      <label className="pw-label" style={{ fontSize: '11px' }}>Body</label>
+                      <textarea
+                        value={editedBody}
+                        onChange={(e) => setEditedBody(e.target.value)}
+                        rows={8}
+                        className="pw-textarea"
+                        style={{ 
+                          fontSize: '15px', 
+                          padding: tokens.spacing[3],
+                          minHeight: '200px',
+                          lineHeight: 1.8,
+                          width: '100%',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <button
+                      onClick={() => handleSaveEdit(i)}
+                      className="pw-btn-primary"
+                      style={{ padding: `${tokens.spacing[1]} ${tokens.spacing[4]}`, fontSize: '12px' }}
+                    >
+                      Save Changes
+                    </button>
                   </div>
                 ) : pitch.error ? (
                   <div style={{ color: tokens.colors.status.error, fontSize: '12px' }}>⚠ {pitch.error}</div>
