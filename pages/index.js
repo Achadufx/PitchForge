@@ -2517,7 +2517,7 @@ export default function PitchWireLanding() {
             </div>
             <div className="pricing-card hot">
               <div className="price-tier">Starter</div>
-              <div className="price-amount"><sup>$</sup>19<sub>/mo</sub></div>
+              <div className="price-amount"><sup>$</sup>29<sub>/mo</sub></div>
               <div className="price-desc">100 pitches per month</div>
               <ul className="price-features">
                 <li><span className="price-check">✓</span> 100 pitches per month</li>
@@ -2530,7 +2530,7 @@ export default function PitchWireLanding() {
             </div>
             <div className="pricing-card">
               <div className="price-tier">Pro</div>
-              <div className="price-amount"><sup>$</sup>49<sub>/mo</sub></div>
+              <div className="price-amount"><sup>$</sup>79<sub>/mo</sub></div>
               <div className="price-desc">Unlimited — for serious rounds</div>
               <ul className="price-features">
                 <li><span className="price-check">✓</span> Unlimited pitches</li>
