@@ -867,7 +867,16 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
           {selected.length}/{pitches.length} selected
         </span>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[3], marginBottom: tokens.spacing[4], maxHeight: 400, overflowY: 'auto' }}>
+     <div style={{
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacing[3],
+  marginBottom: tokens.spacing[4],
+  maxHeight: 400,
+  overflowY: 'auto',
+  paddingRight: tokens.spacing[3], // ADD THIS - prevents scrollbar overlap
+  marginRight: '-4px', // Optional: keeps alignment clean
+}}>
         {pitches.map((pitch, i) => (
           <div key={i} style={{
             border: `1px solid ${selected.includes(i) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
@@ -1652,12 +1661,14 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               </div>
 
               <div style={{
-                maxHeight: 320,
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: tokens.spacing[2],
-              }}>
+  maxHeight: 320,
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacing[2],
+  paddingRight: tokens.spacing[2], // ADD THIS - prevents scrollbar overlap
+  marginRight: '-4px', // Optional: keeps alignment clean
+}}>
                 {matchedInvestors.length === 0 ? (
                   <div style={{
                     textAlign: 'center',
