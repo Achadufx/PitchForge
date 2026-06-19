@@ -141,7 +141,6 @@ const styles = {
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
-    overflow: 'hidden',
   },
   main: {
     maxWidth: '720px',
@@ -803,10 +802,12 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                         rows={8}
                         className="pw-textarea"
                         style={{ 
-                          fontSize: '14px', 
+                          fontSize: '15px', 
                           padding: tokens.spacing[3],
-                          minHeight: '180px',
+                          minHeight: '200px',
                           lineHeight: 1.8,
+                          width: '100%',
+                          boxSizing: 'border-box',
                         }}
                       />
                     </div>
@@ -822,21 +823,20 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                   <div style={{ color: tokens.colors.status.error, fontSize: '12px' }}>⚠ {pitch.error}</div>
                 ) : (
                   <>
-                    <div style={{ fontSize: '12px', color: tokens.colors.accent.light, fontWeight: 600, marginBottom: tokens.spacing[2] }}>
+                    <div style={{ fontSize: '13px', color: tokens.colors.accent.light, fontWeight: 600, marginBottom: tokens.spacing[2] }}>
                       Subject: {pitch.subject}
                     </div>
                     <div style={{
                       fontSize: '15px',
                       color: tokens.colors.text.secondary,
                       whiteSpace: 'pre-wrap',
-                      lineHeight: 1.8,
+                      lineHeight: 1.9,
                       background: tokens.colors.bg.elevated,
                       borderRadius: tokens.radius.md,
                       padding: tokens.spacing[4],
-                      minHeight: '140px',
+                      minHeight: '160px',
                       width: '100%',
                       boxSizing: 'border-box',
-                      overflow: 'auto',
                     }}>
                       {pitch.body}
                     </div>
@@ -1775,20 +1775,17 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
         </button>
       )}
 
-      {/* Only show Back button if there's a previous step */}
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="pw-btn-ghost"
-          style={{
-            marginTop: tokens.spacing[3],
-            width: '100%',
-            justifyContent: 'center',
-          }}
-        >
-          ← Back
-        </button>
-      )}
+      <button
+        onClick={onBack}
+        className="pw-btn-ghost"
+        style={{
+          marginTop: tokens.spacing[3],
+          width: '100%',
+          justifyContent: 'center',
+        }}
+      >
+        ← Back
+      </button>
     </div>
   );
 }
@@ -1861,7 +1858,7 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
                 setInvestors(data.selectedInvestors || []);
                 setStep("review");
               }}
-              onBack={null}
+              onBack={() => {}}
               plan={plan}
               preloadedInvestors={investors}
               savedProfile={savedProfile}
@@ -2357,7 +2354,14 @@ export default function App() {
           setMobileOpen={setMobileOpen}
         />
 
-        <main className="pw-main-content">
+        <main className="pw-main-content" style={{
+          marginLeft: '240px',
+          flex: 1,
+          padding: tokens.spacing[8],
+          overflowY: 'auto',
+          minHeight: '100vh',
+          background: tokens.colors.bg.base,
+        }}>
           <div style={styles.main}>
             {activeTab === "campaign" && (
               <CampaignTab
