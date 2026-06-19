@@ -71,19 +71,13 @@ const tokens = {
     base: '250ms cubic-bezier(0.4, 0, 0.2, 1)',
     slow: '400ms cubic-bezier(0.4, 0, 0.2, 1)',
   },
-  breakpoints: {
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px',
-  }
 };
 
 // ============================================================
 // SVG ICONS
 // ============================================================
 
-const Icon = ({ children, size = 20, color = 'currentColor', className = '', ...props }) => (
+const Icon = ({ children, size = 20, color = 'currentColor' }) => (
   <svg
     width={size}
     height={size}
@@ -93,19 +87,15 @@ const Icon = ({ children, size = 20, color = 'currentColor', className = '', ...
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={className}
-    {...props}
   >
     {children}
   </svg>
 );
 
 const Icons = {
-  Zap: (p) => <Icon {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>,
-  Check: (p) => <Icon {...p}><path d="M20 6L9 17l-5-5" /></Icon>,
-  ArrowRight: (p) => <Icon {...p} size={18}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></Icon>,
-  Sparkles: (p) => <Icon {...p}><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" /><path d="M12 14l1.5 4.5L18 20l-4.5-1.5L12 14z" /></Icon>,
-  Rocket: (p) => <Icon {...p}><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></Icon>,
+  Zap: () => <Icon><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>,
+  Check: () => <Icon><path d="M20 6L9 17l-5-5" /></Icon>,
+  ArrowRight: () => <Icon size={18}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></Icon>,
 };
 
 // ============================================================
@@ -264,7 +254,7 @@ export default function Onboarding() {
               alignItems: "center",
               justifyContent: "center",
             }}>
-              <Icons.Zap size={16} color="#fff" />
+              <Icons.Zap />
             </div>
             <span style={{
               fontSize: 18,
@@ -323,15 +313,24 @@ export default function Onboarding() {
           </p>
         </div>
 
-        {/* Plans */}
+        {/* Plans - Mobile Responsive Grid */}
         <div style={{
           maxWidth: 1060,
           margin: "0 auto",
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateColumns: "1fr 1fr 1fr",
           gap: tokens.spacing[4],
           position: "relative",
           zIndex: 1,
+          // Mobile: 1 column on small screens
+          "@media (max-width: 768px)": {
+            gridTemplateColumns: "1fr",
+            gap: tokens.spacing[6],
+          },
+          // Tablet: 2 columns on medium screens
+          "@media (min-width: 769px) and (max-width: 1024px)": {
+            gridTemplateColumns: "1fr 1fr",
+          },
         }}>
           {plans.map((plan) => (
             <div
@@ -346,12 +345,15 @@ export default function Onboarding() {
                     : tokens.colors.border.default
                 }`,
                 borderRadius: tokens.radius.lg,
-                padding: `${tokens.spacing[8]} ${tokens.spacing[6]}`,
+                padding: `${tokens.spacing[6]} ${tokens.spacing[5]}`,
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
                 boxShadow: plan.hot ? tokens.shadows.lg : "none",
                 transition: `all ${tokens.transitions.base}`,
+                // Mobile: full width
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               {plan.hot && (
@@ -384,7 +386,7 @@ export default function Onboarding() {
                 {plan.name}
               </div>
               <div style={{
-                fontSize: 40,
+                fontSize: "clamp(32px, 4vw, 40px)",
                 fontWeight: 900,
                 letterSpacing: "-2px",
                 color: tokens.colors.text.primary,
@@ -421,7 +423,7 @@ export default function Onboarding() {
                   <li
                     key={i}
                     style={{
-                      fontSize: 13,
+                      fontSize: "clamp(12px, 1.2vw, 13px)",
                       color: tokens.colors.text.secondary,
                       display: "flex",
                       gap: tokens.spacing[2],
@@ -433,7 +435,7 @@ export default function Onboarding() {
                       fontWeight: 700,
                       flexShrink: 0,
                     }}>
-                      <Icons.Check size={16} />
+                      <Icons.Check />
                     </span>
                     {f}
                   </li>
@@ -446,7 +448,7 @@ export default function Onboarding() {
                   width: "100%",
                   padding: tokens.spacing[3],
                   borderRadius: tokens.radius.md,
-                  fontSize: 14,
+                  fontSize: "clamp(13px, 1.2vw, 14px)",
                   fontWeight: 700,
                   cursor: loading[plan.key] ? "not-allowed" : "pointer",
                   background: plan.hot
