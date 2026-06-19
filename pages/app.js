@@ -153,6 +153,12 @@ const styles = {
     padding: `${tokens.spacing[8]} ${tokens.spacing[4]}`,
     width: '100%',
     boxSizing: 'border-box',
+    '@media (max-width: 768px)': {
+      padding: `${tokens.spacing[4]} ${tokens.spacing[3]}`,
+    },
+    '@media (max-width: 480px)': {
+      padding: `${tokens.spacing[3]} ${tokens.spacing[2]}`,
+    },
   },
   card: {
     background: tokens.colors.bg.surface,
@@ -163,6 +169,14 @@ const styles = {
     transition: `all ${tokens.transitions.base}`,
     width: '100%',
     boxSizing: 'border-box',
+    '@media (max-width: 768px)': {
+      padding: tokens.spacing[4],
+      borderRadius: tokens.radius.md,
+    },
+    '@media (max-width: 480px)': {
+      padding: tokens.spacing[3],
+      borderRadius: tokens.radius.md,
+    },
   },
   cardAccent: {
     background: tokens.colors.bg.surface,
@@ -172,6 +186,10 @@ const styles = {
     boxShadow: `0 0 0 1px ${tokens.colors.accent.glow}`,
     width: '100%',
     boxSizing: 'border-box',
+    '@media (max-width: 768px)': {
+      padding: tokens.spacing[4],
+      borderRadius: tokens.radius.md,
+    },
   },
   btnPrimary: {
     background: tokens.colors.accent.primary,
@@ -187,6 +205,19 @@ const styles = {
     alignItems: 'center',
     gap: tokens.spacing[2],
     whiteSpace: 'nowrap',
+    minHeight: '44px',
+    '@media (max-width: 768px)': {
+      padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+      fontSize: '13px',
+      minHeight: '44px',
+      justifyContent: 'center',
+      width: '100%',
+    },
+    '@media (max-width: 480px)': {
+      padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
+      fontSize: '13px',
+      minHeight: '44px',
+    },
   },
   btnSecondary: {
     background: 'transparent',
@@ -202,6 +233,14 @@ const styles = {
     alignItems: 'center',
     gap: tokens.spacing[2],
     whiteSpace: 'nowrap',
+    minHeight: '44px',
+    '@media (max-width: 768px)': {
+      padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+      fontSize: '13px',
+      minHeight: '44px',
+      justifyContent: 'center',
+      flex: 1,
+    },
   },
   btnGhost: {
     background: 'transparent',
@@ -214,6 +253,12 @@ const styles = {
     cursor: 'pointer',
     transition: `all ${tokens.transitions.fast}`,
     whiteSpace: 'nowrap',
+    minHeight: '44px',
+    '@media (max-width: 768px)': {
+      padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
+      fontSize: '12px',
+      minHeight: '44px',
+    },
   },
   input: {
     width: '100%',
@@ -226,6 +271,12 @@ const styles = {
     outline: 'none',
     transition: `all ${tokens.transitions.fast}`,
     boxSizing: 'border-box',
+    minHeight: '44px',
+    '@media (max-width: 768px)': {
+      padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
+      fontSize: '13px',
+      minHeight: '44px',
+    },
   },
   textarea: {
     width: '100%',
@@ -240,6 +291,11 @@ const styles = {
     boxSizing: 'border-box',
     resize: 'vertical',
     fontFamily: 'inherit',
+    minHeight: '44px',
+    '@media (max-width: 768px)': {
+      padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
+      fontSize: '13px',
+    },
   },
   h1: {
     fontSize: '35px',
@@ -248,6 +304,12 @@ const styles = {
     letterSpacing: '-0.02em',
     lineHeight: 1.2,
     margin: 0,
+    '@media (max-width: 768px)': {
+      fontSize: '28px',
+    },
+    '@media (max-width: 480px)': {
+      fontSize: '24px',
+    },
   },
   h2: {
     fontSize: '27px',
@@ -256,6 +318,12 @@ const styles = {
     letterSpacing: '-0.01em',
     lineHeight: 1.2,
     margin: 0,
+    '@media (max-width: 768px)': {
+      fontSize: '22px',
+    },
+    '@media (max-width: 480px)': {
+      fontSize: '19px',
+    },
   },
   h3: {
     fontSize: '21px',
@@ -263,12 +331,24 @@ const styles = {
     color: tokens.colors.text.primary,
     lineHeight: 1.3,
     margin: 0,
+    '@media (max-width: 768px)': {
+      fontSize: '18px',
+    },
+    '@media (max-width: 480px)': {
+      fontSize: '16px',
+    },
   },
   body: {
     fontSize: '15px',
     fontWeight: 400,
     color: tokens.colors.text.secondary,
     lineHeight: 1.6,
+    '@media (max-width: 768px)': {
+      fontSize: '14px',
+    },
+    '@media (max-width: 480px)': {
+      fontSize: '13px',
+    },
   },
   label: {
     display: 'block',
@@ -277,6 +357,9 @@ const styles = {
     color: tokens.colors.text.tertiary,
     marginBottom: tokens.spacing[2],
     letterSpacing: '0.01em',
+    '@media (max-width: 768px)': {
+      fontSize: '12px',
+    },
   },
   tag: {
     display: 'inline-block',
@@ -287,6 +370,10 @@ const styles = {
     background: 'rgba(255,255,255,0.04)',
     color: tokens.colors.text.tertiary,
     border: `1px solid ${tokens.colors.border.default}`,
+    '@media (max-width: 480px)': {
+      fontSize: '10px',
+      padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+    },
   },
   tagAccent: {
     display: 'inline-block',
@@ -297,6 +384,10 @@ const styles = {
     background: tokens.colors.accent.glow,
     color: tokens.colors.accent.light,
     border: `1px solid ${tokens.colors.accent.glowStrong}`,
+    '@media (max-width: 480px)': {
+      fontSize: '10px',
+      padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+    },
   },
   progress: {
     background: 'rgba(255,255,255,0.05)',
@@ -320,6 +411,22 @@ const styles = {
     transition: `all ${tokens.transitions.base}`,
     width: '100%',
     boxSizing: 'border-box',
+    '@media (max-width: 768px)': {
+      padding: `${tokens.spacing[8]} ${tokens.spacing[4]}`,
+      borderRadius: tokens.radius.md,
+    },
+    '@media (max-width: 480px)': {
+      padding: `${tokens.spacing[6]} ${tokens.spacing[3]}`,
+    },
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: tokens.spacing[4],
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+      gap: tokens.spacing[3],
+    },
   },
 };
 
@@ -364,262 +471,298 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
     { key: "account", icon: Icons.User, label: "Account" },
   ];
 
+  // Check if screen is mobile (using window width)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
   return (
-    <div style={{
-      width: '240px',
-      background: tokens.colors.bg.base,
-      borderRight: `1px solid ${tokens.colors.border.default}`,
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      zIndex: 50,
-      transition: `transform ${tokens.transitions.base}`,
-    }}>
-      <div style={{ 
-        padding: `${tokens.spacing[5]} ${tokens.spacing[6]}`, 
-        borderBottom: `1px solid ${tokens.colors.border.default}`,
+    <>
+      {/* Overlay */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 49,
+            backdropFilter: 'blur(4px)',
+          }}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div style={{
+        width: '240px',
+        background: tokens.colors.bg.base,
+        borderRight: `1px solid ${tokens.colors.border.default}`,
         display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacing[3],
+        flexDirection: 'column',
+        height: '100vh',
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        zIndex: 50,
+        transition: `transform ${tokens.transitions.base}`,
+        '@media (max-width: 768px)': {
+          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+          width: '280px',
+          boxShadow: tokens.shadows.xl,
+        },
       }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          background: `linear-gradient(135deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
-          borderRadius: tokens.radius.sm,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <Icons.Zap size={16} color="#fff" />
-        </div>
-        <span style={{
-          fontSize: '18px',
-          fontWeight: 800,
-          color: tokens.colors.text.primary,
-          letterSpacing: '-0.02em',
-        }}>
-          PitchWire
-        </span>
-        {mobileOpen && (
-          <button 
-            onClick={() => setMobileOpen(false)}
-            style={{
-              marginLeft: 'auto',
-              background: 'transparent',
-              border: 'none',
-              color: tokens.colors.text.tertiary,
-              cursor: 'pointer',
-              padding: tokens.spacing[2],
-            }}
-          >
-            <Icons.Close size={20} />
-          </button>
-        )}
-      </div>
-
-      <nav style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, flex: 1, overflowY: 'auto' }}>
-        {tabs.map((tab) => {
-          const active = activeTab === tab.key;
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => {
-                setActiveTab(tab.key);
-                if (mobileOpen) setMobileOpen(false);
-              }}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: tokens.spacing[3],
-                padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-                borderRadius: tokens.radius.md,
-                border: 'none',
-                cursor: 'pointer',
-                background: active ? tokens.colors.accent.glow : 'transparent',
-                color: active ? tokens.colors.accent.light : tokens.colors.text.tertiary,
-                fontFamily: 'inherit',
-                fontSize: '14px',
-                fontWeight: active ? 600 : 500,
-                marginBottom: '2px',
-                transition: `all ${tokens.transitions.fast}`,
-                textAlign: 'left',
-              }}
-            >
-              <Icon size={18} color={active ? tokens.colors.accent.light : tokens.colors.text.muted} />
-              <span style={{ flex: 1 }}>{tab.label}</span>
-              {active && (
-                <div style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: '50%',
-                  background: tokens.colors.accent.primary,
-                }} />
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      <div style={{ 
-        padding: tokens.spacing[4], 
-        borderTop: `1px solid ${tokens.colors.border.default}`,
-      }}>
-        <div style={{
-          background: tokens.colors.bg.elevated,
-          border: `1px solid ${tokens.colors.border.default}`,
-          borderRadius: tokens.radius.md,
-          padding: tokens.spacing[4],
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: tokens.spacing[2],
-          }}>
-            <span style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              color: tokens.colors.text.muted,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}>
-              {plan} plan
-            </span>
-            <span style={{
-              fontSize: '11px',
-              color: tokens.colors.text.muted,
-            }}>
-              {pitchCount}/{limit}
-            </span>
-          </div>
-          <div style={styles.progress}>
-            <div style={{
-              ...styles.progressFill,
-              width: pct + '%',
-              background: pct >= 90 
-                ? `linear-gradient(90deg, ${tokens.colors.status.error}, ${tokens.colors.status.warning})`
-                : `linear-gradient(90deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.light})`,
-            }} />
-          </div>
-          {plan === "free" && (
-            <button 
-              onClick={() => setActiveTab("account")}
-              style={{
-                width: '100%',
-                marginTop: tokens.spacing[3],
-                padding: tokens.spacing[2],
-                borderRadius: tokens.radius.sm,
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                background: tokens.colors.accent.primary,
-                color: tokens.colors.text.inverse,
-                border: 'none',
-                transition: `all ${tokens.transitions.fast}`,
-              }}
-            >
-              Upgrade →
-            </button>
-          )}
-          {plan === "starter" && (
-            <button 
-              onClick={() => setActiveTab("account")}
-              style={{
-                width: '100%',
-                marginTop: tokens.spacing[3],
-                padding: tokens.spacing[2],
-                borderRadius: tokens.radius.sm,
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                background: tokens.colors.accent.glow,
-                color: tokens.colors.accent.light,
-                border: `1px solid ${tokens.colors.accent.glowStrong}`,
-              }}
-            >
-              Upgrade to Pro →
-            </button>
-          )}
-          {plan === "pro" && (
-            <div style={{
-              marginTop: tokens.spacing[3],
-              fontSize: '11px',
-              color: tokens.colors.status.success,
-              fontWeight: 600,
-              textAlign: 'center',
-            }}>
-              ✓ Pro — Full access
-            </div>
-          )}
-        </div>
-
-        <div style={{
+        <div style={{ 
+          padding: `${tokens.spacing[5]} ${tokens.spacing[6]}`, 
+          borderBottom: `1px solid ${tokens.colors.border.default}`,
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing[3],
-          marginTop: tokens.spacing[3],
-          padding: `${tokens.spacing[2]} ${tokens.spacing[2]}`,
         }}>
           <div style={{
             width: 32,
             height: 32,
-            borderRadius: '50%',
             background: `linear-gradient(135deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
+            borderRadius: tokens.radius.sm,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
-            fontWeight: 700,
-            color: tokens.colors.text.inverse,
             flexShrink: 0,
           }}>
-            {user?.email?.[0]?.toUpperCase() || "U"}
+            <Icons.Zap size={16} color="#fff" />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{
+            fontSize: '18px',
+            fontWeight: 800,
+            color: tokens.colors.text.primary,
+            letterSpacing: '-0.02em',
+          }}>
+            PitchWire
+          </span>
+          {mobileOpen && (
+            <button 
+              onClick={() => setMobileOpen(false)}
+              style={{
+                marginLeft: 'auto',
+                background: 'transparent',
+                border: 'none',
+                color: tokens.colors.text.tertiary,
+                cursor: 'pointer',
+                padding: tokens.spacing[2],
+                minHeight: '44px',
+                minWidth: '44px',
+              }}
+            >
+              <Icons.Close size={20} />
+            </button>
+          )}
+        </div>
+
+        <nav style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, flex: 1, overflowY: 'auto' }}>
+          {tabs.map((tab) => {
+            const active = activeTab === tab.key;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  if (mobileOpen) setMobileOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: tokens.spacing[3],
+                  padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+                  borderRadius: tokens.radius.md,
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: active ? tokens.colors.accent.glow : 'transparent',
+                  color: active ? tokens.colors.accent.light : tokens.colors.text.tertiary,
+                  fontFamily: 'inherit',
+                  fontSize: '14px',
+                  fontWeight: active ? 600 : 500,
+                  marginBottom: '2px',
+                  transition: `all ${tokens.transitions.fast}`,
+                  textAlign: 'left',
+                  minHeight: '44px',
+                }}
+              >
+                <Icon size={18} color={active ? tokens.colors.accent.light : tokens.colors.text.muted} />
+                <span style={{ flex: 1 }}>{tab.label}</span>
+                {active && (
+                  <div style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: '50%',
+                    background: tokens.colors.accent.primary,
+                  }} />
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div style={{ 
+          padding: tokens.spacing[4], 
+          borderTop: `1px solid ${tokens.colors.border.default}`,
+        }}>
+          <div style={{
+            background: tokens.colors.bg.elevated,
+            border: `1px solid ${tokens.colors.border.default}`,
+            borderRadius: tokens.radius.md,
+            padding: tokens.spacing[4],
+          }}>
             <div style={{
-              fontSize: '13px',
-              fontWeight: 600,
-              color: tokens.colors.text.primary,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: tokens.spacing[2],
             }}>
-              {user?.user_metadata?.full_name || "Founder"}
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: tokens.colors.text.muted,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}>
+                {plan} plan
+              </span>
+              <span style={{
+                fontSize: '11px',
+                color: tokens.colors.text.muted,
+              }}>
+                {pitchCount}/{limit}
+              </span>
             </div>
-            <div style={{
-              fontSize: '11px',
-              color: tokens.colors.text.muted,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}>
-              {user?.email}
+            <div style={styles.progress}>
+              <div style={{
+                ...styles.progressFill,
+                width: pct + '%',
+                background: pct >= 90 
+                  ? `linear-gradient(90deg, ${tokens.colors.status.error}, ${tokens.colors.status.warning})`
+                  : `linear-gradient(90deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.light})`,
+              }} />
             </div>
+            {plan === "free" && (
+              <button 
+                onClick={() => setActiveTab("account")}
+                style={{
+                  width: '100%',
+                  marginTop: tokens.spacing[3],
+                  padding: tokens.spacing[2],
+                  borderRadius: tokens.radius.sm,
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: tokens.colors.accent.primary,
+                  color: tokens.colors.text.inverse,
+                  border: 'none',
+                  transition: `all ${tokens.transitions.fast}`,
+                  minHeight: '44px',
+                }}
+              >
+                Upgrade →
+              </button>
+            )}
+            {plan === "starter" && (
+              <button 
+                onClick={() => setActiveTab("account")}
+                style={{
+                  width: '100%',
+                  marginTop: tokens.spacing[3],
+                  padding: tokens.spacing[2],
+                  borderRadius: tokens.radius.sm,
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: tokens.colors.accent.glow,
+                  color: tokens.colors.accent.light,
+                  border: `1px solid ${tokens.colors.accent.glowStrong}`,
+                  minHeight: '44px',
+                }}
+              >
+                Upgrade to Pro →
+              </button>
+            )}
+            {plan === "pro" && (
+              <div style={{
+                marginTop: tokens.spacing[3],
+                fontSize: '11px',
+                color: tokens.colors.status.success,
+                fontWeight: 600,
+                textAlign: 'center',
+              }}>
+                ✓ Pro — Full access
+              </div>
+            )}
           </div>
-          <button
-            onClick={onSignOut}
-            title="Sign out"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: tokens.colors.text.muted,
-              fontSize: '16px',
-              padding: tokens.spacing[1],
-              transition: `color ${tokens.transitions.fast}`,
-            }}
-          >
-            →
-          </button>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: tokens.spacing[3],
+            marginTop: tokens.spacing[3],
+            padding: `${tokens.spacing[2]} ${tokens.spacing[2]}`,
+          }}>
+            <div style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: `linear-gradient(135deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 700,
+              color: tokens.colors.text.inverse,
+              flexShrink: 0,
+            }}>
+              {user?.email?.[0]?.toUpperCase() || "U"}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: tokens.colors.text.primary,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user?.user_metadata?.full_name || "Founder"}
+              </div>
+              <div style={{
+                fontSize: '11px',
+                color: tokens.colors.text.muted,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user?.email}
+              </div>
+            </div>
+            <button
+              onClick={onSignOut}
+              title="Sign out"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: tokens.colors.text.muted,
+                fontSize: '16px',
+                padding: tokens.spacing[1],
+                transition: `color ${tokens.transitions.fast}`,
+                minHeight: '44px',
+                minWidth: '44px',
+              }}
+            >
+              →
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -639,6 +782,10 @@ function StepIndicator({ current }) {
       marginBottom: tokens.spacing[6],
       gap: tokens.spacing[3],
       width: '100%',
+      '@media (max-width: 480px)': {
+        gap: tokens.spacing[2],
+        marginBottom: tokens.spacing[4],
+      },
     }}>
       {labels.map((label, i) => {
         const active = i === currentIndex;
@@ -653,6 +800,9 @@ function StepIndicator({ current }) {
               alignItems: 'center',
               flex: isLast ? 'none' : 1,
               gap: tokens.spacing[3],
+              '@media (max-width: 480px)': {
+                gap: tokens.spacing[1],
+              },
             }}
           >
             <div style={{
@@ -684,6 +834,11 @@ function StepIndicator({ current }) {
                 fontSize: '11px',
                 fontWeight: 700,
                 transition: `all ${tokens.transitions.base}`,
+                '@media (max-width: 480px)': {
+                  width: 24,
+                  height: 24,
+                  fontSize: '9px',
+                },
               }}>
                 {done ? <Icons.Check size={14} /> : i + 1}
               </div>
@@ -696,6 +851,9 @@ function StepIndicator({ current }) {
                     ? tokens.colors.status.success 
                     : tokens.colors.text.muted,
                 whiteSpace: 'nowrap',
+                '@media (max-width: 480px)': {
+                  fontSize: '8px',
+                },
               }}>
                 {label}
               </span>
@@ -860,23 +1018,29 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacing[4] }}>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: tokens.spacing[4],
+        flexWrap: 'wrap',
+        gap: tokens.spacing[2],
+      }}>
         <h2 style={styles.h2}>Review pitches</h2>
         <span style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>
           {selected.length}/{pitches.length} selected
         </span>
       </div>
-     <div style={{
-  display: 'flex',
-  flexDirection: 'column',
-  gap: tokens.spacing[3],
-  marginBottom: tokens.spacing[4],
-  maxHeight: 400,
-  overflowY: 'auto',
-  paddingRight: tokens.spacing[3], // ADD THIS - prevents scrollbar overlap
-  marginRight: '-4px', // Optional: keeps alignment clean
-}}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacing[3],
+        marginBottom: tokens.spacing[4],
+        maxHeight: 400,
+        overflowY: 'auto',
+        paddingRight: tokens.spacing[3],
+      }}>
         {pitches.map((pitch, i) => (
           <div key={i} style={{
             border: `1px solid ${selected.includes(i) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
@@ -885,16 +1049,33 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
             background: selected.includes(i) ? tokens.colors.accent.glow : 'transparent',
             width: '100%',
             boxSizing: 'border-box',
+            '@media (max-width: 480px)': {
+              padding: tokens.spacing[3],
+            },
           }}>
             <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
               <input
                 type="checkbox"
                 checked={selected.includes(i)}
                 onChange={() => setSelected((prev) => prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i])}
-                style={{ marginTop: '2px', accentColor: tokens.colors.accent.primary, flexShrink: 0 }}
+                style={{ 
+                  marginTop: '2px', 
+                  accentColor: tokens.colors.accent.primary, 
+                  flexShrink: 0,
+                  width: 18,
+                  height: 18,
+                  cursor: 'pointer',
+                }}
               />
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: tokens.spacing[2] }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start', 
+                  marginBottom: tokens.spacing[2],
+                  flexWrap: 'wrap',
+                  gap: tokens.spacing[2],
+                }}>
                   <div>
                     <span style={{ fontWeight: 600, color: tokens.colors.text.primary, fontSize: '14px' }}>{pitch.name}</span>
                     <span style={{ color: tokens.colors.text.muted, fontSize: '12px', marginLeft: tokens.spacing[2] }}>{pitch.firm || ""}</span>
@@ -910,6 +1091,8 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       fontSize: '10px',
                       color: tokens.colors.text.muted,
                       cursor: 'pointer',
+                      minHeight: '32px',
+                      minWidth: '44px',
                     }}
                   >
                     {regenerating[i] ? "..." : "🔄 Redo"}
@@ -931,6 +1114,10 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       background: tokens.colors.bg.elevated,
                       borderRadius: tokens.radius.sm,
                       padding: tokens.spacing[3],
+                      '@media (max-width: 480px)': {
+                        fontSize: '12px',
+                        padding: tokens.spacing[2],
+                      },
                     }}>
                       {pitch.body}
                     </div>
@@ -941,7 +1128,13 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
           </div>
         ))}
       </div>
-      <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: tokens.spacing[3],
+        '@media (max-width: 768px)': {
+          flexDirection: 'column',
+        },
+      }}>
         <button onClick={onBack} style={styles.btnSecondary}>← Back</button>
         <button
           onClick={() => onNext(pitches.filter((_, i) => selected.includes(i)))}
@@ -1002,7 +1195,7 @@ function SendStep({ pitches, onRestart }) {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '100%' }}>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <h2 style={styles.h2}>Ready to launch</h2>
       <p style={styles.body}>Your name will appear as the sender.</p>
       <div style={{ marginBottom: tokens.spacing[4] }}>
@@ -1025,6 +1218,7 @@ function SendStep({ pitches, onRestart }) {
         display: 'flex',
         alignItems: 'center',
         gap: tokens.spacing[2],
+        flexWrap: 'wrap',
       }}>
         <Icons.Check size={16} />
         <span>{pitches.length} pitch{pitches.length !== 1 ? "es" : ""} queued and ready</span>
@@ -1428,11 +1622,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               }}>
                 Startup Profile
               </div>
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: '1fr 1fr',
-                gap: tokens.spacing[4],
-              }}>
+              <div style={styles.grid}>
                 {[
                   ["Company", profile.companyName],
                   ["Sector", profile.sector],
@@ -1461,6 +1651,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                         fontSize: '14px',
                         color: tokens.colors.text.primary,
                         fontWeight: 500,
+                        '@media (max-width: 480px)': {
+                          fontSize: '13px',
+                        },
                       }}>
                         {v}
                       </div>
@@ -1513,6 +1706,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     fontSize: '16px',
                     fontWeight: 600,
                     color: tokens.colors.text.primary,
+                    '@media (max-width: 480px)': {
+                      fontSize: '14px',
+                    },
                   }}>
                     Matched Investors
                   </span>
@@ -1520,6 +1716,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     fontSize: '13px',
                     color: tokens.colors.text.tertiary,
                     marginLeft: tokens.spacing[3],
+                    '@media (max-width: 480px)': {
+                      fontSize: '12px',
+                    },
                   }}>
                     {selectedIndices.length} selected
                   </span>
@@ -1546,6 +1745,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 textAlign: 'center',
                 width: '100%',
                 boxSizing: 'border-box',
+                '@media (max-width: 480px)': {
+                  padding: tokens.spacing[3],
+                },
               }}
               onClick={() => document.getElementById('csv-upload-input').click()}
               onDragOver={(e) => {
@@ -1579,13 +1781,31 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 24,
+                    '@media (max-width: 480px)': {
+                      width: 40,
+                      height: 40,
+                      fontSize: 20,
+                    },
                   }}>
                     {csvFile ? '✅' : '📂'}
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: tokens.colors.text.primary }}>
+                  <div style={{ 
+                    fontSize: '14px', 
+                    fontWeight: 600, 
+                    color: tokens.colors.text.primary,
+                    '@media (max-width: 480px)': {
+                      fontSize: '13px',
+                    },
+                  }}>
                     {csvFile ? csvFile.name : 'Upload your own investor CSV'}
                   </div>
-                  <div style={{ fontSize: '12px', color: tokens.colors.text.muted }}>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    color: tokens.colors.text.muted,
+                    '@media (max-width: 480px)': {
+                      fontSize: '11px',
+                    },
+                  }}>
                     {csvFile 
                       ? `${csvInvestors.length} investors loaded`
                       : 'Drop your CSV here or click to browse'
@@ -1626,6 +1846,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 transition: `all ${tokens.transitions.base}`,
                 width: '100%',
                 boxSizing: 'border-box',
+                '@media (max-width: 480px)': {
+                  padding: tokens.spacing[2],
+                  flexWrap: 'wrap',
+                },
               }}>
                 <input
                   type="checkbox"
@@ -1640,10 +1864,23 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                   }}
                 />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: tokens.colors.text.primary }}>
+                  <div style={{ 
+                    fontSize: '13px', 
+                    fontWeight: 500, 
+                    color: tokens.colors.text.primary,
+                    '@media (max-width: 480px)': {
+                      fontSize: '12px',
+                    },
+                  }}>
                     Share with PitchWire's investor database
                   </div>
-                  <div style={{ fontSize: '11px', color: tokens.colors.text.muted }}>
+                  <div style={{ 
+                    fontSize: '11px', 
+                    color: tokens.colors.text.muted,
+                    '@media (max-width: 480px)': {
+                      fontSize: '10px',
+                    },
+                  }}>
                     Help other founders find the right investors. Your investors will be anonymized.
                   </div>
                 </div>
@@ -1661,14 +1898,13 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               </div>
 
               <div style={{
-  maxHeight: 320,
-  overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: tokens.spacing[2],
-  paddingRight: tokens.spacing[2], // ADD THIS - prevents scrollbar overlap
-  marginRight: '-4px', // Optional: keeps alignment clean
-}}>
+                maxHeight: 320,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: tokens.spacing[2],
+                paddingRight: tokens.spacing[2],
+              }}>
                 {matchedInvestors.length === 0 ? (
                   <div style={{
                     textAlign: 'center',
@@ -1695,6 +1931,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                         transition: `all ${tokens.transitions.fast}`,
                         width: '100%',
                         boxSizing: 'border-box',
+                        '@media (max-width: 480px)': {
+                          padding: tokens.spacing[2],
+                          gap: tokens.spacing[2],
+                        },
                       }}
                     >
                       <input
@@ -1709,8 +1949,8 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                           accentColor: tokens.colors.accent.primary,
                           cursor: 'pointer',
                           flexShrink: 0,
-                          width: 16,
-                          height: 16,
+                          width: 18,
+                          height: 18,
                         }}
                       />
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -1719,12 +1959,16 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                           justifyContent: 'space-between',
                           alignItems: 'flex-start',
                           gap: tokens.spacing[2],
+                          flexWrap: 'wrap',
                         }}>
                           <div>
                             <div style={{
                               fontWeight: 600,
                               color: tokens.colors.text.primary,
                               fontSize: '14px',
+                              '@media (max-width: 480px)': {
+                                fontSize: '13px',
+                              },
                             }}>
                               {inv.name || inv.firm}
                               {inv.source === 'discovered' && (
@@ -1755,6 +1999,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                             <div style={{
                               fontSize: '13px',
                               color: tokens.colors.text.tertiary,
+                              '@media (max-width: 480px)': {
+                                fontSize: '12px',
+                              },
                             }}>
                               {inv.title ? `${inv.title}${inv.firm ? ` @ ${inv.firm}` : ''}` : inv.firm || ''}
                             </div>
@@ -1776,6 +2023,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                             borderRadius: tokens.radius.full,
                             whiteSpace: 'nowrap',
                             flexShrink: 0,
+                            '@media (max-width: 480px)': {
+                              fontSize: '12px',
+                              padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+                            },
                           }}>
                             {inv.score || 0}%
                           </div>
@@ -1800,6 +2051,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                             color: tokens.colors.accent.light,
                             marginTop: tokens.spacing[1],
                             opacity: 0.7,
+                            '@media (max-width: 480px)': {
+                              fontSize: '11px',
+                            },
                           }}>
                             {inv.matchReasons}
                           </div>
@@ -1809,6 +2063,9 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                             fontSize: '12px',
                             color: tokens.colors.status.success,
                             marginTop: tokens.spacing[1],
+                            '@media (max-width: 480px)': {
+                              fontSize: '11px',
+                            },
                           }}>
                             <Icons.Mail size={12} /> {inv.email}
                           </div>
@@ -1826,18 +2083,26 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               marginTop: tokens.spacing[6],
               alignItems: 'center',
               width: '100%',
+              '@media (max-width: 768px)': {
+                flexDirection: 'column',
+                gap: tokens.spacing[3],
+              },
             }}>
               <button
                 onClick={() => setMode("upload")}
                 style={{
                   ...styles.btnSecondary,
                   whiteSpace: 'nowrap',
+                  '@media (max-width: 768px)': {
+                    width: '100%',
+                    justifyContent: 'center',
+                  },
                 }}
               >
                 <Icons.ArrowLeft size={16} />
                 Re-upload
               </button>
-              <div style={{ flex: 1 }} />
+              <div style={{ flex: 1, '@media (max-width: 768px)': { display: 'none' } }} />
               <button
                 onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })}
                 disabled={!valid}
@@ -1848,6 +2113,11 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                   opacity: valid ? 1 : 0.4,
                   cursor: valid ? 'pointer' : 'not-allowed',
                   minWidth: '200px',
+                  '@media (max-width: 768px)': {
+                    width: '100%',
+                    minWidth: 'unset',
+                    padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+                  },
                 }}
               >
                 Generate Pitches
@@ -1861,7 +2131,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '100%' }}>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div style={{ marginBottom: tokens.spacing[4] }}>
         <h2 style={styles.h2}>
           {savedProfile ? "Update your documents" : "Upload your documents"}
@@ -2120,16 +2390,24 @@ function InvestorsTab({ plan, onStartCampaign }) {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: tokens.spacing[3], flexWrap: 'wrap', marginBottom: tokens.spacing[4] }}>
-        <select value={filters.sector} onChange={(e) => setFilters({ ...filters, sector: e.target.value })} style={styles.input}>
+      <div style={{ 
+        display: 'flex', 
+        gap: tokens.spacing[3], 
+        flexWrap: 'wrap', 
+        marginBottom: tokens.spacing[4],
+        '@media (max-width: 480px)': {
+          gap: tokens.spacing[2],
+        },
+      }}>
+        <select value={filters.sector} onChange={(e) => setFilters({ ...filters, sector: e.target.value })} style={{ ...styles.input, minWidth: '120px', flex: 1 }}>
           <option value="">All sectors</option>
           {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} style={styles.input}>
+        <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} style={{ ...styles.input, minWidth: '120px', flex: 1 }}>
           <option value="">All stages</option>
           {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={filters.region} onChange={(e) => setFilters({ ...filters, region: e.target.value })} style={styles.input}>
+        <select value={filters.region} onChange={(e) => setFilters({ ...filters, region: e.target.value })} style={{ ...styles.input, minWidth: '120px', flex: 1 }}>
           <option value="">All regions</option>
           {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
@@ -2157,18 +2435,51 @@ function InvestorsTab({ plan, onStartCampaign }) {
               borderColor: selected.includes(inv.id) ? tokens.colors.accent.primary : tokens.colors.border.default,
               background: selected.includes(inv.id) ? tokens.colors.accent.glow : 'transparent',
             }}>
-              <div style={{ display: 'flex', gap: tokens.spacing[3], alignItems: 'flex-start' }}>
+              <div style={{ 
+                display: 'flex', 
+                gap: tokens.spacing[3], 
+                alignItems: 'flex-start',
+                '@media (max-width: 480px)': {
+                  gap: tokens.spacing[2],
+                },
+              }}>
                 <input
                   type="checkbox"
                   checked={selected.includes(inv.id)}
                   onChange={() => toggleSelect(inv.id)}
-                  style={{ marginTop: '3px', accentColor: tokens.colors.accent.primary, width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }}
+                  style={{ 
+                    marginTop: '3px', 
+                    accentColor: tokens.colors.accent.primary, 
+                    width: 18, 
+                    height: 18, 
+                    cursor: 'pointer', 
+                    flexShrink: 0 
+                  }}
                 />
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: tokens.spacing[2] }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'flex-start', 
+                    gap: tokens.spacing[2],
+                    flexWrap: 'wrap',
+                  }}>
                     <div>
-                      <div style={{ fontSize: '16px', fontWeight: 700, color: tokens.colors.text.primary }}>{inv.firm}</div>
-                      <div style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>{inv.hq}</div>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: 700, 
+                        color: tokens.colors.text.primary,
+                        '@media (max-width: 480px)': {
+                          fontSize: '14px',
+                        },
+                      }}>{inv.firm}</div>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: tokens.colors.text.tertiary,
+                        '@media (max-width: 480px)': {
+                          fontSize: '12px',
+                        },
+                      }}>{inv.hq}</div>
                     </div>
                     {!inv.email && (
                       <span style={{
@@ -2185,7 +2496,15 @@ function InvestorsTab({ plan, onStartCampaign }) {
                       </span>
                     )}
                   </div>
-                  <p style={{ fontSize: '13px', color: tokens.colors.text.secondary, lineHeight: 1.5, marginBottom: tokens.spacing[3] }}>{inv.notes}</p>
+                  <p style={{ 
+                    fontSize: '13px', 
+                    color: tokens.colors.text.secondary, 
+                    lineHeight: 1.5, 
+                    marginBottom: tokens.spacing[3],
+                    '@media (max-width: 480px)': {
+                      fontSize: '12px',
+                    },
+                  }}>{inv.notes}</p>
                   <div style={{ display: 'flex', gap: tokens.spacing[1], flexWrap: 'wrap' }}>
                     {inv.sectors?.map((s, i) => (
                       <span key={i} style={styles.tagAccent}>{s}</span>
@@ -2216,8 +2535,28 @@ function InvestorsTab({ plan, onStartCampaign }) {
           gap: tokens.spacing[4],
           boxShadow: tokens.shadows.xl,
           zIndex: 100,
+          '@media (max-width: 768px)': {
+            padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+            gap: tokens.spacing[3],
+            bottom: tokens.spacing[4],
+            width: '90%',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+          },
+          '@media (max-width: 480px)': {
+            padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
+            gap: tokens.spacing[2],
+            width: '95%',
+          },
         }}>
-          <span style={{ fontSize: '14px', color: tokens.colors.text.primary, fontWeight: 600 }}>
+          <span style={{ 
+            fontSize: '14px', 
+            color: tokens.colors.text.primary, 
+            fontWeight: 600,
+            '@media (max-width: 480px)': {
+              fontSize: '12px',
+            },
+          }}>
             {selected.length} investor{selected.length !== 1 ? "s" : ""} selected
           </span>
           <button onClick={handleStartCampaign} style={styles.btnPrimary}>
@@ -2230,6 +2569,8 @@ function InvestorsTab({ plan, onStartCampaign }) {
             fontSize: '20px',
             cursor: 'pointer',
             padding: 0,
+            minWidth: '44px',
+            minHeight: '44px',
           }}>×</button>
         </div>
       )}
@@ -2280,7 +2621,15 @@ function AddInvestorForm({ onClose, onAdded }) {
   return (
     <div>
       <h3 style={{ ...styles.h3, marginBottom: tokens.spacing[4] }}>Add an investor to the database</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[3] }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '1fr 1fr', 
+        gap: tokens.spacing[3],
+        '@media (max-width: 480px)': {
+          gridTemplateColumns: '1fr',
+          gap: tokens.spacing[2],
+        },
+      }}>
         <input placeholder="Firm name *" value={form.firm} onChange={(e) => setForm({ ...form, firm: e.target.value })} style={inputStyle} />
         <input placeholder="Contact name" value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} style={inputStyle} />
         <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={inputStyle} />
@@ -2291,9 +2640,25 @@ function AddInvestorForm({ onClose, onAdded }) {
       </div>
       <textarea placeholder="Notes (what do they look for?)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} style={{ ...inputStyle, width: '100%', resize: 'vertical', marginTop: tokens.spacing[3], boxSizing: 'border-box' }} />
       {error && <p style={{ color: tokens.colors.status.error, fontSize: '13px', marginTop: tokens.spacing[3] }}>⚠ {error}</p>}
-      <div style={{ display: 'flex', gap: tokens.spacing[3], marginTop: tokens.spacing[4] }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: tokens.spacing[3], 
+        marginTop: tokens.spacing[4],
+        '@media (max-width: 480px)': {
+          flexDirection: 'column',
+          gap: tokens.spacing[2],
+        },
+      }}>
         <button onClick={onClose} style={styles.btnSecondary}>Cancel</button>
-        <button onClick={handleSubmit} disabled={submitting} style={{ ...styles.btnPrimary, opacity: submitting ? 0.4 : 1, cursor: submitting ? 'not-allowed' : 'pointer' }}>
+        <button onClick={handleSubmit} disabled={submitting} style={{ 
+          ...styles.btnPrimary, 
+          opacity: submitting ? 0.4 : 1, 
+          cursor: submitting ? 'not-allowed' : 'pointer',
+          '@media (max-width: 480px)': {
+            width: '100%',
+            justifyContent: 'center',
+          },
+        }}>
           {submitting ? "Adding..." : "Add Investor"}
         </button>
       </div>
@@ -2373,6 +2738,7 @@ export default function App() {
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '100vh',
+          padding: tokens.spacing[4],
         }}>
           <div style={{ color: tokens.colors.text.muted, fontSize: '14px' }}>Loading...</div>
         </div>
@@ -2411,6 +2777,11 @@ export default function App() {
               color: tokens.colors.text.primary,
               cursor: 'pointer',
               padding: tokens.spacing[2],
+              minHeight: '44px',
+              minWidth: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <Icons.Menu size={24} />
@@ -2440,7 +2811,7 @@ export default function App() {
               PitchWire
             </span>
           </div>
-          <div style={{ width: 40 }} />
+          <div style={{ width: 44 }} />
         </div>
 
         <Sidebar
@@ -2463,7 +2834,10 @@ export default function App() {
           '@media (max-width: 768px)': {
             marginLeft: 0,
             padding: tokens.spacing[4],
-          }
+          },
+          '@media (max-width: 480px)': {
+            padding: tokens.spacing[3],
+          },
         }}>
           <div style={styles.main}>
             {activeTab === "campaign" && (
