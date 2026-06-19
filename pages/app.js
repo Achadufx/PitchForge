@@ -1797,44 +1797,39 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               </div>
             </div>
 
-            <div style={{
-              display: 'flex',
-              gap: tokens.spacing[3],
-              marginTop: tokens.spacing[6],
-              flexWrap: 'wrap',
-            }}>
-              <button
-                onClick={() => setMode("upload")}
-                style={styles.btnSecondary}
-              >
-                <Icons.ArrowLeft size={16} />
-                Re-upload
-              </button>
-              <button
-                onClick={onBack}
-                style={styles.btnSecondary}
-              >
-                <Icons.ArrowLeft size={16} />
-                Back
-              </button>
-              <button
-                onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })}
-                disabled={!valid}
-                style={{
-                  ...styles.btnPrimary,
-                  flex: 1,
-                  justifyContent: 'center',
-                  opacity: valid ? 1 : 0.4,
-                  cursor: valid ? 'pointer' : 'not-allowed',
-                }}
-              >
-                Generate Pitches
-                <Icons.ArrowRight size={16} />
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+           <div style={{
+  display: 'flex',
+  gap: tokens.spacing[3],
+  marginTop: tokens.spacing[6],
+  alignItems: 'center',
+}}>
+  <button
+    onClick={() => setMode("upload")}
+    style={{
+      ...styles.btnSecondary,
+      whiteSpace: 'nowrap',
+    }}
+  >
+    <Icons.ArrowLeft size={16} />
+    Re-upload
+  </button>
+  <div style={{ flex: 1 }} />
+  <button
+    onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })}
+    disabled={!valid}
+    style={{
+      ...styles.btnPrimary,
+      padding: `${tokens.spacing[3]} ${tokens.spacing[8]}`,
+      justifyContent: 'center',
+      opacity: valid ? 1 : 0.4,
+      cursor: valid ? 'pointer' : 'not-allowed',
+      minWidth: '200px',
+    }}
+  >
+    Generate Pitches
+    <Icons.ArrowRight size={16} />
+  </button>
+</div>
     );
   }
 
