@@ -1,12 +1,35 @@
-// components/GlobalStyles.js
 export default function GlobalStyles() {
   return (
     <style jsx global>{`
       /* ============================================================
-         PITCHWIRE - GLOBAL RESPONSIVE STYLES
+         RESET & BASE
          ============================================================ */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-      /* --- Card System --- */
+      html, body {
+        background: #070b14;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        overflow-x: hidden;
+        color: #e8eaed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      #__next {
+        background: #070b14;
+        min-height: 100vh;
+      }
+
+      /* ============================================================
+         CARD SYSTEM
+         ============================================================ */
       .pw-card {
         background: #111827;
         border: 1px solid #1e2a3a;
@@ -18,7 +41,80 @@ export default function GlobalStyles() {
         box-sizing: border-box;
       }
 
-      /* --- Typography --- */
+      .pw-card-accent {
+        background: #111827;
+        border: 1px solid #14b8a6;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 0 0 1px rgba(20,184,166,0.12);
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* ============================================================
+         SIDEBAR
+         ============================================================ */
+      .pw-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 240px;
+        background: #070b14;
+        border-right: 1px solid #1e2a3a;
+        z-index: 50;
+        transform: translateX(0);
+        transition: transform 250ms ease;
+        overflow-y: auto;
+      }
+
+      .pw-sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 49;
+        backdrop-filter: blur(4px);
+      }
+
+      .pw-sidebar-overlay.open {
+        display: block;
+      }
+
+      /* ============================================================
+         MAIN CONTENT
+         ============================================================ */
+      .pw-main-content {
+        margin-left: 240px;
+        flex: 1;
+        padding: 32px;
+        overflow-y: auto;
+        min-height: 100vh;
+        background: #070b14;
+        transition: margin-left 250ms ease;
+      }
+
+      /* ============================================================
+         MOBILE HEADER
+         ============================================================ */
+      .pw-mobile-header {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        border-bottom: 1px solid #1e2a3a;
+        background: #070b14;
+        position: sticky;
+        top: 0;
+        z-index: 40;
+      }
+
+      /* ============================================================
+         TYPOGRAPHY
+         ============================================================ */
       .pw-h1 {
         font-size: 35px;
         font-weight: 800;
@@ -61,7 +157,9 @@ export default function GlobalStyles() {
         letter-spacing: 0.01em;
       }
 
-      /* --- Buttons --- */
+      /* ============================================================
+         BUTTONS
+         ============================================================ */
       .pw-btn-primary {
         background: #14b8a6;
         color: #ffffff;
@@ -128,7 +226,9 @@ export default function GlobalStyles() {
         background: rgba(255,255,255,0.03);
       }
 
-      /* --- Inputs --- */
+      /* ============================================================
+         INPUTS
+         ============================================================ */
       .pw-input {
         width: 100%;
         background: #0f1625;
@@ -169,7 +269,93 @@ export default function GlobalStyles() {
         box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
       }
 
-      /* --- Tags --- */
+      /* ============================================================
+         SCROLLABLE CONTAINERS
+         ============================================================ */
+      .pw-scroll {
+        max-height: 320px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-right: 8px;
+      }
+
+      .pw-scroll-pitches {
+        max-height: 400px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-right: 12px;
+      }
+
+      .pw-scroll::-webkit-scrollbar,
+      .pw-scroll-pitches::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .pw-scroll::-webkit-scrollbar-track,
+      .pw-scroll-pitches::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .pw-scroll::-webkit-scrollbar-thumb,
+      .pw-scroll-pitches::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+      }
+
+      /* ============================================================
+         GRID
+         ============================================================ */
+      .pw-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      /* ============================================================
+         DROPZONE
+         ============================================================ */
+      .pw-dropzone {
+        border: 2px dashed #1e2a3a;
+        border-radius: 16px;
+        padding: 40px 24px;
+        text-align: center;
+        cursor: pointer;
+        background: #0c1120;
+        transition: all 250ms ease;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .pw-dropzone:hover {
+        border-color: #14b8a6;
+        background: rgba(20,184,166,0.12);
+      }
+
+      /* ============================================================
+         PROGRESS
+         ============================================================ */
+      .pw-progress {
+        background: rgba(255,255,255,0.05);
+        border-radius: 999px;
+        height: 4px;
+        overflow: hidden;
+      }
+
+      .pw-progress-fill {
+        background: linear-gradient(90deg, #14b8a6, #5eead4);
+        height: 100%;
+        border-radius: 999px;
+        transition: width 400ms ease;
+      }
+
+      /* ============================================================
+         TAGS
+         ============================================================ */
       .pw-tag {
         display: inline-block;
         font-size: 11px;
@@ -192,84 +378,9 @@ export default function GlobalStyles() {
         border: 1px solid rgba(20,184,166,0.25);
       }
 
-      /* --- Grid --- */
-      .pw-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
-
-      /* --- Progress --- */
-      .pw-progress {
-        background: rgba(255,255,255,0.05);
-        border-radius: 999px;
-        height: 4px;
-        overflow: hidden;
-      }
-
-      .pw-progress-fill {
-        background: linear-gradient(90deg, #14b8a6, #5eead4);
-        height: 100%;
-        border-radius: 999px;
-        transition: width 400ms ease;
-      }
-
-      /* --- Dropzone --- */
-      .pw-dropzone {
-        border: 2px dashed #1e2a3a;
-        border-radius: 16px;
-        padding: 40px 24px;
-        text-align: center;
-        cursor: pointer;
-        background: #0c1120;
-        transition: all 250ms ease;
-        width: 100%;
-        box-sizing: border-box;
-      }
-
-      .pw-dropzone:hover {
-        border-color: #14b8a6;
-        background: rgba(20,184,166,0.12);
-      }
-
-      /* --- Scrollable Containers --- */
-      .pw-scroll {
-        max-height: 320px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding-right: 8px;
-      }
-
-      .pw-scroll-pitches {
-        max-height: 400px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 16px;
-        padding-right: 12px;
-      }
-
-      /* --- Custom Scrollbar --- */
-      .pw-scroll::-webkit-scrollbar,
-      .pw-scroll-pitches::-webkit-scrollbar {
-        width: 4px;
-      }
-
-      .pw-scroll::-webkit-scrollbar-track,
-      .pw-scroll-pitches::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      .pw-scroll::-webkit-scrollbar-thumb,
-      .pw-scroll-pitches::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.1);
-        border-radius: 10px;
-      }
-
-      /* --- Floating Action Bar --- */
+      /* ============================================================
+         FLOATING BAR
+         ============================================================ */
       .pw-floating-bar {
         position: fixed;
         bottom: 24px;
@@ -286,71 +397,71 @@ export default function GlobalStyles() {
         z-index: 100;
       }
 
-      /* --- Sidebar Overlay --- */
-      .pw-sidebar-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.7);
-        z-index: 49;
-        backdrop-filter: blur(4px);
-        display: none;
-      }
-
-      .pw-sidebar-overlay.open {
-        display: block;
-      }
-
-      /* --- Sidebar --- */
-      .pw-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 280px;
-        background: #070b14;
-        border-right: 1px solid #1e2a3a;
-        z-index: 50;
-        transform: translateX(-100%);
-        transition: transform 250ms ease;
-        box-shadow: 0 12px 48px rgba(0,0,0,0.6);
-        overflow-y: auto;
-      }
-
-      .pw-sidebar.open {
-        transform: translateX(0);
-      }
-
-      /* --- Mobile Header --- */
-      .pw-mobile-header {
-        display: none;
+      /* ============================================================
+         STEP INDICATOR
+         ============================================================ */
+      .pw-step-container {
+        display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 16px;
-        border-bottom: 1px solid #1e2a3a;
-        background: #070b14;
-        position: sticky;
-        top: 0;
-        z-index: 40;
+        margin-bottom: 24px;
+        gap: 12px;
+        width: 100%;
       }
 
-      /* --- Main Content --- */
-      .pw-main-content {
-        margin-left: 240px;
-        flex: 1;
-        padding: 32px;
-        overflow-y: auto;
-        min-height: 100vh;
-        transition: margin-left 250ms ease;
+      .pw-step-gap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .pw-step-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        transition: all 250ms ease;
+      }
+
+      .pw-step-label {
+        font-size: 10px;
+        white-space: nowrap;
       }
 
       /* ============================================================
-         MOBILE RESPONSIVE (<= 768px)
+         MOBILE (<= 768px)
          ============================================================ */
-
       @media (max-width: 768px) {
+        .pw-sidebar {
+          transform: translateX(-100%);
+          width: 280px;
+          box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+        }
+
+        .pw-sidebar.open {
+          transform: translateX(0);
+        }
+
+        .pw-sidebar-overlay {
+          display: none;
+        }
+
+        .pw-sidebar-overlay.open {
+          display: block;
+        }
+
+        .pw-mobile-header {
+          display: flex !important;
+        }
+
+        .pw-main-content {
+          margin-left: 0 !important;
+          padding: 16px !important;
+        }
+
         .pw-card {
           padding: 16px;
           border-radius: 12px;
@@ -372,8 +483,9 @@ export default function GlobalStyles() {
           font-size: 14px;
         }
 
-        .pw-label {
-          font-size: 12px;
+        .pw-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
         }
 
         .pw-btn-primary,
@@ -382,39 +494,6 @@ export default function GlobalStyles() {
           font-size: 13px;
           width: 100%;
           justify-content: center;
-        }
-
-        .pw-btn-ghost {
-          padding: 8px 12px;
-          font-size: 12px;
-        }
-
-        .pw-input {
-          padding: 12px 12px;
-          font-size: 13px;
-        }
-
-        .pw-textarea {
-          padding: 12px 12px;
-          font-size: 13px;
-        }
-
-        .pw-grid {
-          grid-template-columns: 1fr;
-          gap: 12px;
-        }
-
-        .pw-dropzone {
-          padding: 32px 16px;
-          border-radius: 12px;
-        }
-
-        .pw-scroll {
-          padding-right: 4px;
-        }
-
-        .pw-scroll-pitches {
-          padding-right: 8px;
         }
 
         .pw-floating-bar {
@@ -426,59 +505,38 @@ export default function GlobalStyles() {
           justify-content: center;
         }
 
-        /* Sidebar - hidden by default on mobile */
-        .pw-sidebar {
-          transform: translateX(-100%);
+        .pw-dropzone {
+          padding: 32px 16px;
+          border-radius: 12px;
         }
 
-        .pw-sidebar.open {
-          transform: translateX(0);
-        }
-
-        .pw-sidebar-overlay {
-          display: none;
-        }
-
-        .pw-sidebar-overlay.open {
-          display: block;
-        }
-
-        /* Mobile header - visible */
-        .pw-mobile-header {
-          display: flex !important;
-        }
-
-        /* Main content - no left margin on mobile */
-        .pw-main-content {
-          margin-left: 0 !important;
-          padding: 16px !important;
-        }
-
-        /* Step indicator mobile */
         .pw-step-container {
-          gap: 8px !important;
-          margin-bottom: 16px !important;
-        }
-
-        .pw-step-circle {
-          width: 24px !important;
-          height: 24px !important;
-          font-size: 9px !important;
-        }
-
-        .pw-step-label {
-          font-size: 8px !important;
+          gap: 8px;
+          margin-bottom: 16px;
         }
 
         .pw-step-gap {
-          gap: 4px !important;
+          gap: 4px;
+        }
+
+        .pw-step-circle {
+          width: 24px;
+          height: 24px;
+          font-size: 9px;
+        }
+
+        .pw-step-label {
+          font-size: 8px;
+        }
+
+        .pw-scroll-pitches {
+          max-height: 300px;
         }
       }
 
       /* ============================================================
          SMALL MOBILE (<= 480px)
          ============================================================ */
-
       @media (max-width: 480px) {
         .pw-h1 {
           font-size: 24px;
@@ -501,36 +559,10 @@ export default function GlobalStyles() {
           border-radius: 10px;
         }
 
-        .pw-btn-primary,
-        .pw-btn-secondary {
-          font-size: 13px;
-          min-height: 44px;
-        }
-
-        .pw-tag,
-        .pw-tag-accent {
-          font-size: 10px;
-          padding: 2px 8px;
-        }
-
         .pw-floating-bar {
           padding: 8px 12px;
           gap: 8px;
           width: 95%;
-        }
-
-        .pw-dropzone {
-          padding: 24px 12px;
-        }
-
-        .pw-input {
-          font-size: 13px;
-          padding: 10px 12px;
-        }
-
-        .pw-textarea {
-          font-size: 13px;
-          padding: 10px 12px;
         }
       }
     `}</style>
