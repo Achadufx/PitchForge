@@ -7,6 +7,7 @@ import AccountTab from "../components/AccountTab";
 import CrmTab from "../components/CrmTab";
 import FollowupsTab from "../components/FollowupsTab";
 import TemplatesTab from "../components/TemplatesTab";
+import GlobalStyles from "../components/GlobalStyles";
 
 // ============================================================
 // DESIGN SYSTEM
@@ -80,12 +81,6 @@ const tokens = {
     base: '250ms cubic-bezier(0.4, 0, 0.2, 1)',
     slow: '400ms cubic-bezier(0.4, 0, 0.2, 1)',
   },
-  breakpoints: {
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px',
-  }
 };
 
 // ============================================================
@@ -135,7 +130,7 @@ const Icons = {
 };
 
 // ============================================================
-// STYLED COMPONENTS (Design System Helpers)
+// STYLES (without @media)
 // ============================================================
 
 const styles = {
@@ -153,280 +148,6 @@ const styles = {
     padding: `${tokens.spacing[8]} ${tokens.spacing[4]}`,
     width: '100%',
     boxSizing: 'border-box',
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[4]} ${tokens.spacing[3]}`,
-    },
-    '@media (max-width: 480px)': {
-      padding: `${tokens.spacing[3]} ${tokens.spacing[2]}`,
-    },
-  },
-  card: {
-    background: tokens.colors.bg.surface,
-    border: `1px solid ${tokens.colors.border.default}`,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.spacing[6],
-    boxShadow: tokens.shadows.sm,
-    transition: `all ${tokens.transitions.base}`,
-    width: '100%',
-    boxSizing: 'border-box',
-    '@media (max-width: 768px)': {
-      padding: tokens.spacing[4],
-      borderRadius: tokens.radius.md,
-    },
-    '@media (max-width: 480px)': {
-      padding: tokens.spacing[3],
-      borderRadius: tokens.radius.md,
-    },
-  },
-  cardAccent: {
-    background: tokens.colors.bg.surface,
-    border: `1px solid ${tokens.colors.accent.primary}`,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.spacing[6],
-    boxShadow: `0 0 0 1px ${tokens.colors.accent.glow}`,
-    width: '100%',
-    boxSizing: 'border-box',
-    '@media (max-width: 768px)': {
-      padding: tokens.spacing[4],
-      borderRadius: tokens.radius.md,
-    },
-  },
-  btnPrimary: {
-    background: tokens.colors.accent.primary,
-    color: tokens.colors.text.inverse,
-    border: 'none',
-    borderRadius: tokens.radius.md,
-    padding: `${tokens.spacing[3]} ${tokens.spacing[6]}`,
-    fontSize: '14px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: `all ${tokens.transitions.fast}`,
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: tokens.spacing[2],
-    whiteSpace: 'nowrap',
-    minHeight: '44px',
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-      fontSize: '13px',
-      minHeight: '44px',
-      justifyContent: 'center',
-      width: '100%',
-    },
-    '@media (max-width: 480px)': {
-      padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
-      fontSize: '13px',
-      minHeight: '44px',
-    },
-  },
-  btnSecondary: {
-    background: 'transparent',
-    color: tokens.colors.text.secondary,
-    border: `1px solid ${tokens.colors.border.default}`,
-    borderRadius: tokens.radius.md,
-    padding: `${tokens.spacing[3]} ${tokens.spacing[6]}`,
-    fontSize: '14px',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: `all ${tokens.transitions.fast}`,
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: tokens.spacing[2],
-    whiteSpace: 'nowrap',
-    minHeight: '44px',
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-      fontSize: '13px',
-      minHeight: '44px',
-      justifyContent: 'center',
-      flex: 1,
-    },
-  },
-  btnGhost: {
-    background: 'transparent',
-    color: tokens.colors.text.tertiary,
-    border: 'none',
-    borderRadius: tokens.radius.md,
-    padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-    fontSize: '13px',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: `all ${tokens.transitions.fast}`,
-    whiteSpace: 'nowrap',
-    minHeight: '44px',
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-      fontSize: '12px',
-      minHeight: '44px',
-    },
-  },
-  input: {
-    width: '100%',
-    background: tokens.colors.bg.input,
-    border: `1px solid ${tokens.colors.border.default}`,
-    borderRadius: tokens.radius.md,
-    padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-    color: tokens.colors.text.primary,
-    fontSize: '14px',
-    outline: 'none',
-    transition: `all ${tokens.transitions.fast}`,
-    boxSizing: 'border-box',
-    minHeight: '44px',
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
-      fontSize: '13px',
-      minHeight: '44px',
-    },
-  },
-  textarea: {
-    width: '100%',
-    background: tokens.colors.bg.input,
-    border: `1px solid ${tokens.colors.border.default}`,
-    borderRadius: tokens.radius.md,
-    padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-    color: tokens.colors.text.primary,
-    fontSize: '14px',
-    outline: 'none',
-    transition: `all ${tokens.transitions.fast}`,
-    boxSizing: 'border-box',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    minHeight: '44px',
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
-      fontSize: '13px',
-    },
-  },
-  h1: {
-    fontSize: '35px',
-    fontWeight: 800,
-    color: tokens.colors.text.primary,
-    letterSpacing: '-0.02em',
-    lineHeight: 1.2,
-    margin: 0,
-    '@media (max-width: 768px)': {
-      fontSize: '28px',
-    },
-    '@media (max-width: 480px)': {
-      fontSize: '24px',
-    },
-  },
-  h2: {
-    fontSize: '27px',
-    fontWeight: 700,
-    color: tokens.colors.text.primary,
-    letterSpacing: '-0.01em',
-    lineHeight: 1.2,
-    margin: 0,
-    '@media (max-width: 768px)': {
-      fontSize: '22px',
-    },
-    '@media (max-width: 480px)': {
-      fontSize: '19px',
-    },
-  },
-  h3: {
-    fontSize: '21px',
-    fontWeight: 700,
-    color: tokens.colors.text.primary,
-    lineHeight: 1.3,
-    margin: 0,
-    '@media (max-width: 768px)': {
-      fontSize: '18px',
-    },
-    '@media (max-width: 480px)': {
-      fontSize: '16px',
-    },
-  },
-  body: {
-    fontSize: '15px',
-    fontWeight: 400,
-    color: tokens.colors.text.secondary,
-    lineHeight: 1.6,
-    '@media (max-width: 768px)': {
-      fontSize: '14px',
-    },
-    '@media (max-width: 480px)': {
-      fontSize: '13px',
-    },
-  },
-  label: {
-    display: 'block',
-    fontSize: '13px',
-    fontWeight: 500,
-    color: tokens.colors.text.tertiary,
-    marginBottom: tokens.spacing[2],
-    letterSpacing: '0.01em',
-    '@media (max-width: 768px)': {
-      fontSize: '12px',
-    },
-  },
-  tag: {
-    display: 'inline-block',
-    fontSize: '11px',
-    fontWeight: 500,
-    padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-    borderRadius: tokens.radius.full,
-    background: 'rgba(255,255,255,0.04)',
-    color: tokens.colors.text.tertiary,
-    border: `1px solid ${tokens.colors.border.default}`,
-    '@media (max-width: 480px)': {
-      fontSize: '10px',
-      padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-    },
-  },
-  tagAccent: {
-    display: 'inline-block',
-    fontSize: '11px',
-    fontWeight: 500,
-    padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-    borderRadius: tokens.radius.full,
-    background: tokens.colors.accent.glow,
-    color: tokens.colors.accent.light,
-    border: `1px solid ${tokens.colors.accent.glowStrong}`,
-    '@media (max-width: 480px)': {
-      fontSize: '10px',
-      padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-    },
-  },
-  progress: {
-    background: 'rgba(255,255,255,0.05)',
-    borderRadius: tokens.radius.full,
-    height: '4px',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    background: `linear-gradient(90deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.light})`,
-    height: '100%',
-    borderRadius: tokens.radius.full,
-    transition: `width ${tokens.transitions.slow}`,
-  },
-  dropzone: {
-    border: `2px dashed ${tokens.colors.border.default}`,
-    borderRadius: tokens.radius.lg,
-    padding: `${tokens.spacing[10]} ${tokens.spacing[6]}`,
-    textAlign: 'center',
-    cursor: 'pointer',
-    background: tokens.colors.bg.elevated,
-    transition: `all ${tokens.transitions.base}`,
-    width: '100%',
-    boxSizing: 'border-box',
-    '@media (max-width: 768px)': {
-      padding: `${tokens.spacing[8]} ${tokens.spacing[4]}`,
-      borderRadius: tokens.radius.md,
-    },
-    '@media (max-width: 480px)': {
-      padding: `${tokens.spacing[6]} ${tokens.spacing[3]}`,
-    },
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: tokens.spacing[4],
-    '@media (max-width: 768px)': {
-      gridTemplateColumns: '1fr',
-      gap: tokens.spacing[3],
-    },
   },
 };
 
@@ -471,30 +192,11 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
     { key: "account", icon: Icons.User, label: "Account" },
   ];
 
-  // Check if screen is mobile (using window width)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-
   return (
     <>
-      {/* Overlay */}
-      {mobileOpen && (
-        <div
-          onClick={() => setMobileOpen(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.7)',
-            zIndex: 49,
-            backdropFilter: 'blur(4px)',
-          }}
-        />
-      )}
+      {mobileOpen && <div className="pw-sidebar-overlay" onClick={() => setMobileOpen(false)} />}
 
-      {/* Sidebar */}
-      <div style={{
+      <div className={mobileOpen ? "pw-sidebar-open" : ""} style={{
         width: '240px',
         background: tokens.colors.bg.base,
         borderRight: `1px solid ${tokens.colors.border.default}`,
@@ -506,11 +208,6 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
         top: 0,
         zIndex: 50,
         transition: `transform ${tokens.transitions.base}`,
-        '@media (max-width: 768px)': {
-          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-          width: '280px',
-          boxShadow: tokens.shadows.xl,
-        },
       }}>
         <div style={{ 
           padding: `${tokens.spacing[5]} ${tokens.spacing[6]}`, 
@@ -608,12 +305,7 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
           padding: tokens.spacing[4], 
           borderTop: `1px solid ${tokens.colors.border.default}`,
         }}>
-          <div style={{
-            background: tokens.colors.bg.elevated,
-            border: `1px solid ${tokens.colors.border.default}`,
-            borderRadius: tokens.radius.md,
-            padding: tokens.spacing[4],
-          }}>
+          <div className="pw-card" style={{ padding: tokens.spacing[4] }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -636,9 +328,8 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
                 {pitchCount}/{limit}
               </span>
             </div>
-            <div style={styles.progress}>
-              <div style={{
-                ...styles.progressFill,
+            <div className="pw-progress">
+              <div className="pw-progress-fill" style={{
                 width: pct + '%',
                 background: pct >= 90 
                   ? `linear-gradient(90deg, ${tokens.colors.status.error}, ${tokens.colors.status.warning})`
@@ -648,19 +339,13 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
             {plan === "free" && (
               <button 
                 onClick={() => setActiveTab("account")}
+                className="pw-btn-primary"
                 style={{
                   width: '100%',
                   marginTop: tokens.spacing[3],
+                  justifyContent: 'center',
                   padding: tokens.spacing[2],
-                  borderRadius: tokens.radius.sm,
                   fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: tokens.colors.accent.primary,
-                  color: tokens.colors.text.inverse,
-                  border: 'none',
-                  transition: `all ${tokens.transitions.fast}`,
-                  minHeight: '44px',
                 }}
               >
                 Upgrade →
@@ -669,18 +354,16 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
             {plan === "starter" && (
               <button 
                 onClick={() => setActiveTab("account")}
+                className="pw-btn-primary"
                 style={{
                   width: '100%',
                   marginTop: tokens.spacing[3],
+                  justifyContent: 'center',
                   padding: tokens.spacing[2],
-                  borderRadius: tokens.radius.sm,
                   fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
                   background: tokens.colors.accent.glow,
                   color: tokens.colors.accent.light,
                   border: `1px solid ${tokens.colors.accent.glowStrong}`,
-                  minHeight: '44px',
                 }}
               >
                 Upgrade to Pro →
@@ -776,16 +459,12 @@ function StepIndicator({ current }) {
   const currentIndex = STEPS.indexOf(current);
 
   return (
-    <div style={{
+    <div className="pw-step-container" style={{
       display: 'flex',
       alignItems: 'center',
       marginBottom: tokens.spacing[6],
       gap: tokens.spacing[3],
       width: '100%',
-      '@media (max-width: 480px)': {
-        gap: tokens.spacing[2],
-        marginBottom: tokens.spacing[4],
-      },
     }}>
       {labels.map((label, i) => {
         const active = i === currentIndex;
@@ -795,14 +474,12 @@ function StepIndicator({ current }) {
         return (
           <div
             key={i}
+            className="pw-step-gap"
             style={{
               display: 'flex',
               alignItems: 'center',
               flex: isLast ? 'none' : 1,
               gap: tokens.spacing[3],
-              '@media (max-width: 480px)': {
-                gap: tokens.spacing[1],
-              },
             }}
           >
             <div style={{
@@ -811,7 +488,7 @@ function StepIndicator({ current }) {
               alignItems: 'center',
               gap: tokens.spacing[1],
             }}>
-              <div style={{
+              <div className="pw-step-circle" style={{
                 width: 28,
                 height: 28,
                 borderRadius: '50%',
@@ -834,15 +511,10 @@ function StepIndicator({ current }) {
                 fontSize: '11px',
                 fontWeight: 700,
                 transition: `all ${tokens.transitions.base}`,
-                '@media (max-width: 480px)': {
-                  width: 24,
-                  height: 24,
-                  fontSize: '9px',
-                },
               }}>
                 {done ? <Icons.Check size={14} /> : i + 1}
               </div>
-              <span style={{
+              <span className="pw-step-label" style={{
                 fontSize: '10px',
                 fontWeight: active ? 600 : 400,
                 color: active 
@@ -851,9 +523,6 @@ function StepIndicator({ current }) {
                     ? tokens.colors.status.success 
                     : tokens.colors.text.muted,
                 whiteSpace: 'nowrap',
-                '@media (max-width: 480px)': {
-                  fontSize: '8px',
-                },
               }}>
                 {label}
               </span>
@@ -1004,13 +673,13 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
     return (
       <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
         <div style={{ fontSize: 36, marginBottom: tokens.spacing[4] }}>⚡</div>
-        <h3 style={styles.h3}>Crafting personalized pitches...</h3>
+        <h3 className="pw-h3">Crafting personalized pitches...</h3>
         <p style={{ color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[6] }}>
           {progress} of {investors.length} done
         </p>
         <div style={{ maxWidth: 240, margin: '0 auto' }}>
-          <div style={styles.progress}>
-            <div style={{ ...styles.progressFill, width: (investors.length ? (progress / investors.length) * 100 : 0) + "%" }} />
+          <div className="pw-progress">
+            <div className="pw-progress-fill" style={{ width: (investors.length ? (progress / investors.length) * 100 : 0) + "%" }} />
           </div>
         </div>
       </div>
@@ -1027,31 +696,16 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
         flexWrap: 'wrap',
         gap: tokens.spacing[2],
       }}>
-        <h2 style={styles.h2}>Review pitches</h2>
+        <h2 className="pw-h2">Review pitches</h2>
         <span style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>
           {selected.length}/{pitches.length} selected
         </span>
       </div>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: tokens.spacing[3],
-        marginBottom: tokens.spacing[4],
-        maxHeight: 400,
-        overflowY: 'auto',
-        paddingRight: tokens.spacing[3],
-      }}>
+      <div className="pw-scroll-pitches">
         {pitches.map((pitch, i) => (
-          <div key={i} style={{
+          <div key={i} className="pw-card" style={{
             border: `1px solid ${selected.includes(i) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
-            borderRadius: tokens.radius.md,
-            padding: tokens.spacing[4],
             background: selected.includes(i) ? tokens.colors.accent.glow : 'transparent',
-            width: '100%',
-            boxSizing: 'border-box',
-            '@media (max-width: 480px)': {
-              padding: tokens.spacing[3],
-            },
           }}>
             <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
               <input
@@ -1114,10 +768,6 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       background: tokens.colors.bg.elevated,
                       borderRadius: tokens.radius.sm,
                       padding: tokens.spacing[3],
-                      '@media (max-width: 480px)': {
-                        fontSize: '12px',
-                        padding: tokens.spacing[2],
-                      },
                     }}>
                       {pitch.body}
                     </div>
@@ -1131,16 +781,13 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
       <div style={{ 
         display: 'flex', 
         gap: tokens.spacing[3],
-        '@media (max-width: 768px)': {
-          flexDirection: 'column',
-        },
       }}>
-        <button onClick={onBack} style={styles.btnSecondary}>← Back</button>
+        <button onClick={onBack} className="pw-btn-secondary">← Back</button>
         <button
           onClick={() => onNext(pitches.filter((_, i) => selected.includes(i)))}
           disabled={selected.length === 0}
+          className="pw-btn-primary"
           style={{
-            ...styles.btnPrimary,
             flex: 1,
             justifyContent: 'center',
             opacity: selected.length > 0 ? 1 : 0.4,
@@ -1187,24 +834,24 @@ function SendStep({ pitches, onRestart }) {
     return (
       <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
         <div style={{ fontSize: 48, marginBottom: tokens.spacing[4] }}>🚀</div>
-        <h2 style={styles.h2}>{succeeded} pitch{succeeded !== 1 ? "es" : ""} sent!</h2>
-        <p style={{ ...styles.body, marginBottom: tokens.spacing[6] }}>Now sit back and let the replies come in.</p>
-        <button onClick={onRestart} style={styles.btnPrimary}>Start new campaign</button>
+        <h2 className="pw-h2">{succeeded} pitch{succeeded !== 1 ? "es" : ""} sent!</h2>
+        <p className="pw-body" style={{ marginBottom: tokens.spacing[6] }}>Now sit back and let the replies come in.</p>
+        <button onClick={onRestart} className="pw-btn-primary">Start new campaign</button>
       </div>
     );
   }
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-      <h2 style={styles.h2}>Ready to launch</h2>
-      <p style={styles.body}>Your name will appear as the sender.</p>
+      <h2 className="pw-h2">Ready to launch</h2>
+      <p className="pw-body">Your name will appear as the sender.</p>
       <div style={{ marginBottom: tokens.spacing[4] }}>
-        <label style={styles.label}>Your name</label>
+        <label className="pw-label">Your name</label>
         <input
           value={senderName}
           onChange={(e) => setSenderName(e.target.value)}
           placeholder="e.g. Samuel"
-          style={styles.input}
+          className="pw-input"
         />
       </div>
       <div style={{
@@ -1226,8 +873,8 @@ function SendStep({ pitches, onRestart }) {
       <button
         onClick={handleSend}
         disabled={sending || !senderName}
+        className="pw-btn-primary"
         style={{
-          ...styles.btnPrimary,
           width: '100%',
           justifyContent: 'center',
           opacity: (sending || !senderName) ? 0.4 : 1,
@@ -1575,13 +1222,13 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
     return (
       <div style={{ maxWidth: '100%', width: '100%', boxSizing: 'border-box' }}>
         <div style={{ marginBottom: tokens.spacing[4] }}>
-          <h2 style={styles.h2}>
+          <h2 className="pw-h2">
             {isAnalyzing || isLoadingMatches ? 
               (isAnalyzing ? "Analyzing your documents..." : "Searching for investors...") : 
               savedProfile ? "Welcome back!" : "Startup profile ready"
             }
           </h2>
-          <p style={styles.body}>
+          <p className="pw-body">
             {savedProfile ? "Your saved startup profile is ready. Review and select investors." : 
              isAnalyzing || isLoadingMatches ? "This will take a moment..." :
              "Review your profile and select the best investors to pitch to."
@@ -1594,12 +1241,12 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
             <div style={{ fontSize: 48, marginBottom: tokens.spacing[4] }}>
               {isLoadingMatches ? <Icons.Target size={48} color={tokens.colors.accent.primary} /> : <Icons.Sparkles size={48} color={tokens.colors.accent.primary} />}
             </div>
-            <p style={{ color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[6] }}>
+            <p className="pw-body" style={{ marginBottom: tokens.spacing[6] }}>
               {isLoadingMatches ? "Finding the best investors for your startup..." : "Analyzing your documents..."}
             </p>
             <div style={{ maxWidth: 240, margin: '0 auto' }}>
-              <div style={styles.progress}>
-                <div style={{ ...styles.progressFill, width: '60%', animation: 'pulse 1.5s infinite' }} />
+              <div className="pw-progress">
+                <div className="pw-progress-fill" style={{ width: '60%', animation: 'pulse 1.5s infinite' }} />
               </div>
               <style>{`
                 @keyframes pulse {
@@ -1611,7 +1258,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
           </div>
         ) : (
           <>
-            <div style={styles.card}>
+            <div className="pw-card">
               <div style={{ 
                 fontSize: '11px', 
                 fontWeight: 600, 
@@ -1622,7 +1269,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               }}>
                 Startup Profile
               </div>
-              <div style={styles.grid}>
+              <div className="pw-grid">
                 {[
                   ["Company", profile.companyName],
                   ["Sector", profile.sector],
@@ -1651,9 +1298,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                         fontSize: '14px',
                         color: tokens.colors.text.primary,
                         fontWeight: 500,
-                        '@media (max-width: 480px)': {
-                          fontSize: '13px',
-                        },
                       }}>
                         {v}
                       </div>
@@ -1669,19 +1313,19 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 { key: "ask", label: "Amount raising" },
               ].map(({ key, label, multiline }) => (
                 <div key={key} style={{ marginBottom: tokens.spacing[4] }}>
-                  <label style={styles.label}>{label}</label>
+                  <label className="pw-label">{label}</label>
                   {multiline ? (
                     <textarea
                       value={startup[key] || ""}
                       onChange={(e) => setStartup({ ...startup, [key]: e.target.value })}
                       rows={4}
-                      style={styles.textarea}
+                      className="pw-textarea"
                     />
                   ) : (
                     <input
                       value={startup[key] || ""}
                       onChange={(e) => setStartup({ ...startup, [key]: e.target.value })}
-                      style={styles.input}
+                      className="pw-input"
                     />
                   )}
                 </div>
@@ -1706,9 +1350,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     fontSize: '16px',
                     fontWeight: 600,
                     color: tokens.colors.text.primary,
-                    '@media (max-width: 480px)': {
-                      fontSize: '14px',
-                    },
                   }}>
                     Matched Investors
                   </span>
@@ -1716,9 +1357,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     fontSize: '13px',
                     color: tokens.colors.text.tertiary,
                     marginLeft: tokens.spacing[3],
-                    '@media (max-width: 480px)': {
-                      fontSize: '12px',
-                    },
                   }}>
                     {selectedIndices.length} selected
                   </span>
@@ -1726,7 +1364,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 <div style={{ display: 'flex', gap: tokens.spacing[2], flexWrap: 'wrap' }}>
                   <button
                     onClick={handleDiscoverInvestors}
-                    style={styles.btnPrimary}
+                    className="pw-btn-primary"
                   >
                     <Icons.Refresh size={14} />
                     Discover
@@ -1734,20 +1372,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 </div>
               </div>
 
-              <div style={{
-                background: tokens.colors.bg.elevated,
+              <div className="pw-dropzone" style={{
                 border: `2px dashed ${csvFile ? tokens.colors.accent.primary : tokens.colors.border.default}`,
-                borderRadius: tokens.radius.md,
-                padding: tokens.spacing[4],
+                background: tokens.colors.bg.elevated,
                 marginBottom: tokens.spacing[4],
-                transition: `all ${tokens.transitions.base}`,
-                cursor: 'pointer',
-                textAlign: 'center',
-                width: '100%',
-                boxSizing: 'border-box',
-                '@media (max-width: 480px)': {
-                  padding: tokens.spacing[3],
-                },
               }}
               onClick={() => document.getElementById('csv-upload-input').click()}
               onDragOver={(e) => {
@@ -1781,11 +1409,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 24,
-                    '@media (max-width: 480px)': {
-                      width: 40,
-                      height: 40,
-                      fontSize: 20,
-                    },
                   }}>
                     {csvFile ? '✅' : '📂'}
                   </div>
@@ -1793,18 +1416,12 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     fontSize: '14px', 
                     fontWeight: 600, 
                     color: tokens.colors.text.primary,
-                    '@media (max-width: 480px)': {
-                      fontSize: '13px',
-                    },
                   }}>
                     {csvFile ? csvFile.name : 'Upload your own investor CSV'}
                   </div>
                   <div style={{ 
                     fontSize: '12px', 
                     color: tokens.colors.text.muted,
-                    '@media (max-width: 480px)': {
-                      fontSize: '11px',
-                    },
                   }}>
                     {csvFile 
                       ? `${csvInvestors.length} investors loaded`
@@ -1813,13 +1430,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                   </div>
                   {csvFile && (
                     <div style={{ display: 'flex', gap: tokens.spacing[2], marginTop: tokens.spacing[2] }}>
-                      <span style={{
-                        fontSize: '11px',
-                        color: tokens.colors.accent.light,
-                        background: tokens.colors.accent.glow,
-                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-                        borderRadius: tokens.radius.full,
-                      }}>
+                      <span className="pw-tag-accent">
                         {csvInvestors.length} investors added
                       </span>
                     </div>
@@ -1846,10 +1457,6 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 transition: `all ${tokens.transitions.base}`,
                 width: '100%',
                 boxSizing: 'border-box',
-                '@media (max-width: 480px)': {
-                  padding: tokens.spacing[2],
-                  flexWrap: 'wrap',
-                },
               }}>
                 <input
                   type="checkbox"
@@ -1868,43 +1475,24 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     fontSize: '13px', 
                     fontWeight: 500, 
                     color: tokens.colors.text.primary,
-                    '@media (max-width: 480px)': {
-                      fontSize: '12px',
-                    },
                   }}>
                     Share with PitchWire's investor database
                   </div>
                   <div style={{ 
                     fontSize: '11px', 
                     color: tokens.colors.text.muted,
-                    '@media (max-width: 480px)': {
-                      fontSize: '10px',
-                    },
                   }}>
                     Help other founders find the right investors. Your investors will be anonymized.
                   </div>
                 </div>
                 {shareWithDatabase && (
-                  <div style={{
-                    fontSize: '11px',
-                    color: tokens.colors.accent.light,
-                    background: tokens.colors.accent.glow,
-                    padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-                    borderRadius: tokens.radius.full,
-                  }}>
+                  <div className="pw-tag-accent">
                     ✓ Shared
                   </div>
                 )}
               </div>
 
-              <div style={{
-                maxHeight: 320,
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: tokens.spacing[2],
-                paddingRight: tokens.spacing[2],
-              }}>
+              <div className="pw-scroll">
                 {matchedInvestors.length === 0 ? (
                   <div style={{
                     textAlign: 'center',
@@ -1919,157 +1507,119 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     <div
                       key={index}
                       onClick={() => toggleInvestor(index)}
+                      className="pw-card"
                       style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: tokens.spacing[3],
                         padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-                        borderRadius: tokens.radius.md,
                         border: `1px solid ${isSelected(index) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
                         background: isSelected(index) ? tokens.colors.accent.glow : 'transparent',
                         cursor: 'pointer',
-                        transition: `all ${tokens.transitions.fast}`,
-                        width: '100%',
-                        boxSizing: 'border-box',
-                        '@media (max-width: 480px)': {
-                          padding: tokens.spacing[2],
-                          gap: tokens.spacing[2],
-                        },
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={isSelected(index)}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          toggleInvestor(index);
-                        }}
-                        style={{
-                          marginTop: '2px',
-                          accentColor: tokens.colors.accent.primary,
-                          cursor: 'pointer',
-                          flexShrink: 0,
-                          width: 18,
-                          height: 18,
-                        }}
-                      />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          gap: tokens.spacing[2],
-                          flexWrap: 'wrap',
-                        }}>
-                          <div>
-                            <div style={{
-                              fontWeight: 600,
-                              color: tokens.colors.text.primary,
-                              fontSize: '14px',
-                              '@media (max-width: 480px)': {
-                                fontSize: '13px',
-                              },
-                            }}>
-                              {inv.name || inv.firm}
-                              {inv.source === 'discovered' && (
-                                <span style={{
-                                  fontSize: '10px',
-                                  color: tokens.colors.accent.light,
-                                  marginLeft: tokens.spacing[2],
-                                  background: tokens.colors.accent.glow,
-                                  padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-                                  borderRadius: tokens.radius.full,
-                                }}>
-                                  🎯
-                                </span>
-                              )}
-                              {inv.source === 'csv' && (
-                                <span style={{
-                                  fontSize: '10px',
-                                  color: tokens.colors.status.warning,
-                                  marginLeft: tokens.spacing[2],
-                                  background: 'rgba(251, 191, 36, 0.1)',
-                                  padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-                                  borderRadius: tokens.radius.full,
-                                }}>
-                                  📄 CSV
-                                </span>
-                              )}
-                            </div>
-                            <div style={{
-                              fontSize: '13px',
-                              color: tokens.colors.text.tertiary,
-                              '@media (max-width: 480px)': {
-                                fontSize: '12px',
-                              },
-                            }}>
-                              {inv.title ? `${inv.title}${inv.firm ? ` @ ${inv.firm}` : ''}` : inv.firm || ''}
-                            </div>
-                          </div>
-                          <div style={{
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            color: inv.score >= 90 
-                              ? tokens.colors.status.success 
-                              : inv.score >= 70 
-                                ? tokens.colors.accent.light 
-                                : tokens.colors.text.muted,
-                            background: inv.score >= 90 
-                              ? 'rgba(52, 211, 153, 0.1)'
-                              : inv.score >= 70 
-                                ? tokens.colors.accent.glow
-                                : 'transparent',
-                            padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-                            borderRadius: tokens.radius.full,
-                            whiteSpace: 'nowrap',
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: tokens.spacing[3] }}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected(index)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleInvestor(index);
+                          }}
+                          style={{
+                            marginTop: '2px',
+                            accentColor: tokens.colors.accent.primary,
+                            cursor: 'pointer',
                             flexShrink: 0,
-                            '@media (max-width: 480px)': {
-                              fontSize: '12px',
-                              padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-                            },
-                          }}>
-                            {inv.score || 0}%
-                          </div>
-                        </div>
-                        {inv.investment_focus && inv.investment_focus.length > 0 && (
+                            width: 18,
+                            height: 18,
+                          }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{
                             display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            gap: tokens.spacing[2],
                             flexWrap: 'wrap',
-                            gap: tokens.spacing[1],
-                            marginTop: tokens.spacing[1],
                           }}>
-                            {inv.investment_focus.slice(0, 3).map((tag, i) => (
-                              <span key={i} style={styles.tagAccent}>
-                                {tag}
-                              </span>
-                            ))}
+                            <div>
+                              <div style={{
+                                fontWeight: 600,
+                                color: tokens.colors.text.primary,
+                                fontSize: '14px',
+                              }}>
+                                {inv.name || inv.firm}
+                                {inv.source === 'discovered' && (
+                                  <span className="pw-tag-accent" style={{ fontSize: '10px', marginLeft: tokens.spacing[2] }}>
+                                    🎯
+                                  </span>
+                                )}
+                                {inv.source === 'csv' && (
+                                  <span className="pw-tag" style={{ fontSize: '10px', marginLeft: tokens.spacing[2], color: tokens.colors.status.warning, background: 'rgba(251, 191, 36, 0.1)' }}>
+                                    📄 CSV
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{
+                                fontSize: '13px',
+                                color: tokens.colors.text.tertiary,
+                              }}>
+                                {inv.title ? `${inv.title}${inv.firm ? ` @ ${inv.firm}` : ''}` : inv.firm || ''}
+                              </div>
+                            </div>
+                            <div style={{
+                              fontSize: '14px',
+                              fontWeight: 700,
+                              color: inv.score >= 90 
+                                ? tokens.colors.status.success 
+                                : inv.score >= 70 
+                                  ? tokens.colors.accent.light 
+                                  : tokens.colors.text.muted,
+                              background: inv.score >= 90 
+                                ? 'rgba(52, 211, 153, 0.1)'
+                                : inv.score >= 70 
+                                  ? tokens.colors.accent.glow
+                                  : 'transparent',
+                              padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+                              borderRadius: tokens.radius.full,
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0,
+                            }}>
+                              {inv.score || 0}%
+                            </div>
                           </div>
-                        )}
-                        {inv.matchReasons && (
-                          <div style={{
-                            fontSize: '12px',
-                            color: tokens.colors.accent.light,
-                            marginTop: tokens.spacing[1],
-                            opacity: 0.7,
-                            '@media (max-width: 480px)': {
-                              fontSize: '11px',
-                            },
-                          }}>
-                            {inv.matchReasons}
-                          </div>
-                        )}
-                        {inv.email && (
-                          <div style={{
-                            fontSize: '12px',
-                            color: tokens.colors.status.success,
-                            marginTop: tokens.spacing[1],
-                            '@media (max-width: 480px)': {
-                              fontSize: '11px',
-                            },
-                          }}>
-                            <Icons.Mail size={12} /> {inv.email}
-                          </div>
-                        )}
+                          {inv.investment_focus && inv.investment_focus.length > 0 && (
+                            <div style={{
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              gap: tokens.spacing[1],
+                              marginTop: tokens.spacing[1],
+                            }}>
+                              {inv.investment_focus.slice(0, 3).map((tag, i) => (
+                                <span key={i} className="pw-tag-accent">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {inv.matchReasons && (
+                            <div style={{
+                              fontSize: '12px',
+                              color: tokens.colors.accent.light,
+                              marginTop: tokens.spacing[1],
+                              opacity: 0.7,
+                            }}>
+                              {inv.matchReasons}
+                            </div>
+                          )}
+                          {inv.email && (
+                            <div style={{
+                              fontSize: '12px',
+                              color: tokens.colors.status.success,
+                              marginTop: tokens.spacing[1],
+                            }}>
+                              <Icons.Mail size={12} /> {inv.email}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
@@ -2083,41 +1633,28 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               marginTop: tokens.spacing[6],
               alignItems: 'center',
               width: '100%',
-              '@media (max-width: 768px)': {
-                flexDirection: 'column',
-                gap: tokens.spacing[3],
-              },
             }}>
               <button
                 onClick={() => setMode("upload")}
+                className="pw-btn-secondary"
                 style={{
-                  ...styles.btnSecondary,
                   whiteSpace: 'nowrap',
-                  '@media (max-width: 768px)': {
-                    width: '100%',
-                    justifyContent: 'center',
-                  },
                 }}
               >
                 <Icons.ArrowLeft size={16} />
                 Re-upload
               </button>
-              <div style={{ flex: 1, '@media (max-width: 768px)': { display: 'none' } }} />
+              <div style={{ flex: 1 }} />
               <button
                 onClick={() => onNext({ startup, selectedInvestors: getSelectedInvestors() })}
                 disabled={!valid}
+                className="pw-btn-primary"
                 style={{
-                  ...styles.btnPrimary,
                   padding: `${tokens.spacing[3]} ${tokens.spacing[8]}`,
                   justifyContent: 'center',
                   opacity: valid ? 1 : 0.4,
                   cursor: valid ? 'pointer' : 'not-allowed',
                   minWidth: '200px',
-                  '@media (max-width: 768px)': {
-                    width: '100%',
-                    minWidth: 'unset',
-                    padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-                  },
                 }}
               >
                 Generate Pitches
@@ -2133,10 +1670,10 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
   return (
     <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div style={{ marginBottom: tokens.spacing[4] }}>
-        <h2 style={styles.h2}>
+        <h2 className="pw-h2">
           {savedProfile ? "Update your documents" : "Upload your documents"}
         </h2>
-        <p style={styles.body}>
+        <p className="pw-body">
           {savedProfile 
             ? "Upload new documents to update your startup profile."
             : "Upload your pitch deck, whitepaper, or executive summary."}
@@ -2155,8 +1692,8 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
               country: savedProfile.country,
             });
           }}
+          className="pw-btn-primary"
           style={{
-            ...styles.btnPrimary,
             width: '100%',
             marginTop: tokens.spacing[3],
             justifyContent: 'center',
@@ -2169,8 +1706,8 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
 
       <button
         onClick={onBack}
+        className="pw-btn-ghost"
         style={{
-          ...styles.btnGhost,
           marginTop: tokens.spacing[3],
           width: '100%',
           justifyContent: 'center',
@@ -2218,29 +1755,29 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
   return (
     <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div style={{ marginBottom: tokens.spacing[6] }}>
-        <h1 style={styles.h1}>New Campaign</h1>
-        <p style={styles.body}>Upload your documents and we'll match you with the right investors.</p>
+        <h1 className="pw-h1">New Campaign</h1>
+        <p className="pw-body">Upload your documents and we'll match you with the right investors.</p>
       </div>
 
       {isAtLimit ? (
-        <div style={styles.card}>
+        <div className="pw-card">
           <div style={{ textAlign: "center", padding: tokens.spacing[8] }}>
             <div style={{ fontSize: 48, marginBottom: tokens.spacing[4] }}>🔒</div>
-            <h3 style={styles.h3}>
+            <h3 className="pw-h3">
               {plan === "starter" ? "You've hit your Starter limit." : "You've used all 10 free pitches."}
             </h3>
-            <p style={{ ...styles.body, marginBottom: tokens.spacing[6] }}>
+            <p className="pw-body" style={{ marginBottom: tokens.spacing[6] }}>
               {plan === "starter" 
                 ? "Upgrade to Pro and unlock 500 pitches/month."
                 : "Upgrade to keep sending. Starter gives you 100 pitches/month."}
             </p>
-            <a href="/upgrade" style={styles.btnPrimary}>
+            <a href="/upgrade" className="pw-btn-primary">
               Upgrade →
             </a>
           </div>
         </div>
       ) : (
-        <div style={styles.card}>
+        <div className="pw-card">
           <StepIndicator current={step} />
 
           {step === "describe" && (
@@ -2369,8 +1906,8 @@ function InvestorsTab({ plan, onStartCampaign }) {
   return (
     <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div style={{ marginBottom: tokens.spacing[6] }}>
-        <h1 style={styles.h1}>Investor Discovery</h1>
-        <p style={styles.body}>
+        <h1 className="pw-h1">Investor Discovery</h1>
+        <p className="pw-body">
           {investors.length} investors in database. 
           <span style={{ color: tokens.colors.status.warning, marginLeft: tokens.spacing[2] }}>
             ⚠️ {investors.filter(i => !i.email).length} need email verification
@@ -2379,13 +1916,13 @@ function InvestorsTab({ plan, onStartCampaign }) {
       </div>
 
       <div style={{ display: 'flex', gap: tokens.spacing[3], flexWrap: 'wrap', marginBottom: tokens.spacing[4] }}>
-        <button onClick={() => setShowAddForm(!showAddForm)} style={styles.btnPrimary}>
+        <button onClick={() => setShowAddForm(!showAddForm)} className="pw-btn-primary">
           + Add Investor
         </button>
       </div>
 
       {showAddForm && (
-        <div style={{ ...styles.card, marginBottom: tokens.spacing[4] }}>
+        <div className="pw-card" style={{ marginBottom: tokens.spacing[4] }}>
           <AddInvestorForm onClose={() => setShowAddForm(false)} onAdded={fetchInvestors} />
         </div>
       )}
@@ -2395,24 +1932,21 @@ function InvestorsTab({ plan, onStartCampaign }) {
         gap: tokens.spacing[3], 
         flexWrap: 'wrap', 
         marginBottom: tokens.spacing[4],
-        '@media (max-width: 480px)': {
-          gap: tokens.spacing[2],
-        },
       }}>
-        <select value={filters.sector} onChange={(e) => setFilters({ ...filters, sector: e.target.value })} style={{ ...styles.input, minWidth: '120px', flex: 1 }}>
+        <select value={filters.sector} onChange={(e) => setFilters({ ...filters, sector: e.target.value })} className="pw-input" style={{ minWidth: '120px', flex: 1 }}>
           <option value="">All sectors</option>
           {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} style={{ ...styles.input, minWidth: '120px', flex: 1 }}>
+        <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} className="pw-input" style={{ minWidth: '120px', flex: 1 }}>
           <option value="">All stages</option>
           {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={filters.region} onChange={(e) => setFilters({ ...filters, region: e.target.value })} style={{ ...styles.input, minWidth: '120px', flex: 1 }}>
+        <select value={filters.region} onChange={(e) => setFilters({ ...filters, region: e.target.value })} className="pw-input" style={{ minWidth: '120px', flex: 1 }}>
           <option value="">All regions</option>
           {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         {(filters.sector || filters.stage || filters.region) && (
-          <button onClick={() => setFilters({ sector: "", stage: "", region: "" })} style={styles.btnGhost}>
+          <button onClick={() => setFilters({ sector: "", stage: "", region: "" })} className="pw-btn-ghost">
             Clear filters ×
           </button>
         )}
@@ -2423,15 +1957,14 @@ function InvestorsTab({ plan, onStartCampaign }) {
       {loading ? (
         <div style={{ textAlign: 'center', padding: tokens.spacing[12], color: tokens.colors.text.muted }}>Loading investors...</div>
       ) : investors.length === 0 ? (
-        <div style={{ ...styles.card, textAlign: 'center', padding: tokens.spacing[12] }}>
+        <div className="pw-card" style={{ textAlign: 'center', padding: tokens.spacing[12] }}>
           <div style={{ fontSize: 40, marginBottom: tokens.spacing[4] }}>🔍</div>
-          <p style={styles.body}>No investors match these filters. Try widening your search.</p>
+          <p className="pw-body">No investors match these filters. Try widening your search.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[3], marginBottom: tokens.spacing[10] }}>
           {investors.map(inv => (
-            <div key={inv.id} style={{
-              ...styles.card,
+            <div key={inv.id} className="pw-card" style={{
               borderColor: selected.includes(inv.id) ? tokens.colors.accent.primary : tokens.colors.border.default,
               background: selected.includes(inv.id) ? tokens.colors.accent.glow : 'transparent',
             }}>
@@ -2439,9 +1972,6 @@ function InvestorsTab({ plan, onStartCampaign }) {
                 display: 'flex', 
                 gap: tokens.spacing[3], 
                 alignItems: 'flex-start',
-                '@media (max-width: 480px)': {
-                  gap: tokens.spacing[2],
-                },
               }}>
                 <input
                   type="checkbox"
@@ -2469,28 +1999,16 @@ function InvestorsTab({ plan, onStartCampaign }) {
                         fontSize: '16px', 
                         fontWeight: 700, 
                         color: tokens.colors.text.primary,
-                        '@media (max-width: 480px)': {
-                          fontSize: '14px',
-                        },
                       }}>{inv.firm}</div>
                       <div style={{ 
                         fontSize: '13px', 
                         color: tokens.colors.text.tertiary,
-                        '@media (max-width: 480px)': {
-                          fontSize: '12px',
-                        },
                       }}>{inv.hq}</div>
                     </div>
                     {!inv.email && (
-                      <span style={{
-                        fontSize: '10px',
-                        fontWeight: 600,
+                      <span className="pw-tag" style={{
                         color: tokens.colors.status.warning,
                         background: 'rgba(251, 191, 36, 0.1)',
-                        padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-                        borderRadius: tokens.radius.full,
-                        whiteSpace: 'nowrap',
-                        flexShrink: 0,
                       }}>
                         Need email
                       </span>
@@ -2501,16 +2019,13 @@ function InvestorsTab({ plan, onStartCampaign }) {
                     color: tokens.colors.text.secondary, 
                     lineHeight: 1.5, 
                     marginBottom: tokens.spacing[3],
-                    '@media (max-width: 480px)': {
-                      fontSize: '12px',
-                    },
                   }}>{inv.notes}</p>
                   <div style={{ display: 'flex', gap: tokens.spacing[1], flexWrap: 'wrap' }}>
                     {inv.sectors?.map((s, i) => (
-                      <span key={i} style={styles.tagAccent}>{s}</span>
+                      <span key={i} className="pw-tag-accent">{s}</span>
                     ))}
                     {inv.stages?.map((s, i) => (
-                      <span key={i} style={styles.tag}>{s}</span>
+                      <span key={i} className="pw-tag">{s}</span>
                     ))}
                   </div>
                 </div>
@@ -2521,45 +2036,15 @@ function InvestorsTab({ plan, onStartCampaign }) {
       )}
 
       {selected.length > 0 && (
-        <div style={{
-          position: 'fixed',
-          bottom: tokens.spacing[6],
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: tokens.colors.bg.surface,
-          border: `1px solid ${tokens.colors.accent.primary}`,
-          borderRadius: tokens.radius.lg,
-          padding: `${tokens.spacing[4]} ${tokens.spacing[6]}`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: tokens.spacing[4],
-          boxShadow: tokens.shadows.xl,
-          zIndex: 100,
-          '@media (max-width: 768px)': {
-            padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-            gap: tokens.spacing[3],
-            bottom: tokens.spacing[4],
-            width: '90%',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-          },
-          '@media (max-width: 480px)': {
-            padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-            gap: tokens.spacing[2],
-            width: '95%',
-          },
-        }}>
+        <div className="pw-floating-bar">
           <span style={{ 
             fontSize: '14px', 
             color: tokens.colors.text.primary, 
             fontWeight: 600,
-            '@media (max-width: 480px)': {
-              fontSize: '12px',
-            },
           }}>
             {selected.length} investor{selected.length !== 1 ? "s" : ""} selected
           </span>
-          <button onClick={handleStartCampaign} style={styles.btnPrimary}>
+          <button onClick={handleStartCampaign} className="pw-btn-primary">
             Start Campaign →
           </button>
           <button onClick={() => setSelected([])} style={{
@@ -2616,48 +2101,47 @@ function AddInvestorForm({ onClose, onAdded }) {
     setSubmitting(false);
   };
 
-  const inputStyle = styles.input;
+  const inputStyle = styles.input || {
+    width: '100%',
+    background: '#0f1625',
+    border: '1px solid #1e2a3a',
+    borderRadius: '10px',
+    padding: '12px 16px',
+    color: '#e8eaed',
+    fontSize: '14px',
+    outline: 'none',
+    transition: 'all 150ms ease',
+    boxSizing: 'border-box',
+    minHeight: '44px',
+  };
 
   return (
     <div>
-      <h3 style={{ ...styles.h3, marginBottom: tokens.spacing[4] }}>Add an investor to the database</h3>
+      <h3 className="pw-h3" style={{ marginBottom: tokens.spacing[4] }}>Add an investor to the database</h3>
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '1fr 1fr', 
         gap: tokens.spacing[3],
-        '@media (max-width: 480px)': {
-          gridTemplateColumns: '1fr',
-          gap: tokens.spacing[2],
-        },
       }}>
-        <input placeholder="Firm name *" value={form.firm} onChange={(e) => setForm({ ...form, firm: e.target.value })} style={inputStyle} />
-        <input placeholder="Contact name" value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} style={inputStyle} />
-        <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={inputStyle} />
-        <input placeholder="HQ location" value={form.hq} onChange={(e) => setForm({ ...form, hq: e.target.value })} style={inputStyle} />
-        <input placeholder="Sectors (comma separated)" value={form.sectors} onChange={(e) => setForm({ ...form, sectors: e.target.value })} style={inputStyle} />
-        <input placeholder="Stages (comma separated)" value={form.stages} onChange={(e) => setForm({ ...form, stages: e.target.value })} style={inputStyle} />
-        <input placeholder="Region" value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} style={{ ...inputStyle, gridColumn: "1 / -1" }} />
+        <input placeholder="Firm name *" value={form.firm} onChange={(e) => setForm({ ...form, firm: e.target.value })} className="pw-input" />
+        <input placeholder="Contact name" value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} className="pw-input" />
+        <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="pw-input" />
+        <input placeholder="HQ location" value={form.hq} onChange={(e) => setForm({ ...form, hq: e.target.value })} className="pw-input" />
+        <input placeholder="Sectors (comma separated)" value={form.sectors} onChange={(e) => setForm({ ...form, sectors: e.target.value })} className="pw-input" />
+        <input placeholder="Stages (comma separated)" value={form.stages} onChange={(e) => setForm({ ...form, stages: e.target.value })} className="pw-input" />
+        <input placeholder="Region" value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} className="pw-input" style={{ gridColumn: "1 / -1" }} />
       </div>
-      <textarea placeholder="Notes (what do they look for?)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} style={{ ...inputStyle, width: '100%', resize: 'vertical', marginTop: tokens.spacing[3], boxSizing: 'border-box' }} />
+      <textarea placeholder="Notes (what do they look for?)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="pw-textarea" style={{ marginTop: tokens.spacing[3] }} />
       {error && <p style={{ color: tokens.colors.status.error, fontSize: '13px', marginTop: tokens.spacing[3] }}>⚠ {error}</p>}
       <div style={{ 
         display: 'flex', 
         gap: tokens.spacing[3], 
         marginTop: tokens.spacing[4],
-        '@media (max-width: 480px)': {
-          flexDirection: 'column',
-          gap: tokens.spacing[2],
-        },
       }}>
-        <button onClick={onClose} style={styles.btnSecondary}>Cancel</button>
-        <button onClick={handleSubmit} disabled={submitting} style={{ 
-          ...styles.btnPrimary, 
+        <button onClick={onClose} className="pw-btn-secondary">Cancel</button>
+        <button onClick={handleSubmit} disabled={submitting} className="pw-btn-primary" style={{ 
           opacity: submitting ? 0.4 : 1, 
           cursor: submitting ? 'not-allowed' : 'pointer',
-          '@media (max-width: 480px)': {
-            width: '100%',
-            justifyContent: 'center',
-          },
         }}>
           {submitting ? "Adding..." : "Add Investor"}
         </button>
@@ -2753,21 +2237,11 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
+      <GlobalStyles />
       <div style={styles.page}>
         {/* Mobile Header */}
-        <div style={{
+        <div className="pw-mobile-header" style={{
           display: 'none',
-          '@media (max-width: 768px)': {
-            display: 'flex',
-          },
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: tokens.spacing[4],
-          borderBottom: `1px solid ${tokens.colors.border.default}`,
-          background: tokens.colors.bg.base,
-          position: 'sticky',
-          top: 0,
-          zIndex: 40,
         }}>
           <button
             onClick={() => setMobileOpen(true)}
@@ -2825,19 +2299,12 @@ export default function App() {
           setMobileOpen={setMobileOpen}
         />
 
-        <main style={{
+        <main className="pw-main-content" style={{
           marginLeft: '240px',
           flex: 1,
           padding: tokens.spacing[8],
           overflowY: 'auto',
           minHeight: '100vh',
-          '@media (max-width: 768px)': {
-            marginLeft: 0,
-            padding: tokens.spacing[4],
-          },
-          '@media (max-width: 480px)': {
-            padding: tokens.spacing[3],
-          },
         }}>
           <div style={styles.main}>
             {activeTab === "campaign" && (
