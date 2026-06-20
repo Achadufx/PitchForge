@@ -18,8 +18,9 @@ export default async function handler(req, res) {
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: userEmail,
       metadata: { userId, plan },
-    success_url: req.headers.origin + "/success?plan=" + plan,
-cancel_url: req.headers.origin + "/app",
+      client_reference_id: userId,
+      success_url: req.headers.origin + "/success?plan=" + plan,
+      cancel_url: req.headers.origin + "/app",
     });
 
     res.json({ url: session.url });
