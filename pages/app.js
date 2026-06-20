@@ -2228,10 +2228,14 @@ export default function App() {
           return;
         }
         setUser(session.user);
-        const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
-        const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
-        setPitchCount(count);
-        setPlan(savedPlan);
+
+// Save that user has completed onboarding
+localStorage.setItem('pitchwire_onboarded', 'true');
+
+const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
+const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
+setPitchCount(count);
+setPlan(savedPlan);
 
         try {
           const { data, error } = await supabase
