@@ -108,10 +108,10 @@ export default function Onboarding() {
   const [checking, setChecking] = useState(true);
 
 useEffect(() => {
-  checkUser();
+  initOnboarding();
 }, []);
 
-const checkUser = async () => {
+const initOnboarding = async () => {
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session) { 
@@ -119,20 +119,36 @@ const checkUser = async () => {
     return; 
   }
 
-  // Check database if user already onboarded
-action: async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    await supabase.from('user_plans').upsert({
-      user_id: session.user.id,
-      plan: 'free',
-      onboarded: true
-    });
+  try {
+    // Check if user exists in user_plans
+    const { data, error } = await supabase
+      .from('user_plans')
+      .select('onboarded')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error checking user:", error);
+      // If table doesn't exist yet, just show onboarding
+      setUser(session.user);
+      setChecking(false);
+      return;
+    }
+
+    if (data?.onboarded) {
+      // Already onboarded - go to app
+      router.push("/app");
+      return;
+    }
+
+    // New user - show onboarding
+    setUser(session.user);
+    setChecking(false);
+  } catch (err) {
+    console.error("Error:", err);
+    setUser(session.user);
+    setChecking(false);
   }
-  router.push("/app");
-},
-  setUser(session.user);
-  setChecking(false);
 };
 
   const handleFreeStart = async () => {
