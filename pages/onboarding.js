@@ -108,10 +108,10 @@ export default function Onboarding() {
   const [checking, setChecking] = useState(true);
 
 useEffect(() => {
-  checkSession();
+  checkUser();
 }, []);
 
-const checkSession = async () => {
+const checkUser = async () => {
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session) { 
@@ -119,18 +119,18 @@ const checkSession = async () => {
     return; 
   }
 
-  // Check if user was created more than 1 minute ago (returning user)
-  const createdAt = new Date(session.user.created_at).getTime();
-  const now = Date.now();
-  const isNewUser = (now - createdAt) < 60000; // Created less than 1 minute ago
-
-  if (!isNewUser) {
-    // Returning user - skip onboarding
-    router.push("/app");
-    return;
+  // Check database if user already onboarded
+action: async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    await supabase.from('user_plans').upsert({
+      user_id: session.user.id,
+      plan: 'free',
+      onboarded: true
+    });
   }
-
-  // New user - show onboarding
+  router.push("/app");
+},
   setUser(session.user);
   setChecking(false);
 };
