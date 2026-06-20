@@ -107,59 +107,51 @@ export default function Onboarding() {
   const [loading, setLoading] = useState({});
   const [checking, setChecking] = useState(true);
 
-useEffect(() => {
-  initOnboarding();
-}, []);
+  useEffect(() => {
+    initOnboarding();
+  }, []);
 
-const initOnboarding = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session) { 
-    router.push("/login"); 
-    return; 
-  }
+  const initOnboarding = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) { 
+      router.push("/login"); 
+      return; 
+    }
 
-  try {
-    // Check if user exists in user_plans
-    const { data, error } = await supabase
-      .from('user_plans')
-      .select('onboarded')
-      .eq('user_id', session.user.id)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('user_plans')
+        .select('onboarded')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Error checking user:", error);
-      // If table doesn't exist yet, just show onboarding
+      if (data?.onboarded) {
+        router.push("/app");
+        return;
+      }
+
       setUser(session.user);
       setChecking(false);
-      return;
+    } catch (err) {
+      console.error("Error checking user:", err);
+      setUser(session.user);
+      setChecking(false);
     }
-
-    if (data?.onboarded) {
-      // Already onboarded - go to app
-      router.push("/app");
-      return;
-    }
-
-    // New user - show onboarding
-    setUser(session.user);
-    setChecking(false);
-  } catch (err) {
-    console.error("Error:", err);
-    setUser(session.user);
-    setChecking(false);
-  }
-};
+  };
 
   const handleFreeStart = async () => {
-    // Save free plan to profiles before redirecting
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      await supabase.from('profiles').upsert({
-        id: session.user.id,
-        plan: 'free',
-        email: session.user.email,
-      });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.from('user_plans').upsert({
+          user_id: session.user.id,
+          plan: 'free',
+          onboarded: true
+        });
+      }
+    } catch (err) {
+      console.error("Save failed:", err);
     }
     router.push("/app");
   };
@@ -263,20 +255,9 @@ const initOnboarding = async () => {
       </Head>
 
       <style>{`
-        /* Reset */
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #070b14; margin: 0; padding: 0; }
 
-        body {
-          background: #070b14;
-          margin: 0;
-          padding: 0;
-        }
-
-        /* Onboarding Container */
         .onboarding-page {
           min-height: 100vh;
           background: #070b14;
@@ -286,19 +267,15 @@ const initOnboarding = async () => {
           overflow: hidden;
         }
 
-        /* Background Glow */
         .onboarding-glow {
           position: absolute;
-          top: 0;
-          left: 50%;
+          top: 0; left: 50%;
           transform: translateX(-50%);
-          width: 700px;
-          height: 400px;
+          width: 700px; height: 400px;
           background: radial-gradient(ellipse, rgba(20,184,166,0.12) 0%, transparent 70%);
           pointer-events: none;
         }
 
-        /* Nav */
         .onboarding-nav {
           max-width: 1060px;
           margin: 0 auto 32px;
@@ -316,16 +293,14 @@ const initOnboarding = async () => {
         }
 
         .onboarding-logo-icon {
-          width: 32px;
-          height: 32px;
+          width: 32px; height: 32px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
         .onboarding-logo-icon img {
-          width: 32px;
-          height: 32px;
+          width: 32px; height: 32px;
           object-fit: contain;
         }
 
@@ -341,7 +316,6 @@ const initOnboarding = async () => {
           color: #4a5166;
         }
 
-        /* Header */
         .onboarding-header {
           text-align: center;
           margin-bottom: 48px;
@@ -373,7 +347,6 @@ const initOnboarding = async () => {
           line-height: 1.6;
         }
 
-        /* Plans Grid */
         .onboarding-plans {
           max-width: 1060px;
           margin: 0 auto;
@@ -384,7 +357,6 @@ const initOnboarding = async () => {
           z-index: 1;
         }
 
-        /* Plan Card */
         .onboarding-plan {
           background: #0c1120;
           border: 1px solid #1e2a3a;
@@ -406,8 +378,7 @@ const initOnboarding = async () => {
 
         .onboarding-plan-badge {
           position: absolute;
-          top: 0;
-          left: 50%;
+          top: 0; left: 50%;
           transform: translateX(-50%);
           background: #14b8a6;
           color: #ffffff;
@@ -522,75 +493,32 @@ const initOnboarding = async () => {
           z-index: 1;
         }
 
-        /* MOBILE RESPONSIVE */
         @media (max-width: 768px) {
-          .onboarding-page {
-            padding: 16px 12px;
-          }
-
-          .onboarding-plans {
-            grid-template-columns: 1fr;
-            gap: 20px;
-          }
-
-          .onboarding-plan {
-            padding: 24px 20px;
-          }
-
-          .onboarding-plan-features li {
-            font-size: 13px;
-          }
-
-          .onboarding-plan-btn {
-            font-size: 14px;
-          }
-
-          .onboarding-title {
-            font-size: 28px;
-          }
-
-          .onboarding-subtitle {
-            font-size: 14px;
-          }
-
-          .onboarding-nav {
-            flex-direction: column;
-            gap: 8px;
-            align-items: flex-start;
-          }
-
-          .onboarding-user-email {
-            font-size: 12px;
-          }
-
-          .onboarding-logo-icon {
-            width: 28px;
-            height: 28px;
-          }
-
-          .onboarding-logo-icon img {
-            width: 28px;
-            height: 28px;
-          }
+          .onboarding-page { padding: 16px 12px; }
+          .onboarding-plans { grid-template-columns: 1fr; gap: 20px; }
+          .onboarding-plan { padding: 24px 20px; }
+          .onboarding-plan-features li { font-size: 13px; }
+          .onboarding-plan-btn { font-size: 14px; }
+          .onboarding-title { font-size: 28px; }
+          .onboarding-subtitle { font-size: 14px; }
+          .onboarding-nav { flex-direction: column; gap: 8px; align-items: flex-start; }
+          .onboarding-user-email { font-size: 12px; }
+          .onboarding-logo-icon { width: 28px; height: 28px; }
+          .onboarding-logo-icon img { width: 28px; height: 28px; }
         }
 
         @media (min-width: 769px) and (max-width: 1024px) {
-          .onboarding-plans {
-            grid-template-columns: 1fr 1fr;
-          }
+          .onboarding-plans { grid-template-columns: 1fr 1fr; }
         }
 
         @media (min-width: 1025px) {
-          .onboarding-plans {
-            grid-template-columns: repeat(3, 1fr);
-          }
+          .onboarding-plans { grid-template-columns: repeat(3, 1fr); }
         }
       `}</style>
 
       <div className="onboarding-page">
         <div className="onboarding-glow" />
 
-        {/* Nav */}
         <div className="onboarding-nav">
           <div className="onboarding-logo">
             <div className="onboarding-logo-icon">
@@ -603,7 +531,6 @@ const initOnboarding = async () => {
           )}
         </div>
 
-        {/* Header */}
         <div className="onboarding-header">
           <div className="onboarding-welcome">
             {user?.user_metadata?.full_name
@@ -618,7 +545,6 @@ const initOnboarding = async () => {
           </p>
         </div>
 
-        {/* Plans */}
         <div className="onboarding-plans">
           {plans.map((plan) => (
             <div
