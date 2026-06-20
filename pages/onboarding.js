@@ -108,25 +108,32 @@ export default function Onboarding() {
   const [checking, setChecking] = useState(true);
 
 useEffect(() => {
-  supabase.auth.getSession().then(async ({ data: { session } }) => {
-    if (!session) { 
-      router.push("/login"); 
-      return; 
-    }
-    
-    // Check user_metadata for existing plan
-    const existingPlan = session.user.user_metadata?.plan;
-    
-    if (existingPlan) {
-      // User already has a plan, skip onboarding
-      router.push("/app");
-      return;
-    }
-    
-    setUser(session.user);
-    setChecking(false);
-  });
+  checkSession();
 }, []);
+
+const checkSession = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) { 
+    router.push("/login"); 
+    return; 
+  }
+
+  // Check if user was created more than 1 minute ago (returning user)
+  const createdAt = new Date(session.user.created_at).getTime();
+  const now = Date.now();
+  const isNewUser = (now - createdAt) < 60000; // Created less than 1 minute ago
+
+  if (!isNewUser) {
+    // Returning user - skip onboarding
+    router.push("/app");
+    return;
+  }
+
+  // New user - show onboarding
+  setUser(session.user);
+  setChecking(false);
+};
 
   const handleFreeStart = async () => {
     // Save free plan to profiles before redirecting
