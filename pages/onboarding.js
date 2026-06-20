@@ -108,12 +108,47 @@ export default function Onboarding() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { router.push("/login"); return; }
-      setUser(session.user);
-      setChecking(false);
-    });
+    checkUser();
   }, []);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) { 
+      router.push("/login"); 
+      return; 
+    }
+
+    // Check if user already has a plan (already onboarded)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile?.plan) {
+      // User already onboarded, skip to app
+      router.push("/app");
+      return;
+    }
+
+    // New user, show onboarding
+    setUser(session.user);
+    setChecking(false);
+  };
+
+  const handleFreeStart = async () => {
+    // Save free plan to profiles before redirecting
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      await supabase.from('profiles').upsert({
+        id: session.user.id,
+        plan: 'free',
+        email: session.user.email,
+      });
+    }
+    router.push("/app");
+  };
 
   const handleCheckout = async (plan) => {
     setLoading(prev => ({ ...prev, [plan]: true }));
@@ -160,7 +195,7 @@ export default function Onboarding() {
         "Basic campaign tracking"
       ],
       cta: "Start for free",
-      action: () => router.push("/app"),
+      action: handleFreeStart,
     },
     {
       key: "starter",
