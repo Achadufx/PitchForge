@@ -31,16 +31,31 @@ export default async function handler(req, res) {
       
       console.log(`✅ Checkout completed for user ${userId}, plan: ${plan}`);
       
-      // Update user's plan in Supabase
-      const { error } = await supabase
+      // Update user's plan in Supabase users table
+      const { error: userError } = await supabase
         .from('users')
         .update({ plan: plan })
         .eq('id', userId);
       
-      if (error) {
-        console.error('Failed to update user plan:', error);
+      if (userError) {
+        console.error('Failed to update user plan:', userError);
       } else {
         console.log(`✅ User ${userId} upgraded to ${plan}`);
+      }
+
+      // Also update user_plans table (onboarding flag)
+      const { error: planError } = await supabase
+        .from('user_plans')
+        .upsert({
+          user_id: userId,
+          plan: plan,
+          onboarded: true
+        });
+
+      if (planError) {
+        console.error('Failed to update user_plans:', planError);
+      } else {
+        console.log(`✅ User ${userId} marked as onboarded with ${plan}`);
       }
       break;
       
