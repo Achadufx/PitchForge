@@ -115,14 +115,20 @@ export default function Login() {
 
 const handleGoogle = async () => {
   setLoading(true);
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  
+  // Check if user exists before redirecting
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  // If they already have a session, they're returning
+  if (session) {
+    router.push("/app");
+    return;
+  }
+  
+  await supabase.auth.signInWithOAuth({
     provider: "google",
     options: { 
-      redirectTo: window.location.origin + "/onboarding",
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      }
+      redirectTo: window.location.origin + "/onboarding"
     }
   });
 };
