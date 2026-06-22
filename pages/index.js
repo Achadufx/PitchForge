@@ -1137,64 +1137,6 @@ export default function PitchWireLanding() {
         }
         .pm-btn-regen:hover { color: var(--text); }
 
-        /* ORIGIN */
-        .origin-section {
-          padding: 40px 16px;
-          text-align: center;
-          border-top: 1px solid var(--border);
-          border-bottom: 1px solid var(--border);
-          position: relative;
-          overflow: hidden;
-        }
-        
-        @media (min-width: 641px) {
-          .origin-section {
-            padding: 60px 24px;
-          }
-        }
-        
-        .origin-section::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(ellipse 50% 100% at 50% 50%, rgba(20,184,166,0.04) 0%, transparent 70%);
-          pointer-events: none;
-        }
-        
-        .origin-eyebrow {
-          font-size: 10px;
-          font-weight: 700;
-          color: var(--text3);
-          text-transform: uppercase;
-          letter-spacing: 2px;
-          margin-bottom: 16px;
-        }
-        
-        @media (min-width: 641px) {
-          .origin-eyebrow {
-            font-size: 11px;
-            margin-bottom: 20px;
-          }
-        }
-        
-        .origin-text {
-          max-width: 680px;
-          margin: 0 auto;
-          font-size: 15px;
-          color: var(--text2);
-          line-height: 1.8;
-          font-weight: 400;
-          padding: 0 4px;
-        }
-        
-        @media (min-width: 641px) {
-          .origin-text {
-            font-size: 17px;
-          }
-        }
-        
-        .origin-text strong { color: var(--text); font-weight: 600; }
-
         /* FEATURES */
         .features-section {
           padding: 80px 16px;
@@ -2338,14 +2280,6 @@ export default function PitchWireLanding() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* ORIGIN */}
-      <section className="origin-section">
-        <div className="origin-eyebrow">Why PitchWire exists</div>
-        <p className="origin-text reveal">
-          I'm a medical student and co-founder of <strong>ForcepX</strong> — a platform that gives patients secure, verifiable ownership of their own medical records, starting in Africa and expanding globally. When it came time to raise, I spent weeks researching investors, writing emails one by one, and hearing nothing back. So I built the tool I wished existed. Then I realized <strong>every founder has the same problem.</strong>
-        </p>
       </section>
 
       {/* FEATURES */}
