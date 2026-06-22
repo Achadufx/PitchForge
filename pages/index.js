@@ -1137,6 +1137,64 @@ export default function PitchWireLanding() {
         }
         .pm-btn-regen:hover { color: var(--text); }
 
+        /* ORIGIN */
+        .origin-section {
+          padding: 40px 16px;
+          text-align: center;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        @media (min-width: 641px) {
+          .origin-section {
+            padding: 60px 24px;
+          }
+        }
+        
+        .origin-section::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse 50% 100% at 50% 50%, rgba(20,184,166,0.04) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        
+        .origin-eyebrow {
+          font-size: 10px;
+          font-weight: 700;
+          color: var(--text3);
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          margin-bottom: 16px;
+        }
+        
+        @media (min-width: 641px) {
+          .origin-eyebrow {
+            font-size: 11px;
+            margin-bottom: 20px;
+          }
+        }
+        
+        .origin-text {
+          max-width: 680px;
+          margin: 0 auto;
+          font-size: 15px;
+          color: var(--text2);
+          line-height: 1.8;
+          font-weight: 400;
+          padding: 0 4px;
+        }
+        
+        @media (min-width: 641px) {
+          .origin-text {
+            font-size: 17px;
+          }
+        }
+        
+        .origin-text strong { color: var(--text); font-weight: 600; }
+
         /* FEATURES */
         .features-section {
           padding: 80px 16px;
@@ -1584,138 +1642,6 @@ export default function PitchWireLanding() {
         }
         
         .comp-body strong { color: var(--text); font-weight: 600; }
-
-        /* FOUNDER STORY */
-        .story-section {
-          padding: 80px 16px;
-          position: relative;
-          overflow: hidden;
-        }
-        
-        @media (min-width: 641px) {
-          .story-section {
-            padding: 140px 24px;
-          }
-        }
-        
-        .story-inner {
-          max-width: 800px;
-          margin: 0 auto;
-          text-align: center;
-          position: relative;
-          z-index: 1;
-        }
-        
-        .story-card {
-          background: var(--surface2);
-          border: 1px solid rgba(20,184,166,0.15);
-          border-radius: 16px;
-          padding: 28px 20px;
-          margin-top: 36px;
-          text-align: left;
-          position: relative;
-          overflow: hidden;
-          box-shadow: 0 0 80px rgba(20,184,166,0.04);
-        }
-        
-        @media (min-width: 641px) {
-          .story-card {
-            border-radius: 20px;
-            padding: 52px 48px;
-            margin-top: 52px;
-          }
-        }
-        
-        .story-card::before {
-          content: '"';
-          position: absolute;
-          top: -30px;
-          left: 20px;
-          font-size: 120px;
-          font-weight: 900;
-          color: rgba(20,184,166,0.06);
-          line-height: 1;
-          font-family: Georgia, serif;
-          pointer-events: none;
-        }
-        
-        @media (min-width: 641px) {
-          .story-card::before {
-            top: -20px;
-            left: 40px;
-            font-size: 200px;
-          }
-        }
-        
-        .story-text {
-          font-size: 15px;
-          color: rgba(255,255,255,0.8);
-          line-height: 1.85;
-          margin-bottom: 28px;
-          position: relative;
-          z-index: 1;
-        }
-        
-        @media (min-width: 641px) {
-          .story-text {
-            font-size: 18px;
-            margin-bottom: 40px;
-          }
-        }
-        
-        .story-text strong { color: var(--text); font-weight: 700; }
-        
-        .story-author {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding-top: 24px;
-          border-top: 1px solid var(--border);
-          position: relative;
-          z-index: 1;
-        }
-        
-        @media (min-width: 641px) {
-          .story-author {
-            gap: 14px;
-            padding-top: 32px;
-          }
-        }
-        
-        .story-avatar {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--teal), #0d9488);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 16px;
-          font-weight: 900;
-          color: white;
-          flex-shrink: 0;
-          box-shadow: 0 0 0 3px rgba(20,184,166,0.2);
-        }
-        
-        @media (min-width: 641px) {
-          .story-avatar {
-            width: 52px;
-            height: 52px;
-            font-size: 18px;
-          }
-        }
-        
-        .story-author-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-        
-        @media (min-width: 641px) {
-          .story-author-name { font-size: 15px; }
-        }
-        
-        .story-author-role { font-size: 12px; color: var(--text3); line-height: 1.4; }
-        
-        @media (min-width: 641px) {
-          .story-author-role { font-size: 13px; }
-        }
 
         /* PRICING */
         .pricing-section {
@@ -2282,6 +2208,14 @@ export default function PitchWireLanding() {
         </div>
       </section>
 
+      {/* ORIGIN */}
+      <section className="origin-section">
+        <div className="origin-eyebrow">Why PitchWire exists</div>
+        <p className="origin-text reveal">
+          I'm a medical student and co-founder of <strong>ForcepX</strong> — a platform that gives patients secure, verifiable ownership of their own medical records, starting in Africa and expanding globally. When it came time to raise, I spent weeks researching investors, writing emails one by one, and hearing nothing back. So I built the tool I wished existed. Then I realized <strong>every founder has the same problem.</strong>
+        </p>
+      </section>
+
       {/* FEATURES */}
       <section className="features-section" id="features">
         <div className="section-header reveal">
@@ -2387,31 +2321,6 @@ export default function PitchWireLanding() {
               <strong>Sequoia's bet on health data portability is well documented.</strong> The same crisis is 10x worse in markets where patients have no rights at all — and nobody has built the infrastructure layer.<br /><br />
               A patient in Accra carries her child's entire medical history in her head because no hospital will share the file. This isn't a developing world problem. It's a global infrastructure failure.<br /><br />
               We built the fix. Working MVP. Live portals. <strong>15 minutes this week?</strong>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOUNDER STORY */}
-      <section className="story-section">
-        <div className="story-inner">
-          <div className="reveal">
-            <div className="eyebrow" style={{ justifyContent: 'center' }}>The origin</div>
-            <div className="section-title" style={{ textAlign: 'center' }}>Built by a founder,<br /><em>for founders.</em></div>
-          </div>
-          <div className="story-card reveal">
-            <div className="story-text">
-              "I'm a medical student and the CTO of <strong>ForcepX</strong> — a platform that gives patients secure, verifiable control over their own medical records. No hospital, insurer, or third party can access or share their data without explicit, real-time consent. We're building the infrastructure that makes true patient ownership possible — every access request logged in a permanent, tamper-proof audit trail, so patients always know who saw their records, when, and why. Starting in Africa, expanding globally, because this problem exists everywhere.<br /><br />
-              When we started fundraising, I did what every founder does: spent hours on Crunchbase, wrote personalised emails one by one, second-guessed every subject line, and heard nothing back.<br /><br />
-              So I built the tool I wished existed. PitchWire reads your deck, finds the right investors, and writes pitches that sound like you spent two hours researching each person. Because it did.<br /><br />
-              If you're raising right now — <strong>this is the tool I wish I had.</strong>"
-            </div>
-            <div className="story-author">
-              <div className="story-avatar">S</div>
-              <div>
-                <div className="story-author-name">Samuel</div>
-                <div className="story-author-role">Co-founder &amp; CTO, ForcepX<br />Creator of PitchWire</div>
-              </div>
             </div>
           </div>
         </div>
