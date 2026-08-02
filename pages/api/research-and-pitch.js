@@ -73,7 +73,7 @@ export default async function handler(req, res) {
   // Step 2: Score using fresh research
   var scoring = scoreInvestor(research, startupProfile);
 
-  // Step 3: Generate pitch using same research object — no second API call
+  // Step 3: Generate pitch using same research object
   console.log('Step 2: Generating pitch for', investorName);
   var pitch = await generatePitch(investorName, firm, startupName, description, ask, research);
 
