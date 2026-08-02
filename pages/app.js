@@ -540,63 +540,62 @@ function StepIndicator({ current }) {
 // ============================================================
 
 async function generateSingle(inv, startup) {
-  console.log(`📧 Generating pitch for: ${inv.name}`);
-  
+  console.log('Generating pitch for: ' + inv.name);
+
   try {
-    const res = await fetch(API_URL + "/api/generate-pitch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    var res = await fetch('/api/research-and-pitch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         investorName: inv.name,
-        firm: inv.firm || "",
+        firm: inv.firm || '',
         startupName: startup.name,
         description: startup.description,
         ask: startup.ask,
-      }),
+        startupProfile: {
+          sector: startup.sector || '',
+          stage: startup.stage || '',
+          geography: startup.geography || ['Global'],
+        }
+      })
     });
-    
-    const responseText = await res.text();
-    console.log(`📝 Response for ${inv.name}:`, responseText.substring(0, 200));
-    
-    let data;
+
+    var responseText = await res.text();
+    var data;
     try {
       data = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error(`❌ Failed to parse JSON for ${inv.name}:`, parseError.message);
+    } catch (e) {
+      console.error('JSON parse error for ' + inv.name + ':', e.message);
       return {
-        subject: `We're fixing what investors know is broken`,
-        body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem. ${startup.description}\n\nWe're raising ${startup.ask} to scale our solution.\n\nWould love 15 minutes to show you what we're building.\n\nBest,\nFounder, ${startup.name}`
+        subject: 'Investment opportunity: ' + startup.name,
+        body: 'Hi ' + inv.name + ',\n\nWe\'re building ' + startup.name + '. ' + startup.description + '\n\nWe\'re raising ' + startup.ask + '.\n\nWould love to connect.\n\nBest,\nFounder'
       };
     }
-    
-    if (!res.ok || data.error) {
-      console.error(`❌ API error for ${inv.name}:`, data.error || `Status: ${res.status}`);
-      return {
-        subject: `We're fixing what investors know is broken`,
-        body: `Hi ${inv.name},\n\nWe're building ${startup.name} to solve a critical problem. ${startup.description}\n\nWe're raising ${startup.ask} to scale our solution.\n\nWould love 15 minutes to show you what we're building.\n\nBest,\nFounder, ${startup.name}`
-      };
+
+    // New endpoint returns { success, pitch: { subject, body }, research, score }
+    if (data.success && data.pitch && data.pitch.subject && data.pitch.body) {
+      console.log('Pitch generated for ' + inv.name + ' | Score: ' + (data.score || 'N/A') + ' | Research: ' + (data.research ? 'yes' : 'no'));
+      return { subject: data.pitch.subject, body: data.pitch.body };
     }
-    
-    if (!data.subject || !data.body) {
-      console.warn(`⚠️ Missing subject or body for ${inv.name}, using fallback`);
-      return {
-        subject: `Investment opportunity: ${startup.name}`,
-        body: `Hi ${inv.name},\n\nWe're building ${startup.name}. ${startup.description}\n\nWe're raising ${startup.ask}.\n\nWould love to connect.\n\nBest,\nFounder`
-      };
+
+    // If pitch failed but we got an error message, log it
+    if (data.error) {
+      console.error('API error for ' + inv.name + ':', data.error);
     }
-    
-    console.log(`✅ Pitch generated for ${inv.name}`);
-    return data;
-    
-  } catch (err) {
-    console.error(`❌ Network error for ${inv.name}:`, err);
+
     return {
-      subject: `Investment opportunity: ${startup.name}`,
-      body: `Hi ${inv.name},\n\nWe're building ${startup.name}. ${startup.description}\n\nWe're raising ${startup.ask}.\n\nWould love to connect.\n\nBest,\nFounder`
+      subject: 'Investment opportunity: ' + startup.name,
+      body: 'Hi ' + inv.name + ',\n\nWe\'re building ' + startup.name + '. ' + startup.description + '\n\nWe\'re raising ' + startup.ask + '.\n\nWould love to connect.\n\nBest,\nFounder'
+    };
+
+  } catch (err) {
+    console.error('Network error for ' + inv.name + ':', err.message);
+    return {
+      subject: 'Investment opportunity: ' + startup.name,
+      body: 'Hi ' + inv.name + ',\n\nWe\'re building ' + startup.name + '. ' + startup.description + '\n\nWe\'re raising ' + startup.ask + '.\n\nWould love to connect.\n\nBest,\nFounder'
     };
   }
 }
-
 // ============================================================
 // REVIEW STEP - FIXED (Pitch body fills the box)
 // ============================================================
