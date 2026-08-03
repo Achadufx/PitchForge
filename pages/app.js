@@ -688,9 +688,9 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
           onPitchGenerated(1);
         } else {
           const msg = lastError && lastError.rateLimited
-            ? 'Rate limited — Gemini free-tier quota exhausted after ' +
+            ? 'Rate limited — AI provider quota exhausted after ' +
               RATE_LIMIT_RETRY_DELAYS_MS.length +
-              ' retries. Press Redo on this investor in a minute, or upgrade the API key.'
+              ' retries. Press Redo on this investor in a minute, or check the server logs for which provider.'
             : (lastError ? lastError.message : 'Pitch generation failed');
           console.error('Giving up on ' + investors[i].name + ': ' + msg);
           results.push({
@@ -777,7 +777,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
       });
     } else {
       const msg = lastError && lastError.rateLimited
-        ? 'Rate limited — Gemini free-tier quota exhausted after ' +
+        ? 'Rate limited — AI provider quota exhausted after ' +
           RATE_LIMIT_RETRY_DELAYS_MS.length + ' retries. Wait a minute, then press Redo again.'
         : (lastError ? lastError.message : 'Pitch generation failed');
       setPitches((prev) => {

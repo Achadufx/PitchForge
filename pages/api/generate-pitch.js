@@ -1,10 +1,9 @@
 import { generatePitch } from '../../lib/generatePitch';
-import { geminiConfigError } from '../../lib/geminiClient';
+import { groqConfigError } from '../../lib/groqClient';
 
 // Thin wrapper over lib/generatePitch so this endpoint and /api/research-and-pitch
-// can never drift apart. It previously carried its own duplicated copy of the
-// prompt, its own model name, and a `thinkingBudget` option that was both
-// misplaced (it belongs under thinkingConfig) and unsupported outside 2.5.
+// can never drift apart. Pitch generation runs on Groq since the provider split;
+// only investor research still uses Gemini.
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -25,7 +24,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'investorName, startupName, and description are required' });
   }
 
-  var configError = geminiConfigError();
+  var configError = groqConfigError();
   if (configError) {
     console.error('generate-pitch: ' + configError);
     return res.status(500).json({ error: configError });

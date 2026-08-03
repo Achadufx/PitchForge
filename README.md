@@ -5,8 +5,14 @@ AI-powered investor outreach. Upload a CSV of investors, describe your startup, 
 ## Stack
 
 - **Frontend + API routes**: Next.js 14 (deployed on Vercel)
-- **AI**: Groq (llama3-70b) for pitch generation
+- **Pitch generation**: Groq (`llama-3.3-70b-versatile`) — free tier, generous limits
+- **Investor research**: Google Gemini (`gemini-3.6-flash`) — optional, adds specificity
+- **Document analysis**: Google Gemini
 - **Email**: Resend for delivery
+
+The two AI calls are split across providers on purpose: Gemini's free tier is
+too restrictive to serve both research and pitching in one campaign, so pitching
+runs on Groq and only research stays on Gemini.
 
 ---
 
@@ -29,16 +35,39 @@ Go to [vercel.com/new](https://vercel.com/new) → Import your GitHub repo → V
 
 In Vercel project settings → **Environment Variables**, add:
 
-| Variable | Value |
-|---|---|
-| `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com) |
-| `RESEND_API_KEY` | From [resend.com](https://resend.com) |
-| `SENDER_EMAIL` | A verified Resend domain address |
-| `SENDER_NAME` | Display name (e.g. PitchBlast) |
+| Variable | Required | Value |
+|---|---|---|
+| `GROQ_API_KEY` | **Yes** | From [console.groq.com](https://console.groq.com). Generates the pitch — without it nothing is produced. |
+| `GEMINI_API_KEY` | Recommended | From [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Investor research only; pitches still generate without it, just less specific. |
+| `RESEND_API_KEY` | Yes, to send | From [resend.com](https://resend.com) |
+| `SENDER_EMAIL` | Yes, to send | A verified Resend domain address |
+| `SENDER_NAME` | No | Display name (e.g. PitchBlast) |
+| `GROQ_MODEL` | No | Override the default Groq model |
+| `GEMINI_MODEL` | No | Override the default Gemini model |
+
+Supabase, Stripe, and Apify keys are additionally required for auth, billing,
+and investor scraping — see `.env.example` for the full list.
 
 ### 4. Deploy
 
 Click **Deploy**. Done. Your app is live.
+
+Then hit `/api/version` to confirm which commit is actually running, and
+`/api/test-gemini` to confirm the Gemini key and model resolve.
+
+---
+
+## Verifying your keys
+
+Before debugging the pipeline, confirm each provider works:
+
+```bash
+node scripts/test-groq.js     # lists reachable Groq models, live round-trip
+node scripts/test-gemini.js   # same for Gemini
+```
+
+Both print the models your key can actually reach, which is the fastest way to
+settle a "model not found" error. Neither prints key material.
 
 ---
 
@@ -72,5 +101,12 @@ Jane Doe,jane@sequoia.com,Sequoia Capital
 ## Notes
 
 - Resend's free tier requires a verified domain for the sender address.
-- Groq's free tier is generous — llama3-70b handles 100+ pitches easily.
-- Vercel's hobby tier serverless functions have a 10s timeout; `vercel.json` bumps API routes to 30s for large batches.
+- Groq's free tier is generous and comfortably handles a full campaign.
+- Gemini's free tier is per-minute limited, so campaigns pace themselves between
+  investors. If research is rate-limited the pitch is still generated.
+- `vercel.json` sets API routes to a 60s timeout. `/api/research-and-pitch` makes
+  two sequential provider calls and budgets itself to stay inside that limit.
+- `llama-3.3-70b-versatile` was deprecated by Groq on 2026-06-17 with a shutdown
+  date of 2026-08-16. `lib/groqClient.js` falls back to `openai/gpt-oss-120b`
+  automatically once it is decommissioned; set `GROQ_MODEL` to skip the wasted
+  first call.

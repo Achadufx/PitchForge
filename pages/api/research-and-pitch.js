@@ -1,16 +1,17 @@
 import { researchInvestor } from '../../lib/researchInvestor';
 import { generatePitch } from '../../lib/generatePitch';
 import { geminiConfigError } from '../../lib/geminiClient';
+import { groqConfigError } from '../../lib/groqClient';
 
-// Spacing between the two Gemini calls in a single investor request. Free-tier
-// quota is per-minute, so firing research and pitch back to back counts as two
-// requests in the same window and pushes the campaign over the limit faster.
+// Spacing between the research call and the pitch call. Since the provider split
+// these hit DIFFERENT providers — research on Gemini, pitch on Groq — so they no
+// longer share a quota window and the long 12s spacer is unnecessary. A small
+// gap is kept because consecutive investors still queue against Gemini's
+// per-minute research quota.
 //
-// This sleep is dead time inside a 60s Vercel function, so raising it directly
-// squeezes the budget available to the two API calls. The per-call deadlines in
-// lib/researchInvestor.js and lib/generatePitch.js were reduced to compensate:
-//   research 13s + delay 12s + pitch 14s + truncation retry 12s = 51s
-var INTER_CALL_DELAY_MS = 12000;
+// This sleep is dead time inside a 60s Vercel function:
+//   research 13s + delay 2s + pitch 20s + truncation retry 14s = 49s
+var INTER_CALL_DELAY_MS = 2000;
 
 function sleep(ms) {
   return new Promise(function (resolve) { setTimeout(resolve, ms); });
@@ -103,22 +104,39 @@ export default async function handler(req, res) {
     });
   }
 
-  // Fail loudly and early on misconfiguration rather than after two dead API calls.
-  var configError = geminiConfigError();
-  if (configError) {
-    console.error('research-and-pitch: ' + configError);
-    return res.status(500).json({ success: false, error: configError, stage: 'config' });
+  // Fail loudly and early on misconfiguration rather than after dead API calls.
+  //
+  // GROQ_API_KEY is the hard requirement: it generates the pitch, which is the
+  // actual deliverable. GEMINI_API_KEY is only needed for research, and a pitch
+  // still generates without it (the prompt then avoids inventing specifics), so
+  // a missing Gemini key degrades rather than fails.
+  var groqError = groqConfigError();
+  if (groqError) {
+    console.error('research-and-pitch: ' + groqError);
+    return res.status(500).json({ success: false, error: groqError, stage: 'config' });
+  }
+
+  var geminiError = geminiConfigError();
+  if (geminiError) {
+    console.warn('research-and-pitch: ' + geminiError +
+      ' Continuing without investor research — pitches will be less specific.');
   }
 
   var research = null;
-  var researchError = null;
+  var researchError = geminiError
+    ? 'Investor research skipped: GEMINI_API_KEY is not configured.'
+    : null;
 
   try {
-    console.log('research-and-pitch step 1: researching ' + investorName);
-    research = await researchInvestor(investorName, firm);
-    if (!research) {
-      researchError = 'Investor research returned no usable data. Check server logs for the Gemini error.';
-      console.warn('research-and-pitch: ' + researchError);
+    if (geminiError) {
+      console.log('research-and-pitch step 1: SKIPPED (no Gemini key) for ' + investorName);
+    } else {
+      console.log('research-and-pitch step 1: researching ' + investorName);
+      research = await researchInvestor(investorName, firm);
+      if (!research) {
+        researchError = 'Investor research returned no usable data. Check server logs for the Gemini error.';
+        console.warn('research-and-pitch: ' + researchError);
+      }
     }
   } catch (err) {
     researchError = 'Research threw: ' + (err && err.message ? err.message : String(err));
@@ -136,12 +154,13 @@ export default async function handler(req, res) {
   var pitchError = null;
   var rateLimited = false;
 
-  // Space the two Gemini calls apart. Skipped when research failed outright,
-  // since there was no successful request to space away from and the remaining
-  // function budget is better spent on the pitch itself.
+  // Small gap between the Gemini research call and the Groq pitch call. Skipped
+  // when research did not run or failed outright: there was no successful request
+  // to space away from, and the remaining function budget is better spent on the
+  // pitch itself.
   if (research) {
     console.log('research-and-pitch: waiting ' + INTER_CALL_DELAY_MS +
-      'ms before the pitch call to stay under the per-minute quota');
+      'ms before the Groq pitch call');
     await sleep(INTER_CALL_DELAY_MS);
   }
 
@@ -155,7 +174,7 @@ export default async function handler(req, res) {
   } catch (err) {
     rateLimited = !!(err && err.rateLimited);
     pitchError = rateLimited
-      ? (err.message || 'Gemini rate limit exceeded')
+      ? (err.message || 'AI provider rate limit exceeded')
       : 'Pitch generation threw: ' + (err && err.message ? err.message : String(err));
     console.error('research-and-pitch: ' + pitchError);
   }
