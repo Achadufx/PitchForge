@@ -1,3 +1,5 @@
+import { callGemini } from '../../lib/geminiClient';
+
 export const config = {
   api: {
     bodyParser: {
@@ -42,36 +44,53 @@ function extractJSON(text) {
 
 // Helper function to extract text from different file types
 async function extractTextFromFile(file) {
-  const buffer = Buffer.from(file.base64, "base64");
-  
-  console.log(`📄 Processing: ${file.name} (${file.mimeType})`);
-  
+  // Guard: name/mimeType/base64 may be missing on direct API calls (the UI always
+  // sends them, but this endpoint is publicly reachable). Normalise before use so
+  // .endsWith()/.startsWith() below can never throw on undefined.
+  if (!file || typeof file.base64 !== "string" || !file.base64) {
+    console.log("⚠️ Skipping file with no base64 content");
+    return null;
+  }
+
+  const name = typeof file.name === "string" ? file.name : "unnamed";
+  const mimeType = typeof file.mimeType === "string" ? file.mimeType : "";
+
+  let buffer;
+  try {
+    buffer = Buffer.from(file.base64, "base64");
+  } catch (bufErr) {
+    console.error(`❌ Invalid base64 for ${name}:`, bufErr.message);
+    return null;
+  }
+
+  console.log(`📄 Processing: ${name} (${mimeType || "unknown type"})`);
+
   try {
     let text = "";
-    
-    if (file.mimeType === "application/pdf" || file.name.endsWith(".pdf")) {
+
+    if (mimeType === "application/pdf" || name.endsWith(".pdf")) {
       try {
         const pdf = require("pdf-parse");
         const data = await pdf(buffer);
         text = data.text;
-        console.log(`✅ Extracted ${text.length} chars from PDF: ${file.name}`);
+        console.log(`✅ Extracted ${text.length} chars from PDF: ${name}`);
       } catch (pdfError) {
-        console.log(`⚠️ PDF parsing failed, trying text fallback: ${file.name}`);
+        console.log(`⚠️ PDF parsing failed, trying text fallback: ${name}`);
         text = buffer.toString("utf-8");
       }
-    } 
-    else if (file.mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || file.name.endsWith(".docx")) {
+    }
+    else if (mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || name.endsWith(".docx")) {
       try {
         const mammoth = require("mammoth");
         const result = await mammoth.extractRawText({ buffer });
         text = result.value;
-        console.log(`✅ Extracted ${text.length} chars from DOCX: ${file.name}`);
+        console.log(`✅ Extracted ${text.length} chars from DOCX: ${name}`);
       } catch (docxError) {
-        console.log(`⚠️ DOCX parsing failed, trying text fallback: ${file.name}`);
+        console.log(`⚠️ DOCX parsing failed, trying text fallback: ${name}`);
         text = buffer.toString("utf-8");
       }
-    } 
-    else if (file.mimeType === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || file.name.endsWith(".pptx")) {
+    }
+    else if (mimeType === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || name.endsWith(".pptx")) {
       try {
         const JSZip = require("jszip");
         const zip = await JSZip.loadAsync(buffer);
@@ -85,61 +104,51 @@ async function extractTextFromFile(file) {
           }
         }
         text = extractedText.join("\n\n");
-        console.log(`✅ Extracted ${text.length} chars from PPTX: ${file.name}`);
+        console.log(`✅ Extracted ${text.length} chars from PPTX: ${name}`);
       } catch (pptxError) {
-        console.log(`⚠️ PPTX parsing failed, trying text fallback: ${file.name}`);
+        console.log(`⚠️ PPTX parsing failed, trying text fallback: ${name}`);
         text = buffer.toString("utf-8");
       }
-    } 
-    else if (file.mimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.name.endsWith(".xlsx")) {
-      try {
-        const XLSX = require("xlsx");
-        const workbook = XLSX.read(buffer, { type: "buffer" });
-        let extractedText = [];
-        
-        workbook.SheetNames.forEach(sheetName => {
-          const worksheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          extractedText.push(`Sheet: ${sheetName}`);
-          extractedText.push(JSON.stringify(jsonData, null, 2));
-        });
-        
-        text = extractedText.join("\n\n");
-        console.log(`✅ Extracted ${text.length} chars from XLSX: ${file.name}`);
-      } catch (xlsxError) {
-        console.log(`⚠️ XLSX parsing failed, trying text fallback: ${file.name}`);
-        text = buffer.toString("utf-8");
-      }
-    } 
-    else if (file.mimeType === "text/plain" || file.name.endsWith(".txt") || file.name.endsWith(".md") || file.name.endsWith(".csv")) {
+    }
+    else if (mimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || name.endsWith(".xlsx")) {
+      // The `xlsx` package this branch used was never declared in package.json, so
+      // require() always threw and every spreadsheet fell through to a raw-bytes
+      // read that produced binary garbage. Not adding it: the npm release is stale
+      // and carries prototype-pollution/ReDoS advisories. XLSX is also not offered
+      // by the upload UI (components/DocumentUpload.js accepts pdf/docx/txt only),
+      // so this reports honestly instead of pretending to parse.
+      console.log(`⚠️ XLSX is not supported: ${name}. Export the sheet to CSV and re-upload.`);
+      return null;
+    }
+    else if (mimeType === "text/plain" || name.endsWith(".txt") || name.endsWith(".md") || name.endsWith(".csv")) {
       text = buffer.toString("utf-8");
-      console.log(`✅ Extracted ${text.length} chars from text file: ${file.name}`);
-    } 
-    else if (file.mimeType.startsWith("image/")) {
-      console.log(`📸 Found image: ${file.name} (${file.mimeType})`);
-      return { type: "image", mimeType: file.mimeType, data: file.base64, name: file.name };
-    } 
+      console.log(`✅ Extracted ${text.length} chars from text file: ${name}`);
+    }
+    else if (mimeType.startsWith("image/")) {
+      console.log(`📸 Found image: ${name} (${mimeType})`);
+      return { type: "image", mimeType: mimeType, data: file.base64, name: name };
+    }
     else {
       text = buffer.toString("utf-8");
       if (text.length > 0 && !text.includes("\0")) {
-        console.log(`✅ Extracted ${text.length} chars from unknown type: ${file.name}`);
+        console.log(`✅ Extracted ${text.length} chars from unknown type: ${name}`);
       } else {
-        console.log(`⚠️ Could not extract readable text from: ${file.name}`);
+        console.log(`⚠️ Could not extract readable text from: ${name}`);
         return null;
       }
     }
-    
+
     if (text && text.length > 0) {
       text = text.replace(/\s+/g, " ").trim();
       // Reduce text size to avoid token limits - only keep first 10000 chars per file
-      return { type: "text", text: text.slice(0, 10000), name: file.name };
+      return { type: "text", text: text.slice(0, 10000), name: name };
     } else {
-      console.log(`⚠️ No readable text found in: ${file.name}`);
+      console.log(`⚠️ No readable text found in: ${name}`);
       return null;
     }
-    
+
   } catch (err) {
-    console.error(`❌ Failed to process ${file.name}:`, err.message);
+    console.error(`❌ Failed to process ${name}:`, err.message);
     return null;
   }
 }
@@ -255,55 +264,35 @@ Example format:
       });
     }
 
-    // Gemini configuration with INCREASED token limit
-    const MODEL = "gemini-2.5-flash";
+    // Routed through the shared client so the model name, error logging, and
+    // multi-part text extraction stay consistent with the rest of the app.
+    const result = await callGemini({
+      parts,
+      temperature: 0.1,
+      maxOutputTokens: 8192,
+      jsonMode: true,
+      timeoutMs: 45000,
+      label: 'analyze-documents'
+    });
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 8192, // Increased from 1500 to 8192
-          },
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (data.error) {
-      console.error("Gemini API error:", data.error);
-      return res.status(500).json({
-        error: "Gemini error: " + data.error.message
-      });
+    if (!result.ok) {
+      return res.status(502).json({ error: "Gemini error: " + result.error });
     }
 
-    const text = data.candidates?.[0]?.content?.parts
-      ?.map(part => part.text || "")
-      .join("") || "";
-    
-    const finishReason = data.candidates?.[0]?.finishReason;
-
-    if (finishReason === "MAX_TOKENS") {
-      return res.status(500).json({
+    if (result.finishReason === "MAX_TOKENS") {
+      return res.status(502).json({
         error: "Gemini output was truncated because it exceeded the token limit. Please try with fewer documents or use manual input."
       });
     }
-    
-    if (!text) {
-      return res.status(500).json({ error: "AI returned empty response." });
-    }
+
+    const text = result.text;
 
     console.log("📝 Parsing Gemini response...");
-    
+
     const parsed = extractJSON(text);
 
     if (!parsed) {
-      return res.status(500).json({
+      return res.status(502).json({
         error: "AI returned invalid JSON format. Please try again with fewer files or use manual input.",
         raw: text.substring(0, 500),
       });

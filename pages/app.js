@@ -539,11 +539,15 @@ function StepIndicator({ current }) {
 // GENERATE SINGLE
 // ============================================================
 
+// Throws on failure. It must NOT substitute a generic template: doing that made
+// every backend failure look like a working-but-bland pitch, which is why the
+// pipeline appeared to "work" while producing garbage.
 async function generateSingle(inv, startup) {
   console.log('Generating pitch for: ' + inv.name);
 
+  var res;
   try {
-    var res = await fetch('/api/research-and-pitch', {
+    res = await fetch('/api/research-and-pitch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -559,42 +563,28 @@ async function generateSingle(inv, startup) {
         }
       })
     });
-
-    var responseText = await res.text();
-    var data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      console.error('JSON parse error for ' + inv.name + ':', e.message);
-      return {
-        subject: 'Investment opportunity: ' + startup.name,
-        body: 'Hi ' + inv.name + ',\n\nWe\'re building ' + startup.name + '. ' + startup.description + '\n\nWe\'re raising ' + startup.ask + '.\n\nWould love to connect.\n\nBest,\nFounder'
-      };
-    }
-
-    // New endpoint returns { success, pitch: { subject, body }, research, score }
-    if (data.success && data.pitch && data.pitch.subject && data.pitch.body) {
-      console.log('Pitch generated for ' + inv.name + ' | Score: ' + (data.score || 'N/A') + ' | Research: ' + (data.research ? 'yes' : 'no'));
-      return { subject: data.pitch.subject, body: data.pitch.body };
-    }
-
-    // If pitch failed but we got an error message, log it
-    if (data.error) {
-      console.error('API error for ' + inv.name + ':', data.error);
-    }
-
-    return {
-      subject: 'Investment opportunity: ' + startup.name,
-      body: 'Hi ' + inv.name + ',\n\nWe\'re building ' + startup.name + '. ' + startup.description + '\n\nWe\'re raising ' + startup.ask + '.\n\nWould love to connect.\n\nBest,\nFounder'
-    };
-
   } catch (err) {
-    console.error('Network error for ' + inv.name + ':', err.message);
-    return {
-      subject: 'Investment opportunity: ' + startup.name,
-      body: 'Hi ' + inv.name + ',\n\nWe\'re building ' + startup.name + '. ' + startup.description + '\n\nWe\'re raising ' + startup.ask + '.\n\nWould love to connect.\n\nBest,\nFounder'
-    };
+    throw new Error('Could not reach the pitch service: ' + err.message);
   }
+
+  var responseText = await res.text();
+  var data = null;
+  try {
+    data = JSON.parse(responseText);
+  } catch (e) {
+    throw new Error('Pitch service returned a non-JSON response (HTTP ' + res.status + '): ' +
+      responseText.substring(0, 200));
+  }
+
+  if (data.success && data.pitch && data.pitch.subject && data.pitch.body) {
+    console.log('Pitch generated for ' + inv.name + ' | score: ' + (data.score || 'N/A') +
+      ' | research: ' + (data.research ? 'yes' : 'no'));
+    return { subject: data.pitch.subject, body: data.pitch.body };
+  }
+
+  var reason = data.error || 'Pitch generation failed (HTTP ' + res.status + ')';
+  console.error('Pitch failed for ' + inv.name + ': ' + reason);
+  throw new Error(reason);
 }
 // ============================================================
 // REVIEW STEP - FIXED (Pitch body fills the box)
@@ -634,7 +624,13 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
         setProgress(i + 1);
       }
       setPitches(results);
-      setSelected(results.map((_, i) => i));
+      // Only preselect pitches that actually generated. Selecting everything
+      // meant a failed pitch (empty body) could be sent to a real investor.
+      setSelected(
+        results
+          .map((r, i) => (r.error ? -1 : i))
+          .filter((i) => i !== -1)
+      );
       setGenerating(false);
     };
     generate();
@@ -1042,7 +1038,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
       });
 
       const data = await res.json();
-      if (data.success && data.investors.length > 0) {
+      if (data.success && Array.isArray(data.investors) && data.investors.length > 0) {
         const scoredInvestors = data.investors.map((inv, index) => ({
           ...inv,
           id: inv.id || `investor-${index}-${Date.now()}`,
@@ -1198,7 +1194,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
             });
 
             const discoverData = await discoverRes.json();
-            if (discoverData.success && discoverData.investors.length > 0) {
+            if (discoverData.success && Array.isArray(discoverData.investors) && discoverData.investors.length > 0) {
               const discoveredInvestors = discoverData.investors.map((inv, index) => ({
                 ...inv,
                 id: inv.id || `investor-${index}-${Date.now()}`,
