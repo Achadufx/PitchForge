@@ -1,7 +1,7 @@
 import { researchInvestor } from '../../lib/researchInvestor';
-import { groqConfigError } from '../../lib/groqClient';
+import { geminiConfigError } from '../../lib/geminiClient';
 
-// Thin wrapper over lib/researchInvestor, which runs on Groq.
+// Thin wrapper over lib/researchInvestor, which runs on Gemini.
 //
 // This endpoint previously called the Anthropic API directly with model
 // 'claude-sonnet-4-6' and ANTHROPIC_API_KEY — a second provider, a second key,
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'investorName is required' });
   }
 
-  var configError = groqConfigError();
+  var configError = geminiConfigError();
   if (configError) {
     console.error('research-investor: ' + configError);
     return res.status(500).json({ error: configError });

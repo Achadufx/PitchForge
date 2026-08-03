@@ -1,10 +1,11 @@
 import { researchInvestor } from '../../lib/researchInvestor';
 import { generatePitch } from '../../lib/generatePitch';
+import { geminiConfigError } from '../../lib/geminiClient';
 import { groqConfigError } from '../../lib/groqClient';
 
-// Spacing between the research call and the pitch call. Both hit Groq, so this
-// keeps two rapid-fire requests from stacking against the same per-minute
-// window. Groq's limits are generous, so a short gap is enough.
+// Spacing between the research call and the pitch call. These hit DIFFERENT
+// providers — research on Gemini, pitch on Groq — so they do not share a quota
+// window and only a short gap is needed.
 //
 // This sleep is dead time inside a 60s Vercel function:
 //   research 13s + delay 2s + pitch 20s + truncation retry 14s = 49s
@@ -102,22 +103,38 @@ export default async function handler(req, res) {
   }
 
   // Fail loudly and early on misconfiguration rather than after dead API calls.
-  // Both steps now run on Groq, so GROQ_API_KEY is the only key this route needs.
+  //
+  // GROQ_API_KEY is the hard requirement: it writes the pitch, which is the
+  // actual deliverable. GEMINI_API_KEY only powers research, and a pitch still
+  // generates without it (the prompt then avoids inventing specifics), so a
+  // missing Gemini key degrades rather than fails.
   var groqError = groqConfigError();
   if (groqError) {
     console.error('research-and-pitch: ' + groqError);
     return res.status(500).json({ success: false, error: groqError, stage: 'config' });
   }
 
+  var geminiError = geminiConfigError();
+  if (geminiError) {
+    console.warn('research-and-pitch: ' + geminiError +
+      ' Continuing without investor research — pitches will be less specific.');
+  }
+
   var research = null;
-  var researchError = null;
+  var researchError = geminiError
+    ? 'Investor research skipped: GEMINI_API_KEY is not configured.'
+    : null;
 
   try {
-    console.log('research-and-pitch step 1: researching ' + investorName);
-    research = await researchInvestor(investorName, firm);
-    if (!research) {
-      researchError = 'Investor research returned no usable data. Check server logs for the [researchInvestor] error.';
-      console.warn('research-and-pitch: ' + researchError);
+    if (geminiError) {
+      console.log('research-and-pitch step 1: SKIPPED (no Gemini key) for ' + investorName);
+    } else {
+      console.log('research-and-pitch step 1: researching ' + investorName);
+      research = await researchInvestor(investorName, firm);
+      if (!research) {
+        researchError = 'Investor research returned no usable data. Check server logs for the [researchInvestor] error.';
+        console.warn('research-and-pitch: ' + researchError);
+      }
     }
   } catch (err) {
     researchError = 'Research threw: ' + (err && err.message ? err.message : String(err));
