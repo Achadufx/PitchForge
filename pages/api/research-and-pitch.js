@@ -2,6 +2,15 @@ import { researchInvestor } from '../../lib/researchInvestor';
 import { generatePitch } from '../../lib/generatePitch';
 import { geminiConfigError } from '../../lib/geminiClient';
 
+// Spacing between the two Gemini calls in a single investor request. Free-tier
+// quota is per-minute, so firing research and pitch back to back counts as two
+// requests in the same window and pushes the campaign over the limit faster.
+var INTER_CALL_DELAY_MS = 3000;
+
+function sleep(ms) {
+  return new Promise(function (resolve) { setTimeout(resolve, ms); });
+}
+
 // Every field here can be null — Gemini is told to use null for unknowns — so
 // each accessor guards before calling array methods. The previous version called
 // research.sectorFocus.some(...) directly and threw TypeError on null, killing
@@ -121,6 +130,15 @@ export default async function handler(req, res) {
   var pitch = null;
   var pitchError = null;
   var rateLimited = false;
+
+  // Space the two Gemini calls apart. Skipped when research failed outright,
+  // since there was no successful request to space away from and the remaining
+  // function budget is better spent on the pitch itself.
+  if (research) {
+    console.log('research-and-pitch: waiting ' + INTER_CALL_DELAY_MS +
+      'ms before the pitch call to stay under the per-minute quota');
+    await sleep(INTER_CALL_DELAY_MS);
+  }
 
   try {
     console.log('research-and-pitch step 2: generating pitch for ' + investorName);

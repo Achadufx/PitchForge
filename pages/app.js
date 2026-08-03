@@ -542,7 +542,13 @@ function StepIndicator({ current }) {
 // Paces campaign requests. Gemini's free tier enforces a per-minute request
 // quota, and a campaign fires 2 Gemini calls per investor, so an unthrottled
 // 5-investor run bursts 10 calls in seconds and the later ones get 429s.
-const CAMPAIGN_DELAY_MS = 2500;
+const CAMPAIGN_DELAY_MS = 8000;
+
+// Client-side continuation of the 15s/30s/60s backoff schedule. The server can
+// only execute the first step or so before Vercel kills the function at 60s, so
+// the browser carries the rest — it has no execution limit. This is what makes a
+// rate-limited investor recover instead of failing.
+const RATE_LIMIT_RETRY_DELAYS_MS = [15000, 30000, 60000];
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -612,6 +618,9 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
   const [editingPitch, setEditingPitch] = useState(null);
   const [editedBody, setEditedBody] = useState("");
   const [editedSubject, setEditedSubject] = useState("");
+  // Explains a long pause during rate-limit backoff. Without it a 60s wait is
+  // indistinguishable from the app hanging.
+  const [rateLimitNotice, setRateLimitNotice] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -632,37 +641,70 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
           if (cancelled) return;
         }
 
-        try {
-          const data = await generateSingle(investors[i], startup);
+        // Retry this investor through the full backoff schedule before giving up.
+        // The server returns 429 quickly (it cannot afford to sleep), so without
+        // this the investor would be abandoned the moment quota ran out.
+        let outcome = null;
+        let lastError = null;
+
+        for (let attempt = 0; attempt <= RATE_LIMIT_RETRY_DELAYS_MS.length; attempt++) {
+          if (cancelled) return;
+          try {
+            outcome = await generateSingle(investors[i], startup);
+            break;
+          } catch (err) {
+            lastError = err;
+
+            // Only quota failures are worth waiting on; anything else will fail
+            // again identically.
+            if (!err || !err.rateLimited || attempt === RATE_LIMIT_RETRY_DELAYS_MS.length) break;
+
+            const waitMs = RATE_LIMIT_RETRY_DELAYS_MS[attempt];
+            // Once quota is hit, every later investor needs more room too.
+            pacing = Math.max(pacing, waitMs);
+            console.warn(
+              'Rate limited on ' + investors[i].name + '. Waiting ' + (waitMs / 1000) +
+              's before retry ' + (attempt + 1) + ' of ' + RATE_LIMIT_RETRY_DELAYS_MS.length +
+              '. Campaign spacing raised to ' + (pacing / 1000) + 's.'
+            );
+            setRateLimitNotice(
+              'Gemini free-tier quota reached. Waiting ' + (waitMs / 1000) +
+              's before retrying ' + investors[i].name + '...'
+            );
+            await delay(waitMs);
+            if (cancelled) return;
+            setRateLimitNotice('');
+          }
+        }
+
+        if (outcome) {
           results.push({
             ...investors[i],
-            subject: data.subject,
-            body: data.body,
+            subject: outcome.subject,
+            body: outcome.body,
             error: false,
           });
           onPitchGenerated(1);
-        } catch (err) {
-          if (err && err.rateLimited) {
-            // Server already retried with backoff and still hit the wall, so
-            // give the quota real time to refill before the next investor.
-            pacing = Math.min(pacing * 2, 20000);
-            console.warn(
-              'Rate limited on ' + investors[i].name +
-              '. Slowing campaign to ' + pacing + 'ms between investors.'
-            );
-          }
+        } else {
+          const msg = lastError && lastError.rateLimited
+            ? 'Gemini free-tier quota exhausted after ' + RATE_LIMIT_RETRY_DELAYS_MS.length +
+              ' retries. Use Redo on this investor in a minute, or upgrade the API key.'
+            : (lastError ? lastError.message : 'Pitch generation failed');
+          console.error('Giving up on ' + investors[i].name + ': ' + msg);
           results.push({
             ...investors[i],
             subject: "",
             body: "",
-            error: err.message,
+            error: msg,
           });
         }
+
         if (!cancelled) setProgress(i + 1);
       }
 
       if (cancelled) return;
 
+      setRateLimitNotice('');
       setPitches(results);
       // Only preselect pitches that actually generated. Selecting everything
       // meant a failed pitch (empty body) could be sent to a real investor.
@@ -733,6 +775,18 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
         <p style={{ color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[6] }}>
           {progress} of {investors.length} done
         </p>
+        {rateLimitNotice && (
+          <p style={{
+            color: tokens.colors.status.warning,
+            fontSize: '13px',
+            marginBottom: tokens.spacing[6],
+            maxWidth: 420,
+            margin: `0 auto ${tokens.spacing[6]}`,
+            lineHeight: 1.6,
+          }}>
+            ⏳ {rateLimitNotice}
+          </p>
+        )}
         <div style={{ maxWidth: 240, margin: '0 auto' }}>
           <div className="pw-progress">
             <div className="pw-progress-fill" style={{ width: (investors.length ? (progress / investors.length) * 100 : 0) + "%" }} />
