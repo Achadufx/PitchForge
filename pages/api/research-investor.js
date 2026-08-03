@@ -1,13 +1,13 @@
 import { researchInvestor } from '../../lib/researchInvestor';
-import { geminiConfigError } from '../../lib/geminiClient';
+import { groqConfigError } from '../../lib/groqClient';
 
-// Thin wrapper over lib/researchInvestor.
+// Thin wrapper over lib/researchInvestor, which runs on Groq.
 //
 // This endpoint previously called the Anthropic API directly with model
 // 'claude-sonnet-4-6' and ANTHROPIC_API_KEY — a second provider, a second key,
-// and a duplicated prompt, none of which matched the Gemini pipeline the rest
-// of the app uses. Nothing in the frontend calls this route; it now shares one
-// implementation with /api/research-and-pitch so the two cannot diverge.
+// and a duplicated prompt. Nothing in the frontend calls this route; it now
+// shares one implementation with /api/research-and-pitch so the two cannot
+// diverge.
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'investorName is required' });
   }
 
-  var configError = geminiConfigError();
+  var configError = groqConfigError();
   if (configError) {
     console.error('research-investor: ' + configError);
     return res.status(500).json({ error: configError });

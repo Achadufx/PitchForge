@@ -1,4 +1,5 @@
 import { geminiModel } from '../../lib/geminiClient';
+import { groqModel } from '../../lib/groqClient';
 
 // Reports which build is actually running, so a stale deployment can be
 // identified without guessing. Vercel injects VERCEL_GIT_COMMIT_SHA at build
@@ -16,6 +17,11 @@ export default function handler(req, res) {
     branch: process.env.VERCEL_GIT_COMMIT_REF || null,
     deployedAt: process.env.VERCEL_DEPLOYMENT_ID || null,
     env: process.env.VERCEL_ENV || 'local',
+    // Pitch pipeline (research + generation) runs entirely on Groq.
+    groqModel: groqModel(),
+    groqKeyConfigured: !!process.env.GROQ_API_KEY,
+
+    // Document analysis only — not used by the pitch pipeline.
     geminiModel: geminiModel(),
     geminiKeyConfigured: !!process.env.GEMINI_API_KEY,
 

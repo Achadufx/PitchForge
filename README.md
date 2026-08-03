@@ -5,14 +5,18 @@ AI-powered investor outreach. Upload a CSV of investors, describe your startup, 
 ## Stack
 
 - **Frontend + API routes**: Next.js 14 (deployed on Vercel)
-- **Pitch generation**: Groq (`llama-3.3-70b-versatile`) — free tier, generous limits
-- **Investor research**: Google Gemini (`gemini-3.6-flash`) — optional, adds specificity
-- **Document analysis**: Google Gemini
+- **Pitch generation**: Groq (`llama-3.3-70b-versatile`)
+- **Investor research**: Groq (same model)
+- **Document analysis**: Google Gemini (`gemini-3.6-flash`) — vision-capable
 - **Email**: Resend for delivery
 
-The two AI calls are split across providers on purpose: Gemini's free tier is
-too restrictive to serve both research and pitching in one campaign, so pitching
-runs on Groq and only research stays on Gemini.
+The whole pitch pipeline runs on Groq. Gemini's free tier was too restrictive to
+serve research and pitching in one campaign, so both moved to Groq's more
+generous free tier.
+
+Gemini is still used for the document-upload step, which reads pitch decks and
+scanned PDFs — that needs a vision model, and Groq's llama models are text-only.
+If you never upload documents, you do not need a Gemini key.
 
 ---
 
@@ -37,8 +41,8 @@ In Vercel project settings → **Environment Variables**, add:
 
 | Variable | Required | Value |
 |---|---|---|
-| `GROQ_API_KEY` | **Yes** | From [console.groq.com](https://console.groq.com). Generates the pitch — without it nothing is produced. |
-| `GEMINI_API_KEY` | Recommended | From [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Investor research only; pitches still generate without it, just less specific. |
+| `GROQ_API_KEY` | **Yes** | From [console.groq.com](https://console.groq.com). Runs research **and** pitch generation — without it nothing is produced. |
+| `GEMINI_API_KEY` | Only for uploads | From [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Needed by the document-upload step (vision). Not used by pitching or research. |
 | `RESEND_API_KEY` | Yes, to send | From [resend.com](https://resend.com) |
 | `SENDER_EMAIL` | Yes, to send | A verified Resend domain address |
 | `SENDER_NAME` | No | Display name (e.g. PitchBlast) |
@@ -53,7 +57,8 @@ and investor scraping — see `.env.example` for the full list.
 Click **Deploy**. Done. Your app is live.
 
 Then hit `/api/version` to confirm which commit is actually running, and
-`/api/test-gemini` to confirm the Gemini key and model resolve.
+`/api/test-gemini` to confirm the Gemini key and model resolve (document uploads
+only — the pitch pipeline itself needs `GROQ_API_KEY`).
 
 ---
 
@@ -101,12 +106,20 @@ Jane Doe,jane@sequoia.com,Sequoia Capital
 ## Notes
 
 - Resend's free tier requires a verified domain for the sender address.
-- Groq's free tier is generous and comfortably handles a full campaign.
-- Gemini's free tier is per-minute limited, so campaigns pace themselves between
-  investors. If research is rate-limited the pitch is still generated.
+- Groq's free tier is generous and comfortably handles a full campaign. Campaigns
+  still pace themselves between investors; if a call is rate-limited the client
+  backs off and retries rather than failing.
+- Gemini is only reached by the document-upload step, which is one call per
+  upload rather than one per investor, so its per-minute limit is not a
+  bottleneck.
 - `vercel.json` sets API routes to a 60s timeout. `/api/research-and-pitch` makes
-  two sequential provider calls and budgets itself to stay inside that limit.
+  two sequential Groq calls and budgets itself to stay inside that limit.
 - `llama-3.3-70b-versatile` was deprecated by Groq on 2026-06-17 with a shutdown
   date of 2026-08-16. `lib/groqClient.js` falls back to `openai/gpt-oss-120b`
   automatically once it is decommissioned; set `GROQ_MODEL` to skip the wasted
   first call.
+- Investor research runs on a model with no web access and a fixed training
+  cutoff, so for lesser-known investors it will often return "unknown" rather
+  than facts. That is intentional: the prompt forbids guessing, because a
+  fabricated deal or quote goes straight into a real email. When research comes
+  back empty the pitch opens on the problem instead of faking familiarity.
