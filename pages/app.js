@@ -668,8 +668,9 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
               '. Campaign spacing raised to ' + (pacing / 1000) + 's.'
             );
             setRateLimitNotice(
-              'Gemini free-tier quota reached. Waiting ' + (waitMs / 1000) +
-              's before retrying ' + investors[i].name + '...'
+              'Rate limited — waiting ' + Math.round(waitMs / 1000) + 's to retry ' +
+              investors[i].name + ' (attempt ' + (attempt + 1) + ' of ' +
+              RATE_LIMIT_RETRY_DELAYS_MS.length + ')...'
             );
             await delay(waitMs);
             if (cancelled) return;
@@ -687,8 +688,9 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
           onPitchGenerated(1);
         } else {
           const msg = lastError && lastError.rateLimited
-            ? 'Gemini free-tier quota exhausted after ' + RATE_LIMIT_RETRY_DELAYS_MS.length +
-              ' retries. Use Redo on this investor in a minute, or upgrade the API key.'
+            ? 'Rate limited — Gemini free-tier quota exhausted after ' +
+              RATE_LIMIT_RETRY_DELAYS_MS.length +
+              ' retries. Press Redo on this investor in a minute, or upgrade the API key.'
             : (lastError ? lastError.message : 'Pitch generation failed');
           console.error('Giving up on ' + investors[i].name + ': ' + msg);
           results.push({
@@ -696,6 +698,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
             subject: "",
             body: "",
             error: msg,
+            rateLimited: !!(lastError && lastError.rateLimited),
           });
         }
 
@@ -724,25 +727,67 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
 
   const handleRegenerate = async (i) => {
     setRegenerating((prev) => ({ ...prev, [i]: true }));
-    try {
-      const data = await generateSingle(pitches[i], startup);
+
+    let outcome = null;
+    let lastError = null;
+
+    // Same backoff schedule as the campaign loop. Without this, hitting Redo
+    // during a quota window failed instantly with no explanation.
+    for (let attempt = 0; attempt <= RATE_LIMIT_RETRY_DELAYS_MS.length; attempt++) {
+      try {
+        outcome = await generateSingle(pitches[i], startup);
+        break;
+      } catch (err) {
+        lastError = err;
+        if (!err || !err.rateLimited || attempt === RATE_LIMIT_RETRY_DELAYS_MS.length) break;
+
+        const waitMs = RATE_LIMIT_RETRY_DELAYS_MS[attempt];
+        const secs = Math.round(waitMs / 1000);
+
+        // Visible on the pitch card itself, so the user knows it is waiting
+        // rather than broken.
+        setPitches((prev) => {
+          const u = [...prev];
+          u[i] = {
+            ...u[i],
+            error: 'Rate limited — waiting ' + secs + 's to retry (attempt ' +
+              (attempt + 1) + ' of ' + RATE_LIMIT_RETRY_DELAYS_MS.length + ')...',
+            rateLimited: true,
+          };
+          return u;
+        });
+        setRateLimitNotice('Rate limited — waiting ' + secs + 's to retry ' +
+          (pitches[i].name || 'this investor') + '...');
+
+        await delay(waitMs);
+      }
+    }
+
+    if (outcome) {
       setPitches((prev) => {
         const u = [...prev];
         u[i] = {
           ...u[i],
-          subject: data.subject,
-          body: data.body,
+          subject: outcome.subject,
+          body: outcome.body,
           error: false,
+          rateLimited: false,
         };
         return u;
       });
-    } catch (err) {
+    } else {
+      const msg = lastError && lastError.rateLimited
+        ? 'Rate limited — Gemini free-tier quota exhausted after ' +
+          RATE_LIMIT_RETRY_DELAYS_MS.length + ' retries. Wait a minute, then press Redo again.'
+        : (lastError ? lastError.message : 'Pitch generation failed');
       setPitches((prev) => {
         const u = [...prev];
-        u[i] = { ...u[i], error: err.message };
+        u[i] = { ...u[i], error: msg, rateLimited: !!(lastError && lastError.rateLimited) };
         return u;
       });
     }
+
+    setRateLimitNotice('');
     setRegenerating((prev) => ({ ...prev, [i]: false }));
   };
 
@@ -919,7 +964,19 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                     </button>
                   </div>
                 ) : pitch.error ? (
-                  <div style={{ color: tokens.colors.status.error, fontSize: '12px' }}>⚠ {pitch.error}</div>
+                  // Rate limits are temporary and retryable, so they read as a
+                  // warning with a next step rather than a hard failure.
+                  <div style={{
+                    color: pitch.rateLimited ? tokens.colors.status.warning : tokens.colors.status.error,
+                    fontSize: '12px',
+                    lineHeight: 1.6,
+                    background: pitch.rateLimited ? 'rgba(251,191,36,0.08)' : 'transparent',
+                    border: pitch.rateLimited ? '1px solid rgba(251,191,36,0.25)' : 'none',
+                    borderRadius: pitch.rateLimited ? tokens.radius.sm : 0,
+                    padding: pitch.rateLimited ? tokens.spacing[3] : 0,
+                  }}>
+                    {pitch.rateLimited ? '⏳' : '⚠'} {pitch.error}
+                  </div>
                 ) : (
                   <>
                     <div style={{ fontSize: '13px', color: tokens.colors.accent.light, fontWeight: 600, marginBottom: tokens.spacing[2] }}>

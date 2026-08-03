@@ -5,7 +5,12 @@ import { geminiConfigError } from '../../lib/geminiClient';
 // Spacing between the two Gemini calls in a single investor request. Free-tier
 // quota is per-minute, so firing research and pitch back to back counts as two
 // requests in the same window and pushes the campaign over the limit faster.
-var INTER_CALL_DELAY_MS = 3000;
+//
+// This sleep is dead time inside a 60s Vercel function, so raising it directly
+// squeezes the budget available to the two API calls. The per-call deadlines in
+// lib/researchInvestor.js and lib/generatePitch.js were reduced to compensate:
+//   research 13s + delay 12s + pitch 14s + truncation retry 12s = 51s
+var INTER_CALL_DELAY_MS = 12000;
 
 function sleep(ms) {
   return new Promise(function (resolve) { setTimeout(resolve, ms); });
