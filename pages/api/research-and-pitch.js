@@ -120,6 +120,7 @@ export default async function handler(req, res) {
 
   var pitch = null;
   var pitchError = null;
+  var rateLimited = false;
 
   try {
     console.log('research-and-pitch step 2: generating pitch for ' + investorName);
@@ -129,8 +130,30 @@ export default async function handler(req, res) {
       console.error('research-and-pitch: ' + pitchError);
     }
   } catch (err) {
-    pitchError = 'Pitch generation threw: ' + (err && err.message ? err.message : String(err));
+    rateLimited = !!(err && err.rateLimited);
+    pitchError = rateLimited
+      ? (err.message || 'Gemini rate limit exceeded')
+      : 'Pitch generation threw: ' + (err && err.message ? err.message : String(err));
     console.error('research-and-pitch: ' + pitchError);
+  }
+
+  // 429 tells the client to back off and retry this investor rather than
+  // treating it as a permanent failure.
+  if (!pitch && rateLimited) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({
+      success: false,
+      investorName: investorName,
+      firm: firm || null,
+      research: research,
+      score: scoring.score,
+      matchReasons: scoring.matchReasons,
+      pitch: null,
+      stage: 'pitch',
+      rateLimited: true,
+      error: pitchError,
+      researchError: researchError
+    });
   }
 
   // A failed pitch is a real failure and must not return HTTP 200 with a null

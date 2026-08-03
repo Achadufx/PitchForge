@@ -539,6 +539,15 @@ function StepIndicator({ current }) {
 // GENERATE SINGLE
 // ============================================================
 
+// Paces campaign requests. Gemini's free tier enforces a per-minute request
+// quota, and a campaign fires 2 Gemini calls per investor, so an unthrottled
+// 5-investor run bursts 10 calls in seconds and the later ones get 429s.
+const CAMPAIGN_DELAY_MS = 2500;
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Throws on failure. It must NOT substitute a generic template: doing that made
 // every backend failure look like a working-but-bland pitch, which is why the
 // pipeline appeared to "work" while producing garbage.
@@ -584,7 +593,11 @@ async function generateSingle(inv, startup) {
 
   var reason = data.error || 'Pitch generation failed (HTTP ' + res.status + ')';
   console.error('Pitch failed for ' + inv.name + ': ' + reason);
-  throw new Error(reason);
+  var failure = new Error(reason);
+  // Lets the campaign loop slow down instead of burning the remaining investors
+  // against a quota that is already exhausted.
+  failure.rateLimited = res.status === 429 || !!data.rateLimited;
+  throw failure;
 }
 // ============================================================
 // REVIEW STEP - FIXED (Pitch body fills the box)
@@ -601,9 +614,24 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
   const [editedSubject, setEditedSubject] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+
     const generate = async () => {
       const results = [];
+      // Grows when the server reports a rate limit, so the rest of the campaign
+      // paces itself instead of hammering an exhausted quota.
+      let pacing = CAMPAIGN_DELAY_MS;
+
       for (let i = 0; i < investors.length; i++) {
+        if (cancelled) return;
+
+        // Space out requests. Skipped before the first call so a single-investor
+        // campaign has no artificial wait.
+        if (i > 0) {
+          await delay(pacing);
+          if (cancelled) return;
+        }
+
         try {
           const data = await generateSingle(investors[i], startup);
           results.push({
@@ -614,6 +642,15 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
           });
           onPitchGenerated(1);
         } catch (err) {
+          if (err && err.rateLimited) {
+            // Server already retried with backoff and still hit the wall, so
+            // give the quota real time to refill before the next investor.
+            pacing = Math.min(pacing * 2, 20000);
+            console.warn(
+              'Rate limited on ' + investors[i].name +
+              '. Slowing campaign to ' + pacing + 'ms between investors.'
+            );
+          }
           results.push({
             ...investors[i],
             subject: "",
@@ -621,8 +658,11 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
             error: err.message,
           });
         }
-        setProgress(i + 1);
+        if (!cancelled) setProgress(i + 1);
       }
+
+      if (cancelled) return;
+
       setPitches(results);
       // Only preselect pitches that actually generated. Selecting everything
       // meant a failed pitch (empty body) could be sent to a real investor.
@@ -633,7 +673,11 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
       );
       setGenerating(false);
     };
+
     generate();
+
+    // Prevents state updates after unmount if the user navigates mid-campaign.
+    return () => { cancelled = true; };
   }, []);
 
   const handleRegenerate = async (i) => {
