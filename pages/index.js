@@ -4,8 +4,40 @@ import GlobalStyles from '../components/GlobalStyles';
 import tokens from '../lib/designTokens';
 
 // Editorial landing page. No hero animation, no particle effects, no scroll
-// reveals, no gradient text — all of which the previous version used. Confidence
-// comes from typography and whitespace, the Stripe/Linear approach.
+// reveals, no gradient text. Confidence comes from typography, whitespace, and
+// showing the actual product difference rather than claiming it.
+
+// Marks the verified facts inside the good pitch, so "specific" is something the
+// visitor sees rather than a word they have to take on faith.
+function Anchor({ children }) {
+  return (
+    <span
+      style={{
+        color: tokens.colors.text.primary,
+        fontWeight: 550,
+        borderBottom: '2px solid ' + tokens.colors.accent.subtleBorder,
+        paddingBottom: 1,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+const CHECKS = [
+  {
+    title: 'Opens on a proper noun',
+    body: 'A named deal, their fund, or a portfolio company. A restatement of their thesis is rejected and rewritten.',
+  },
+  {
+    title: 'Never invents a quote',
+    body: 'Nothing is put in an investor’s mouth. If a claim cannot be traced to the research, it does not ship.',
+  },
+  {
+    title: 'Finishes the thought',
+    body: 'Truncated drafts and leftover placeholders are caught before you ever see them.',
+  },
+];
 
 const STEPS = [
   {
@@ -21,7 +53,7 @@ const STEPS = [
   {
     n: '03',
     title: 'Review, then send',
-    body: 'Each pitch opens on a verified fact about that specific investor. Edit anything before it goes out.',
+    body: 'Every draft arrives already checked. Edit anything, deselect anyone, then send the batch.',
   },
 ];
 
@@ -65,8 +97,14 @@ const TIERS = [
   },
 ];
 
-// Inline mockup of the real review screen rather than stock imagery.
+// Inline recreation of the real review screen rather than stock imagery.
 function ProductMockup() {
+  const rows = [
+    { name: 'Yemi Keri', firm: 'Rising Tide Africa', score: 86, active: true },
+    { name: 'Eloho Omame', firm: 'TLcom Capital', score: 79, active: false },
+    { name: 'Maya Horgan Famodu', firm: 'Ingressive Capital', score: 74, active: false },
+  ];
+
   return (
     <div
       style={{
@@ -84,7 +122,7 @@ function ProductMockup() {
           display: 'flex',
           alignItems: 'center',
           gap: 6,
-          padding: '12px 16px',
+          padding: '13px 16px',
           borderBottom: '1px solid ' + tokens.colors.border.default,
           background: tokens.colors.bg.surface,
         }}
@@ -93,65 +131,90 @@ function ProductMockup() {
         <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#D4CFC7' }} />
         <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#D4CFC7' }} />
         <span style={{ marginLeft: 12, fontSize: 12, color: tokens.colors.text.muted }}>
-          Review pitches — 3 of 5 selected
+          Review pitches — 3 of 3 ready
         </span>
       </div>
 
-      <div style={{ padding: tokens.spacing[6] }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            marginBottom: tokens.spacing[4],
-          }}
-        >
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: tokens.colors.text.primary }}>
-              Yemi Keri
+      <div className="mock-body">
+        <div className="mock-list">
+          {rows.map((r) => (
+            <div
+              key={r.name}
+              style={{
+                padding: '13px 14px',
+                borderRadius: tokens.radius.md,
+                border:
+                  '1px solid ' +
+                  (r.active ? tokens.colors.text.primary : tokens.colors.border.default),
+                background: r.active ? tokens.colors.bg.card : 'transparent',
+                marginBottom: 8,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  gap: 8,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: r.active ? 600 : 500,
+                    color: r.active ? tokens.colors.text.primary : tokens.colors.text.secondary,
+                  }}
+                >
+                  {r.name}
+                </span>
+                <span style={{ fontSize: 12, color: tokens.colors.text.muted }}>{r.score}</span>
+              </div>
+              <div style={{ fontSize: 12.5, color: tokens.colors.text.muted, marginTop: 2 }}>
+                {r.firm}
+              </div>
             </div>
-            <div style={{ fontSize: 13, color: tokens.colors.text.muted }}>Rising Tide Africa</div>
+          ))}
+        </div>
+
+        <div className="mock-pitch">
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 550,
+              color: tokens.colors.text.primary,
+              marginBottom: 12,
+            }}
+          >
+            Subject: rails not apps for clinical records
           </div>
-          <span className="pw-tag-accent">Score 86</span>
-        </div>
-
-        <div
-          style={{
-            fontSize: 13,
-            fontWeight: 550,
-            color: tokens.colors.text.primary,
-            marginBottom: tokens.spacing[3],
-          }}
-        >
-          Subject: rails not apps for clinical records
-        </div>
-
-        <div
-          style={{
-            background: tokens.colors.bg.surface,
-            border: '1px solid ' + tokens.colors.border.default,
-            borderRadius: tokens.radius.md,
-            padding: tokens.spacing[4],
-            fontSize: 14,
-            lineHeight: 1.75,
-            color: tokens.colors.text.secondary,
-          }}
-        >
-          Hi Yemi,
-          <br />
-          <br />
-          Your Series A in Ilara Health said diagnostics fail on distribution, not on
-          science. Clinical records fail the same way.
-          <br />
-          <br />
-          A Lagos clinic loses a patient file every week. Paper, no backup, no audit
-          trail.
-          <br />
-          <br />
-          We built the encrypted vault patients actually own. Two hospital pilots signed.
-          <br />
-          <br />
-          15 minutes Thursday?
+          <div
+            style={{
+              background: tokens.colors.bg.surface,
+              border: '1px solid ' + tokens.colors.border.default,
+              borderRadius: tokens.radius.md,
+              padding: 18,
+              fontSize: 14,
+              lineHeight: 1.8,
+              color: tokens.colors.text.secondary,
+            }}
+          >
+            Hi Yemi,
+            <br />
+            <br />
+            Your <Anchor>Series A in Ilara Health</Anchor> said diagnostics fail on
+            distribution, not on science. Clinical records fail the same way.
+            <br />
+            <br />
+            A Lagos clinic loses a patient file every week. Paper, no backup, no audit
+            trail.
+            <br />
+            <br />
+            We built the encrypted vault patients actually own. Two hospital pilots
+            signed.
+            <br />
+            <br />
+            15 minutes Thursday?
+          </div>
         </div>
       </div>
     </div>
@@ -165,7 +228,7 @@ export default function Landing() {
         <title>PitchWire — Cold pitches investors actually read</title>
         <meta
           name="description"
-          content="PitchWire writes investor cold emails that open on a verified fact about that specific investor. Research, draft, review, send."
+          content="Generic openers are why investors do not reply. PitchWire researches each investor and opens every pitch on a verified fact about them."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -179,9 +242,14 @@ export default function Landing() {
 
       <style jsx>{`
         .wrap {
-          max-width: 1080px;
+          max-width: 1120px;
           margin: 0 auto;
-          padding: 0 24px;
+          padding: 0 28px;
+        }
+        .wrap-narrow {
+          max-width: 880px;
+          margin: 0 auto;
+          padding: 0 28px;
         }
         .nav {
           border-bottom: 1px solid ${tokens.colors.border.default};
@@ -194,23 +262,34 @@ export default function Landing() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          height: 68px;
+          height: 70px;
         }
         .nav-links {
           display: flex;
           align-items: center;
-          gap: 32px;
+          gap: 34px;
         }
+
+        /* HERO — larger than the shared display scale, this is the one place
+           the type should feel oversized. */
         .hero {
-          padding: 120px 0 96px;
+          padding: 132px 0 88px;
         }
-        .hero-title {
-          max-width: 15ch;
-          margin-bottom: 28px;
+        .hero h1 {
+          font-size: clamp(44px, 8vw, 88px);
+          font-weight: 700;
+          letter-spacing: -0.042em;
+          line-height: 0.98;
+          color: ${tokens.colors.text.primary};
+          max-width: 16ch;
+          margin: 0 0 32px;
         }
         .hero-sub {
-          max-width: 54ch;
+          max-width: 52ch;
           margin-bottom: 40px;
+          font-size: 19px;
+          line-height: 1.65;
+          color: ${tokens.colors.text.secondary};
         }
         .hero-actions {
           display: flex;
@@ -218,21 +297,68 @@ export default function Landing() {
           align-items: center;
           flex-wrap: wrap;
         }
-        .mockup-band {
-          padding-bottom: 96px;
+        .hero-note {
+          margin-top: 22px;
+          font-size: 14px;
+          color: ${tokens.colors.text.muted};
         }
+
+        /* THE PROOF — the side-by-side sits directly under the hero, because it
+           is the single most persuasive thing on the page. */
+        .proof {
+          padding: 0 0 112px;
+        }
+        .proof-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+        }
+        .proof-col {
+          border: 1px solid ${tokens.colors.border.default};
+          border-radius: ${tokens.radius.lg};
+          padding: 30px;
+          background: ${tokens.colors.bg.card};
+        }
+        .proof-col.dead {
+          background: transparent;
+          border-style: dashed;
+        }
+        .proof-tag {
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.09em;
+          margin-bottom: 18px;
+        }
+        .proof-quote {
+          font-size: 16px;
+          line-height: 1.75;
+        }
+        .proof-verdict {
+          margin-top: 22px;
+          padding-top: 18px;
+          border-top: 1px solid ${tokens.colors.border.default};
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
         .section {
-          padding: 96px 0;
+          padding: 104px 0;
           border-top: 1px solid ${tokens.colors.border.default};
         }
         .section-head {
-          max-width: 46ch;
-          margin-bottom: 56px;
+          max-width: 44ch;
+          margin-bottom: 60px;
         }
         .steps {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 48px;
+          gap: 52px;
+        }
+        .checks {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
         }
         .tiers {
           display: grid;
@@ -240,14 +366,21 @@ export default function Landing() {
           gap: 20px;
           align-items: start;
         }
-        .compare {
+
+        .mock-body {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 230px 1fr;
           gap: 20px;
+          padding: 20px;
         }
+        .mock-list {
+          border-right: 1px solid ${tokens.colors.border.default};
+          padding-right: 18px;
+        }
+
         .footer {
           border-top: 1px solid ${tokens.colors.border.default};
-          padding: 40px 0;
+          padding: 44px 0;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -258,21 +391,38 @@ export default function Landing() {
           display: flex;
           gap: 28px;
         }
-        @media (max-width: 860px) {
+
+        @media (max-width: 900px) {
           .steps,
+          .checks,
           .tiers,
-          .compare {
+          .proof-grid {
             grid-template-columns: 1fr;
-            gap: 24px;
+            gap: 20px;
+          }
+          .steps {
+            gap: 32px;
           }
           .hero {
-            padding: 72px 0 64px;
+            padding: 76px 0 56px;
+          }
+          .proof {
+            padding-bottom: 72px;
           }
           .section {
-            padding: 64px 0;
+            padding: 68px 0;
           }
           .nav-links {
             display: none;
+          }
+          .mock-body {
+            grid-template-columns: 1fr;
+          }
+          .mock-list {
+            border-right: none;
+            border-bottom: 1px solid ${tokens.colors.border.default};
+            padding-right: 0;
+            padding-bottom: 14px;
           }
         }
       `}</style>
@@ -292,6 +442,9 @@ export default function Landing() {
               PitchWire
             </span>
             <div className="nav-links">
+              <a href="#proof" className="pw-link-muted" style={{ fontSize: 15 }}>
+                The difference
+              </a>
               <a href="#how" className="pw-link-muted" style={{ fontSize: 15 }}>
                 How it works
               </a>
@@ -314,29 +467,102 @@ export default function Landing() {
 
         {/* HERO */}
         <header className="wrap hero">
-          <h1 className="pw-display hero-title">Cold pitches investors actually read.</h1>
-          <p className="pw-body-lg hero-sub">
-            Most outreach dies on the opening line because it could have been sent to
-            anyone. PitchWire researches each investor and opens on something true and
-            specific to them — a named deal, their fund, a company they backed.
+          <h1>Your opening line is why they didn&apos;t reply.</h1>
+          <p className="hero-sub">
+            Investors read the first sentence and know instantly whether you looked them
+            up. PitchWire researches each one and opens every pitch on something only
+            they could receive.
           </p>
           <div className="hero-actions">
             <Link href="/login" className="pw-btn-primary">
               Start free
             </Link>
-            <a href="#how" className="pw-btn-secondary">
-              See how it works
+            <a href="#proof" className="pw-btn-secondary">
+              See the difference
             </a>
           </div>
-          <p style={{ marginTop: 20, fontSize: 14, color: tokens.colors.text.muted }}>
-            10 pitches free. No card required.
-          </p>
+          <p className="hero-note">10 pitches free. No card required.</p>
         </header>
 
-        {/* PRODUCT MOCKUP */}
-        <div className="wrap mockup-band">
-          <ProductMockup />
-        </div>
+        {/* PROOF — same startup, same investor, two openings */}
+        <section id="proof" className="wrap proof">
+          <div className="proof-grid">
+            <div className="proof-col dead">
+              <div className="proof-tag" style={{ color: tokens.colors.text.muted }}>
+                What everyone sends
+              </div>
+              <p className="proof-quote" style={{ color: tokens.colors.text.muted }}>
+                &ldquo;Hi Yemi, I noticed your focus on African fintech and thought you
+                might be interested in what we&apos;re building. We&apos;re a healthtech
+                startup solving a big problem in the market.&rdquo;
+              </p>
+              <p className="proof-verdict" style={{ color: tokens.colors.text.muted }}>
+                Send this to fifty investors without changing a word. They can tell. That
+                is the whole reason it goes unanswered.
+              </p>
+            </div>
+
+            <div className="proof-col">
+              <div className="proof-tag" style={{ color: tokens.colors.accent.secondary }}>
+                What PitchWire writes
+              </div>
+              <p className="proof-quote" style={{ color: tokens.colors.text.secondary }}>
+                &ldquo;Hi Yemi, your <Anchor>Series A in Ilara Health</Anchor> said
+                diagnostics fail on distribution, not on science. Clinical records fail the
+                same way. A Lagos clinic loses a patient file every week.&rdquo;
+              </p>
+              <p className="proof-verdict" style={{ color: tokens.colors.text.secondary }}>
+                Impossible to send to anyone else. Every draft is checked against that bar
+                before it reaches you.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* PRODUCT */}
+        <section className="section">
+          <div className="wrap">
+            <div className="section-head">
+              <p className="pw-eyebrow" style={{ marginBottom: 14 }}>
+                The workspace
+              </p>
+              <h2 className="pw-h2">Review the whole batch before a single one sends.</h2>
+            </div>
+            <ProductMockup />
+          </div>
+        </section>
+
+        {/* THE CHECKS — honest differentiation in place of invented metrics */}
+        <section className="section">
+          <div className="wrap">
+            <div className="section-head">
+              <p className="pw-eyebrow" style={{ marginBottom: 14 }}>
+                Before you see it
+              </p>
+              <h2 className="pw-h2">Three checks run on every draft.</h2>
+            </div>
+            <div className="checks">
+              {CHECKS.map((c) => (
+                <div key={c.title} className="pw-card">
+                  <h3
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: tokens.colors.text.primary,
+                      marginBottom: 10,
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {c.title}
+                  </h3>
+                  <p style={{ fontSize: 14.5, lineHeight: 1.7, color: tokens.colors.text.secondary }}>
+                    {c.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* HOW IT WORKS */}
         <section id="how" className="section">
@@ -355,7 +581,7 @@ export default function Landing() {
                       fontSize: 13,
                       fontWeight: 600,
                       color: tokens.colors.accent.secondary,
-                      marginBottom: 14,
+                      marginBottom: 16,
                       letterSpacing: '0.04em',
                     }}
                   >
@@ -367,51 +593,6 @@ export default function Landing() {
                   <p className="pw-body">{s.body}</p>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* THE DIFFERENCE */}
-        <section className="section">
-          <div className="wrap">
-            <div className="section-head">
-              <p className="pw-eyebrow" style={{ marginBottom: 14 }}>
-                The difference
-              </p>
-              <h2 className="pw-h2">Every pitch passes the portability test.</h2>
-            </div>
-            <div className="compare">
-              <div className="pw-card">
-                <p className="pw-eyebrow" style={{ marginBottom: 12 }}>
-                  Generic outreach
-                </p>
-                <p
-                  className="pw-body"
-                  style={{ fontStyle: 'italic', color: tokens.colors.text.muted }}
-                >
-                  &ldquo;I noticed your focus on African fintech and thought you might be
-                  interested in what we are building.&rdquo;
-                </p>
-                <p style={{ marginTop: 16, fontSize: 14, color: tokens.colors.text.muted }}>
-                  Sendable to fifty investors unchanged. That is why it gets no reply.
-                </p>
-              </div>
-              <div className="pw-card">
-                <p
-                  className="pw-eyebrow"
-                  style={{ marginBottom: 12, color: tokens.colors.accent.secondary }}
-                >
-                  PitchWire
-                </p>
-                <p className="pw-body" style={{ fontStyle: 'italic' }}>
-                  &ldquo;Your Series A in Ilara Health said diagnostics fail on
-                  distribution, not on science. Clinical records fail the same way.&rdquo;
-                </p>
-                <p style={{ marginTop: 16, fontSize: 14, color: tokens.colors.text.secondary }}>
-                  Impossible to send to anyone else. Every draft is checked for this before
-                  you see it.
-                </p>
-              </div>
             </div>
           </div>
         </section>
@@ -430,7 +611,7 @@ export default function Landing() {
                 <div
                   key={t.name}
                   className={t.featured ? 'pw-card-accent' : 'pw-card'}
-                  style={{ display: 'flex', flexDirection: 'column', minHeight: 400 }}
+                  style={{ display: 'flex', flexDirection: 'column', minHeight: 412 }}
                 >
                   <div
                     style={{
@@ -448,16 +629,16 @@ export default function Landing() {
                     {t.featured && <span className="pw-tag-accent">Most popular</span>}
                   </div>
 
-                  <p style={{ fontSize: 14, color: tokens.colors.text.muted, marginBottom: 20 }}>
+                  <p style={{ fontSize: 14, color: tokens.colors.text.muted, marginBottom: 22 }}>
                     {t.blurb}
                   </p>
 
-                  <div style={{ marginBottom: 24 }}>
+                  <div style={{ marginBottom: 26 }}>
                     <span
                       style={{
-                        fontSize: 40,
+                        fontSize: 42,
                         fontWeight: 700,
-                        letterSpacing: '-0.03em',
+                        letterSpacing: '-0.035em',
                         color: tokens.colors.text.primary,
                       }}
                     >
@@ -471,7 +652,7 @@ export default function Landing() {
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 12,
-                      marginBottom: 28,
+                      marginBottom: 30,
                     }}
                   >
                     {t.features.map((f) => (
@@ -515,15 +696,27 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* CLOSING CTA */}
+        {/* CLOSING */}
         <section className="section">
-          <div className="wrap" style={{ textAlign: 'center' }}>
-            <h2 className="pw-h2" style={{ marginBottom: 16 }}>
-              Write the first one in two minutes.
+          <div className="wrap-narrow" style={{ textAlign: 'center' }}>
+            <h2
+              style={{
+                fontSize: 'clamp(30px, 4.6vw, 46px)',
+                fontWeight: 700,
+                letterSpacing: '-0.032em',
+                lineHeight: 1.12,
+                color: tokens.colors.text.primary,
+                marginBottom: 20,
+              }}
+            >
+              Write one. You will know in ten seconds.
             </h2>
-            <p className="pw-body-lg" style={{ maxWidth: '48ch', margin: '0 auto 32px' }}>
-              Add an investor, describe your startup once, and see what a pitch looks like
-              when it could only have been sent to them.
+            <p
+              className="pw-body-lg"
+              style={{ maxWidth: '46ch', margin: '0 auto 36px' }}
+            >
+              Add a single investor and read the opening line it produces. If it could
+              have been sent to anyone else, close the tab.
             </p>
             <Link href="/login" className="pw-btn-primary">
               Start free
@@ -537,6 +730,9 @@ export default function Landing() {
             &copy; {new Date().getFullYear()} PitchWire
           </span>
           <div className="footer-links">
+            <a href="#proof" className="pw-link-muted" style={{ fontSize: 14 }}>
+              The difference
+            </a>
             <a href="#how" className="pw-link-muted" style={{ fontSize: 14 }}>
               How it works
             </a>
