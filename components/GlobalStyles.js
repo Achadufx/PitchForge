@@ -2,6 +2,13 @@ export default function GlobalStyles() {
   return (
     <style jsx global>{`
       /* ============================================================
+         PITCHWIRE DESIGN SYSTEM
+         Warm monochromatic cream. No glows, no gradients, no neon.
+         Shadows are neutral rgba(0,0,0,...) only.
+         Palette mirrors lib/designTokens.js — keep the two in sync.
+         ============================================================ */
+
+      /* ============================================================
          RESET & BASE
          ============================================================ */
       * {
@@ -11,42 +18,56 @@ export default function GlobalStyles() {
       }
 
       html, body {
-        background: #070b14;
+        background: #F5F0E8;
         margin: 0;
         padding: 0;
         min-height: 100vh;
         overflow-x: hidden;
-        color: #e8eaed;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #1A1A1A;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 15px;
+        line-height: 1.7;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
 
       #__next {
-        background: #070b14;
+        background: #F5F0E8;
         min-height: 100vh;
+      }
+
+      ::selection {
+        background: rgba(139,115,85,0.18);
+        color: #1A1A1A;
       }
 
       /* ============================================================
          CARD SYSTEM
+         White on cream, hairline warm border, neutral shadow only.
          ============================================================ */
       .pw-card {
-        background: #111827;
-        border: 1px solid #1e2a3a;
-        border-radius: 16px;
+        background: #FFFFFF;
+        border: 1px solid #D4CFC7;
+        border-radius: 12px;
         padding: 24px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-        transition: all 250ms ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 220ms cubic-bezier(0.4, 0, 0.2, 1);
         width: 100%;
         box-sizing: border-box;
       }
 
+      .pw-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      }
+
+      /* Emphasis comes from a darker border, not a coloured ring. */
       .pw-card-accent {
-        background: #111827;
-        border: 1px solid #14b8a6;
-        border-radius: 16px;
+        background: #FFFFFF;
+        border: 1px solid #1A1A1A;
+        border-radius: 12px;
         padding: 24px;
-        box-shadow: 0 0 0 1px rgba(20,184,166,0.12);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         width: 100%;
         box-sizing: border-box;
       }
@@ -60,12 +81,14 @@ export default function GlobalStyles() {
         left: 0;
         bottom: 0;
         width: 240px;
-        background: #070b14;
-        border-right: 1px solid #1e2a3a;
+        background: #EDE8DE;
+        border-right: 1px solid #D4CFC7;
         z-index: 50;
         transform: translateX(0);
-        transition: transform 250ms ease;
+        transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
       }
 
       .pw-sidebar-overlay {
@@ -75,9 +98,8 @@ export default function GlobalStyles() {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0,0,0,0.7);
+        background: rgba(26,26,26,0.32);
         z-index: 49;
-        backdrop-filter: blur(4px);
       }
 
       .pw-sidebar-overlay.open {
@@ -90,11 +112,11 @@ export default function GlobalStyles() {
       .pw-main-content {
         margin-left: 240px;
         flex: 1;
-        padding: 32px;
+        padding: 40px;
         overflow-y: auto;
         min-height: 100vh;
-        background: #070b14;
-        transition: margin-left 250ms ease;
+        background: #F5F0E8;
+        transition: margin-left 220ms cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       /* ============================================================
@@ -105,8 +127,8 @@ export default function GlobalStyles() {
         align-items: center;
         justify-content: space-between;
         padding: 16px;
-        border-bottom: 1px solid #1e2a3a;
-        background: #070b14;
+        border-bottom: 1px solid #D4CFC7;
+        background: #F5F0E8;
         position: sticky;
         top: 0;
         z-index: 40;
@@ -114,159 +136,233 @@ export default function GlobalStyles() {
 
       /* ============================================================
          TYPOGRAPHY
+         Editorial scale. Generous line height throughout.
          ============================================================ */
+      .pw-display {
+        font-size: clamp(40px, 7vw, 72px);
+        font-weight: 700;
+        color: #1A1A1A;
+        letter-spacing: -0.035em;
+        line-height: 1.05;
+        margin: 0;
+      }
+
       .pw-h1 {
-        font-size: 35px;
-        font-weight: 800;
-        color: #e8eaed;
-        letter-spacing: -0.02em;
-        line-height: 1.2;
+        font-size: clamp(32px, 5vw, 48px);
+        font-weight: 700;
+        color: #1A1A1A;
+        letter-spacing: -0.025em;
+        line-height: 1.15;
         margin: 0;
       }
 
       .pw-h2 {
-        font-size: 27px;
-        font-weight: 700;
-        color: #e8eaed;
-        letter-spacing: -0.01em;
-        line-height: 1.2;
+        font-size: clamp(24px, 3.5vw, 34px);
+        font-weight: 650;
+        color: #1A1A1A;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
         margin: 0;
       }
 
       .pw-h3 {
-        font-size: 21px;
-        font-weight: 700;
-        color: #e8eaed;
-        line-height: 1.3;
+        font-size: clamp(19px, 2.2vw, 23px);
+        font-weight: 600;
+        color: #1A1A1A;
+        letter-spacing: -0.01em;
+        line-height: 1.4;
         margin: 0;
       }
 
       .pw-body {
         font-size: 15px;
         font-weight: 400;
-        color: #b0b6c4;
-        line-height: 1.6;
+        color: #5C5248;
+        line-height: 1.7;
+      }
+
+      .pw-body-lg {
+        font-size: 17px;
+        font-weight: 400;
+        color: #5C5248;
+        line-height: 1.7;
       }
 
       .pw-label {
         display: block;
         font-size: 13px;
         font-weight: 500;
-        color: #7a8194;
+        color: #5C5248;
         margin-bottom: 8px;
-        letter-spacing: 0.01em;
+        letter-spacing: 0;
+      }
+
+      .pw-eyebrow {
+        font-size: 12px;
+        font-weight: 600;
+        color: #9E9589;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
       }
 
       /* ============================================================
          BUTTONS
+         Near-black primary. Hover shifts colour, never adds a glow.
          ============================================================ */
       .pw-btn-primary {
-        background: #14b8a6;
-        color: #ffffff;
-        border: none;
-        border-radius: 10px;
-        padding: 12px 24px;
-        font-size: 14px;
-        font-weight: 600;
+        background: #1A1A1A;
+        color: #FFFFFF;
+        border: 1px solid #1A1A1A;
+        border-radius: 8px;
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 550;
         cursor: pointer;
-        transition: all 150ms ease;
+        transition: background 140ms cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 140ms cubic-bezier(0.4, 0, 0.2, 1);
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
         white-space: nowrap;
         min-height: 44px;
         text-decoration: none;
+        font-family: inherit;
+        line-height: 1.4;
       }
 
       .pw-btn-primary:hover {
-        background: #2dd4bf;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(20,184,166,0.25);
+        background: #333333;
+        border-color: #333333;
+      }
+
+      .pw-btn-primary:disabled {
+        background: #BFB8AD;
+        border-color: #BFB8AD;
+        color: #FFFFFF;
+        cursor: not-allowed;
       }
 
       .pw-btn-secondary {
-        background: transparent;
-        color: #b0b6c4;
-        border: 1px solid #1e2a3a;
-        border-radius: 10px;
-        padding: 12px 24px;
-        font-size: 14px;
+        background: #FFFFFF;
+        color: #1A1A1A;
+        border: 1px solid #D4CFC7;
+        border-radius: 8px;
+        padding: 12px 22px;
+        font-size: 15px;
         font-weight: 500;
         cursor: pointer;
-        transition: all 150ms ease;
+        transition: border-color 140ms cubic-bezier(0.4, 0, 0.2, 1),
+                    background 140ms cubic-bezier(0.4, 0, 0.2, 1);
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
         white-space: nowrap;
         min-height: 44px;
         text-decoration: none;
+        font-family: inherit;
+        line-height: 1.4;
       }
 
       .pw-btn-secondary:hover {
-        border-color: #2a3a4a;
-        color: #e8eaed;
+        border-color: #BFB8AD;
+        background: #EDE8DE;
       }
 
       .pw-btn-ghost {
         background: transparent;
-        color: #7a8194;
+        color: #5C5248;
         border: none;
-        border-radius: 10px;
-        padding: 8px 16px;
-        font-size: 13px;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 14px;
         font-weight: 500;
         cursor: pointer;
-        transition: all 150ms ease;
+        transition: color 140ms cubic-bezier(0.4, 0, 0.2, 1),
+                    background 140ms cubic-bezier(0.4, 0, 0.2, 1);
         white-space: nowrap;
         min-height: 44px;
+        font-family: inherit;
       }
 
       .pw-btn-ghost:hover {
-        color: #e8eaed;
-        background: rgba(255,255,255,0.03);
+        color: #1A1A1A;
+        background: #EDE8DE;
       }
 
       /* ============================================================
          INPUTS
+         Focus ring is a neutral warm halo, not a coloured glow.
          ============================================================ */
       .pw-input {
         width: 100%;
-        background: #0f1625;
-        border: 1px solid #1e2a3a;
-        border-radius: 10px;
-        padding: 12px 16px;
-        color: #e8eaed;
-        font-size: 14px;
+        background: #FFFFFF;
+        border: 1px solid #D4CFC7;
+        border-radius: 8px;
+        padding: 12px 14px;
+        color: #1A1A1A;
+        font-size: 15px;
+        line-height: 1.6;
         outline: none;
-        transition: all 150ms ease;
+        transition: border-color 140ms cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 140ms cubic-bezier(0.4, 0, 0.2, 1);
         box-sizing: border-box;
         min-height: 44px;
+        font-family: inherit;
+      }
+
+      .pw-input::placeholder {
+        color: #9E9589;
       }
 
       .pw-input:focus {
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+        border-color: #1A1A1A;
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
       }
 
       .pw-textarea {
         width: 100%;
-        background: #0f1625;
-        border: 1px solid #1e2a3a;
-        border-radius: 10px;
-        padding: 12px 16px;
-        color: #e8eaed;
-        font-size: 14px;
+        background: #FFFFFF;
+        border: 1px solid #D4CFC7;
+        border-radius: 8px;
+        padding: 12px 14px;
+        color: #1A1A1A;
+        font-size: 15px;
+        line-height: 1.7;
         outline: none;
-        transition: all 150ms ease;
+        transition: border-color 140ms cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 140ms cubic-bezier(0.4, 0, 0.2, 1);
         box-sizing: border-box;
         resize: vertical;
         font-family: inherit;
         min-height: 44px;
       }
 
+      .pw-textarea::placeholder {
+        color: #9E9589;
+      }
+
       .pw-textarea:focus {
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+        border-color: #1A1A1A;
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+      }
+
+      .pw-select {
+        background: #FFFFFF;
+        color: #1A1A1A;
+        border: 1px solid #D4CFC7;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        outline: none;
+        cursor: pointer;
+        font-family: inherit;
+        min-height: 44px;
+      }
+
+      .pw-select:focus {
+        border-color: #1A1A1A;
       }
 
       /* ============================================================
@@ -282,7 +378,7 @@ export default function GlobalStyles() {
       }
 
       .pw-scroll-pitches {
-        max-height: 400px;
+        max-height: 460px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
@@ -293,7 +389,7 @@ export default function GlobalStyles() {
 
       .pw-scroll::-webkit-scrollbar,
       .pw-scroll-pitches::-webkit-scrollbar {
-        width: 4px;
+        width: 6px;
       }
 
       .pw-scroll::-webkit-scrollbar-track,
@@ -303,8 +399,13 @@ export default function GlobalStyles() {
 
       .pw-scroll::-webkit-scrollbar-thumb,
       .pw-scroll-pitches::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.1);
-        border-radius: 10px;
+        background: #D4CFC7;
+        border-radius: 999px;
+      }
+
+      .pw-scroll::-webkit-scrollbar-thumb:hover,
+      .pw-scroll-pitches::-webkit-scrollbar-thumb:hover {
+        background: #BFB8AD;
       }
 
       /* ============================================================
@@ -320,37 +421,39 @@ export default function GlobalStyles() {
          DROPZONE
          ============================================================ */
       .pw-dropzone {
-        border: 2px dashed #1e2a3a;
-        border-radius: 16px;
-        padding: 40px 24px;
+        border: 1px dashed #BFB8AD;
+        border-radius: 12px;
+        padding: 44px 24px;
         text-align: center;
         cursor: pointer;
-        background: #0c1120;
-        transition: all 250ms ease;
+        background: #FFFFFF;
+        transition: border-color 220ms cubic-bezier(0.4, 0, 0.2, 1),
+                    background 220ms cubic-bezier(0.4, 0, 0.2, 1);
         width: 100%;
         box-sizing: border-box;
       }
 
       .pw-dropzone:hover {
-        border-color: #14b8a6;
-        background: rgba(20,184,166,0.12);
+        border-color: #8B7355;
+        background: #EDE8DE;
       }
 
       /* ============================================================
          PROGRESS
+         Solid fill. The old version used a teal gradient.
          ============================================================ */
       .pw-progress {
-        background: rgba(255,255,255,0.05);
+        background: #E6E0D4;
         border-radius: 999px;
-        height: 4px;
+        height: 6px;
         overflow: hidden;
       }
 
       .pw-progress-fill {
-        background: linear-gradient(90deg, #14b8a6, #5eead4);
+        background: #1A1A1A;
         height: 100%;
         border-radius: 999px;
-        transition: width 400ms ease;
+        transition: width 360ms cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       /* ============================================================
@@ -358,24 +461,26 @@ export default function GlobalStyles() {
          ============================================================ */
       .pw-tag {
         display: inline-block;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 500;
-        padding: 4px 12px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.04);
-        color: #7a8194;
-        border: 1px solid #1e2a3a;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: #EDE8DE;
+        color: #5C5248;
+        border: 1px solid #D4CFC7;
+        line-height: 1.5;
       }
 
       .pw-tag-accent {
         display: inline-block;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 500;
-        padding: 4px 12px;
-        border-radius: 999px;
-        background: rgba(20,184,166,0.12);
-        color: #5eead4;
-        border: 1px solid rgba(20,184,166,0.25);
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(139,115,85,0.08);
+        color: #8B7355;
+        border: 1px solid rgba(139,115,85,0.22);
+        line-height: 1.5;
       }
 
       /* ============================================================
@@ -386,14 +491,14 @@ export default function GlobalStyles() {
         bottom: 24px;
         left: 50%;
         transform: translateX(-50%);
-        background: #111827;
-        border: 1px solid #14b8a6;
-        border-radius: 16px;
-        padding: 16px 24px;
+        background: #FFFFFF;
+        border: 1px solid #D4CFC7;
+        border-radius: 12px;
+        padding: 14px 20px;
         display: flex;
         align-items: center;
         gap: 16px;
-        box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.06);
         z-index: 100;
       }
 
@@ -403,7 +508,7 @@ export default function GlobalStyles() {
       .pw-step-container {
         display: flex;
         align-items: center;
-        margin-bottom: 24px;
+        margin-bottom: 32px;
         gap: 12px;
         width: 100%;
       }
@@ -421,14 +526,84 @@ export default function GlobalStyles() {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 11px;
-        font-weight: 700;
-        transition: all 250ms ease;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 220ms cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 220ms cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .pw-step-label {
-        font-size: 10px;
+        font-size: 11px;
         white-space: nowrap;
+      }
+
+      /* ============================================================
+         SKELETON LOADER
+         Shows immediately so the first paint is never a blank screen.
+         Neutral warm shimmer, no colour.
+         ============================================================ */
+      .pw-skeleton {
+        background: #E6E0D4;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .pw-skeleton::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(
+          90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,255,0.55) 50%,
+          rgba(255,255,255,0) 100%
+        );
+        animation: pw-shimmer 1.4s ease-in-out infinite;
+      }
+
+      @keyframes pw-shimmer {
+        100% { transform: translateX(100%); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .pw-skeleton::after { animation: none; }
+        * { transition-duration: 0.01ms !important; }
+      }
+
+      /* ============================================================
+         LINKS
+         ============================================================ */
+      .pw-link {
+        color: #1A1A1A;
+        text-decoration: none;
+        border-bottom: 1px solid #D4CFC7;
+        transition: border-color 140ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .pw-link:hover {
+        border-color: #1A1A1A;
+      }
+
+      .pw-link-muted {
+        color: #5C5248;
+        text-decoration: none;
+        transition: color 140ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .pw-link-muted:hover {
+        color: #1A1A1A;
+      }
+
+      /* ============================================================
+         DIVIDER
+         ============================================================ */
+      .pw-divider {
+        height: 1px;
+        background: #D4CFC7;
+        border: none;
+        width: 100%;
       }
 
       /* ============================================================
@@ -438,7 +613,7 @@ export default function GlobalStyles() {
         .pw-sidebar {
           transform: translateX(-100%);
           width: 280px;
-          box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.06);
         }
 
         .pw-sidebar.open {
@@ -459,28 +634,11 @@ export default function GlobalStyles() {
 
         .pw-main-content {
           margin-left: 0 !important;
-          padding: 16px !important;
+          padding: 20px !important;
         }
 
         .pw-card {
-          padding: 16px;
-          border-radius: 12px;
-        }
-
-        .pw-h1 {
-          font-size: 28px;
-        }
-
-        .pw-h2 {
-          font-size: 22px;
-        }
-
-        .pw-h3 {
-          font-size: 18px;
-        }
-
-        .pw-body {
-          font-size: 14px;
+          padding: 18px;
         }
 
         .pw-grid {
@@ -490,8 +648,7 @@ export default function GlobalStyles() {
 
         .pw-btn-primary,
         .pw-btn-secondary {
-          padding: 12px 16px;
-          font-size: 13px;
+          padding: 12px 18px;
           width: 100%;
           justify-content: center;
         }
@@ -500,37 +657,36 @@ export default function GlobalStyles() {
           padding: 12px 16px;
           gap: 12px;
           bottom: 16px;
-          width: 90%;
+          width: 92%;
           flex-wrap: wrap;
           justify-content: center;
         }
 
         .pw-dropzone {
           padding: 32px 16px;
-          border-radius: 12px;
         }
 
         .pw-step-container {
           gap: 8px;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
         }
 
         .pw-step-gap {
-          gap: 4px;
+          gap: 6px;
         }
 
         .pw-step-circle {
           width: 24px;
           height: 24px;
-          font-size: 9px;
+          font-size: 10px;
         }
 
         .pw-step-label {
-          font-size: 8px;
+          font-size: 9px;
         }
 
         .pw-scroll-pitches {
-          max-height: 300px;
+          max-height: 340px;
         }
       }
 
@@ -538,29 +694,12 @@ export default function GlobalStyles() {
          SMALL MOBILE (<= 480px)
          ============================================================ */
       @media (max-width: 480px) {
-        .pw-h1 {
-          font-size: 24px;
-        }
-
-        .pw-h2 {
-          font-size: 19px;
-        }
-
-        .pw-h3 {
-          font-size: 16px;
-        }
-
-        .pw-body {
-          font-size: 13px;
-        }
-
         .pw-card {
-          padding: 12px;
-          border-radius: 10px;
+          padding: 14px;
         }
 
         .pw-floating-bar {
-          padding: 8px 12px;
+          padding: 10px 12px;
           gap: 8px;
           width: 95%;
         }

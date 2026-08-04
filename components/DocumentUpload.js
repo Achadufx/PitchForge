@@ -98,13 +98,13 @@ export default function DocumentUpload({ onComplete, plan }) {
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#f1f5f9", marginBottom: 4 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A1A", marginBottom: 4 }}>
           Upload your startup documents
         </h3>
-        <p style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, color: "#9E9589", lineHeight: 1.5 }}>
           PDF, DOCX, or TXT — pitch deck, whitepaper, executive summary, business plan.
           {plan === "free" && (
-            <span style={{ color: "#f87171" }}> Free: up to 3 files.</span>
+            <span style={{ color: "#8B1A1A" }}> Free: up to 3 files.</span>
           )}
         </p>
       </div>
@@ -117,20 +117,20 @@ export default function DocumentUpload({ onComplete, plan }) {
         }}
         onClick={() => document.getElementById("doc-upload-input").click()}
         style={{
-          border: "2px dashed #334155",
+          border: "2px dashed #D4CFC7",
           borderRadius: 10,
           padding: "28px 20px",
           textAlign: "center",
           cursor: "pointer",
-          background: "#0a0f1e",
+          background: "#EDE8DE",
           marginBottom: 12,
         }}
       >
         <div style={{ fontSize: 28, marginBottom: 8 }}>📄</div>
-        <div style={{ fontWeight: 600, color: "#e2e8f0", fontSize: 13, marginBottom: 4 }}>
+        <div style={{ fontWeight: 600, color: "#1A1A1A", fontSize: 13, marginBottom: 4 }}>
           Drop files here or click to browse
         </div>
-        <div style={{ fontSize: 11, color: "#475569" }}>
+        <div style={{ fontSize: 11, color: "#9E9589" }}>
           PDF · DOCX · TXT · Up to {docLimit} files
         </div>
         <input
@@ -159,8 +159,8 @@ export default function DocumentUpload({ onComplete, plan }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                background: "#0f172a",
-                border: "1px solid #1e293b",
+                background: "#FFFFFF",
+                border: "1px solid #D4CFC7",
                 borderRadius: 8,
                 padding: "10px 14px",
               }}
@@ -173,7 +173,7 @@ export default function DocumentUpload({ onComplete, plan }) {
                   style={{
                     fontSize: 12,
                     fontWeight: 600,
-                    color: "#e2e8f0",
+                    color: "#1A1A1A",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -184,7 +184,7 @@ export default function DocumentUpload({ onComplete, plan }) {
                 <div
                   style={{
                     fontSize: 10,
-                    color: doc.status === "done" ? "#4ade80" : doc.status === "analyzing" ? "#a78bfa" : "#475569",
+                    color: doc.status === "done" ? "#2D5016" : doc.status === "analyzing" ? "#8B7355" : "#9E9589",
                   }}
                 >
                   {doc.status === "done" ? "✓ Done" : doc.status === "analyzing" ? "⏳ Analyzing..." : "Ready"}
@@ -196,7 +196,7 @@ export default function DocumentUpload({ onComplete, plan }) {
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#475569",
+                    color: "#9E9589",
                     cursor: "pointer",
                     fontSize: 16,
                     padding: 2,
@@ -211,7 +211,7 @@ export default function DocumentUpload({ onComplete, plan }) {
       )}
       
       {error && (
-        <p style={{ color: "#f87171", fontSize: 12, marginBottom: 12 }}>
+        <p style={{ color: "#8B1A1A", fontSize: 12, marginBottom: 12 }}>
           ⚠ {error}
         </p>
       )}
@@ -227,8 +227,8 @@ export default function DocumentUpload({ onComplete, plan }) {
             fontSize: 14,
             fontWeight: 700,
             cursor: analyzing ? "not-allowed" : "pointer",
-            background: analyzing ? "#1e293b" : "#7c3aed",
-            color: analyzing ? "#475569" : "#fff",
+            background: analyzing ? "#D4CFC7" : "#1A1A1A",
+            color: analyzing ? "#9E9589" : "#fff",
             border: "none",
           }}
         >

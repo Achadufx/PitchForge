@@ -1,79 +1,33 @@
 import { useState } from "react";
+import tokens from "../lib/designTokens";
 
 // ============================================================
 // DESIGN SYSTEM
+// Palette comes from lib/designTokens.js. This file previously carried its own
+// duplicate token object, which is how the teal palette survived in two places.
 // ============================================================
-
-const tokens = {
-  colors: {
-    bg: {
-      base: '#070b14',
-      elevated: '#0c1120',
-      surface: '#111827',
-      surfaceLight: '#1a2332',
-      input: '#0f1625',
-    },
-    accent: {
-      primary: '#14b8a6',
-      hover: '#2dd4bf',
-      active: '#0d9488',
-      light: '#5eead4',
-      glow: 'rgba(20,184,166,0.12)',
-      glowStrong: 'rgba(20,184,166,0.25)',
-    },
-    text: {
-      primary: '#e8eaed',
-      secondary: '#b0b6c4',
-      tertiary: '#7a8194',
-      muted: '#4a5166',
-      inverse: '#ffffff',
-    },
-    border: {
-      default: '#1e2a3a',
-      hover: '#2a3a4a',
-      active: '#14b8a6',
-    },
-    status: {
-      success: '#34d399',
-      warning: '#fbbf24',
-      error: '#f87171',
-    }
-  },
-  spacing: {
-    1: '4px',
-    2: '8px',
-    3: '12px',
-    4: '16px',
-    5: '20px',
-    6: '24px',
-    8: '32px',
-    10: '40px',
-    12: '48px',
-  },
-  radius: {
-    sm: '6px',
-    md: '10px',
-    lg: '16px',
-    full: '999px',
-  },
-  shadows: {
-    sm: '0 2px 8px rgba(0,0,0,0.35)',
-    md: '0 4px 16px rgba(0,0,0,0.4)',
-    lg: '0 8px 32px rgba(0,0,0,0.5)',
-  },
-  transitions: {
-    fast: '150ms ease',
-    base: '250ms ease',
-    slow: '500ms ease',
-  },
-};
 
 const PLAN_LIMITS = { free: 10, starter: 100, pro: 500 };
 
 const PLAN_META = {
-  free: { label: "Free", color: "#7a8194", bg: "rgba(122,129,148,0.08)", border: "rgba(122,129,148,0.18)" },
-  starter: { label: "Starter", color: "#5eead4", bg: "rgba(20,184,166,0.1)", border: "rgba(20,184,166,0.25)" },
-  pro: { label: "Pro", color: "#34d399", bg: "rgba(52,211,153,0.08)", border: "rgba(52,211,153,0.2)" },
+  free: {
+    label: "Free",
+    color: tokens.colors.text.muted,
+    bg: "rgba(158,149,137,0.08)",
+    border: "rgba(158,149,137,0.20)",
+  },
+  starter: {
+    label: "Starter",
+    color: tokens.colors.accent.secondary,
+    bg: tokens.colors.accent.subtle,
+    border: tokens.colors.accent.subtleBorder,
+  },
+  pro: {
+    label: "Pro",
+    color: tokens.colors.status.success,
+    bg: tokens.colors.status.successBg,
+    border: tokens.colors.status.successBorder,
+  },
 };
 
 // ============================================================
@@ -126,7 +80,7 @@ function SectionLabel({ children }) {
 function Card({ children, style = {} }) {
   return (
     <div style={{
-      background: tokens.colors.bg.surface,
+      background: tokens.colors.bg.card,
       border: `1px solid ${tokens.colors.border.default}`,
       borderRadius: tokens.radius.lg,
       padding: `${tokens.spacing[6]} ${tokens.spacing[6]}`,
@@ -205,14 +159,13 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
             width: 48,
             height: 48,
             borderRadius: '50%',
-            background: `linear-gradient(150deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
+            background: tokens.colors.accent.primary,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 18,
             fontWeight: 600,
             color: tokens.colors.text.inverse,
-            boxShadow: `0 0 0 1px ${tokens.colors.accent.glowStrong}`,
             flexShrink: 0,
           }}>
             {initial}
@@ -291,15 +244,15 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
           </div>
         </div>
         <div style={{
-          background: 'rgba(255,255,255,0.05)',
+          background: 'rgba(26,26,26,0.04)',
           borderRadius: tokens.radius.full,
           height: 5,
           overflow: 'hidden',
         }}>
           <div style={{
             background: pct >= 90
-              ? `linear-gradient(90deg, ${tokens.colors.status.error}, ${tokens.colors.status.warning})`
-              : `linear-gradient(90deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.light})`,
+              ? tokens.colors.status.error
+              : tokens.colors.accent.primary,
             height: '100%',
             borderRadius: tokens.radius.full,
             width: pct + '%',
@@ -311,7 +264,7 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
       {/* Upgrade */}
       {plan !== "pro" && (
         <Card style={{
-          borderColor: tokens.colors.accent.glowStrong,
+          borderColor: tokens.colors.accent.subtleBorder,
         }}>
           <SectionLabel>Upgrade your plan</SectionLabel>
           <div style={{
@@ -328,14 +281,14 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
                   textAlign: 'left',
                   padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
                   borderRadius: tokens.radius.md,
-                  background: tokens.colors.bg.elevated,
+                  background: tokens.colors.bg.surface,
                   border: `1px solid ${tokens.colors.border.default}`,
                   cursor: checkoutLoading === "starter" ? "not-allowed" : "pointer",
                   transition: `all ${tokens.transitions.fast}`,
                   minHeight: '64px',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = tokens.colors.accent.glowStrong;
+                  e.currentTarget.style.borderColor = tokens.colors.accent.subtleBorder;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = tokens.colors.border.default;
@@ -367,7 +320,7 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
                   <div style={{
                     fontSize: 'clamp(13px, 1.3vw, 14px)',
                     fontWeight: 700,
-                    color: tokens.colors.accent.light,
+                    color: tokens.colors.accent.secondary,
                     whiteSpace: 'nowrap',
                   }}>
                     {checkoutLoading === "starter" ? "..." : "$29/mo →"}
@@ -384,8 +337,8 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
                 textAlign: 'left',
                 padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
                 borderRadius: tokens.radius.md,
-                background: tokens.colors.accent.glow,
-                border: `1px solid ${tokens.colors.accent.glowStrong}`,
+                background: tokens.colors.accent.subtle,
+                border: `1px solid ${tokens.colors.accent.subtleBorder}`,
                 cursor: checkoutLoading === "pro" ? "not-allowed" : "pointer",
                 transition: `all ${tokens.transitions.fast}`,
                 minHeight: '64px',
@@ -416,8 +369,8 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
                     <span style={{
                       fontSize: 9.5,
                       fontWeight: 700,
-                      color: tokens.colors.accent.light,
-                      background: tokens.colors.accent.glow,
+                      color: tokens.colors.accent.secondary,
+                      background: tokens.colors.accent.subtle,
                       padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
                       borderRadius: tokens.radius.sm,
                       letterSpacing: '0.3px',
@@ -449,7 +402,7 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
 
       {/* Danger Zone */}
       <Card style={{
-        borderColor: 'rgba(248,113,113,0.15)',
+        borderColor: 'rgba(139,26,26,0.15)',
         marginBottom: 0,
       }}>
         <SectionLabel>Session</SectionLabel>
@@ -458,7 +411,7 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
           style={{
             background: 'transparent',
             color: tokens.colors.status.error,
-            border: `1px solid rgba(248,113,113,0.18)`,
+            border: `1px solid rgba(139,26,26,0.18)`,
             borderRadius: tokens.radius.md,
             padding: `${tokens.spacing[2]} ${tokens.spacing[5]}`,
             fontWeight: 600,
@@ -469,7 +422,7 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
             minWidth: '44px',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(248,113,113,0.06)';
+            e.currentTarget.style.background = 'rgba(139,26,26,0.06)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent';

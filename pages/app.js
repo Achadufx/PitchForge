@@ -8,80 +8,15 @@ import CrmTab from "../components/CrmTab";
 import FollowupsTab from "../components/FollowupsTab";
 import TemplatesTab from "../components/TemplatesTab";
 import GlobalStyles from "../components/GlobalStyles";
+import tokens from "../lib/designTokens";
 
 // ============================================================
 // DESIGN SYSTEM
 // ============================================================
-
-const tokens = {
-  colors: {
-    bg: {
-      base: '#070b14',
-      elevated: '#0c1120',
-      surface: '#111827',
-      surfaceLight: '#1a2332',
-      input: '#0f1625',
-    },
-    accent: {
-      primary: '#14b8a6',
-      hover: '#2dd4bf',
-      active: '#0d9488',
-      light: '#5eead4',
-      glow: 'rgba(20,184,166,0.12)',
-      glowStrong: 'rgba(20,184,166,0.25)',
-    },
-    text: {
-      primary: '#e8eaed',
-      secondary: '#b0b6c4',
-      tertiary: '#7a8194',
-      muted: '#4a5166',
-      inverse: '#ffffff',
-    },
-    border: {
-      default: '#1e2a3a',
-      hover: '#2a3a4a',
-      active: '#14b8a6',
-    },
-    status: {
-      success: '#34d399',
-      warning: '#fbbf24',
-      error: '#f87171',
-      info: '#60a5fa',
-    }
-  },
-  spacing: {
-    1: '4px',
-    2: '8px',
-    3: '12px',
-    4: '16px',
-    5: '20px',
-    6: '24px',
-    8: '32px',
-    10: '40px',
-    12: '48px',
-    16: '64px',
-    20: '80px',
-  },
-  radius: {
-    sm: '6px',
-    md: '10px',
-    lg: '16px',
-    xl: '20px',
-    full: '999px',
-  },
-  shadows: {
-    xs: '0 1px 2px rgba(0,0,0,0.3)',
-    sm: '0 2px 8px rgba(0,0,0,0.35)',
-    md: '0 4px 16px rgba(0,0,0,0.4)',
-    lg: '0 8px 32px rgba(0,0,0,0.5)',
-    xl: '0 12px 48px rgba(0,0,0,0.6)',
-  },
-  transitions: {
-    fast: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
-    base: '250ms cubic-bezier(0.4, 0, 0.2, 1)',
-    slow: '400ms cubic-bezier(0.4, 0, 0.2, 1)',
-  },
-};
+// DESIGN SYSTEM
+// Palette lives in lib/designTokens.js so a colour change is one edit
+// rather than a sweep across every component.
+// ============================================================
 
 // ============================================================
 // SVG ICONS
@@ -179,9 +114,13 @@ function parseCsv(text) {
 // ============================================================
 
 const Logo = ({ size = 28, alt = "PitchWire" }) => (
-  <img 
-    src="/logo.png" 
-    alt={alt} 
+  <img
+    src="/logo.png"
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+    width={size}
+    height={size} 
     style={{ 
       width: `${size}px`, 
       height: `${size}px`, 
@@ -236,7 +175,7 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
                 marginLeft: 'auto',
                 background: 'transparent',
                 border: 'none',
-                color: tokens.colors.text.tertiary,
+                color: tokens.colors.text.secondary,
                 cursor: 'pointer',
                 padding: tokens.spacing[2],
                 minHeight: '44px',
@@ -268,8 +207,8 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
                   borderRadius: tokens.radius.md,
                   border: 'none',
                   cursor: 'pointer',
-                  background: active ? tokens.colors.accent.glow : 'transparent',
-                  color: active ? tokens.colors.accent.light : tokens.colors.text.tertiary,
+                  background: active ? tokens.colors.accent.subtle : 'transparent',
+                  color: active ? tokens.colors.accent.secondary : tokens.colors.text.secondary,
                   fontFamily: 'inherit',
                   fontSize: '14px',
                   fontWeight: active ? 600 : 500,
@@ -279,7 +218,7 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
                   minHeight: '44px',
                 }}
               >
-                <Icon size={18} color={active ? tokens.colors.accent.light : tokens.colors.text.muted} />
+                <Icon size={18} color={active ? tokens.colors.accent.secondary : tokens.colors.text.muted} />
                 <span style={{ flex: 1 }}>{tab.label}</span>
                 {active && (
                   <div style={{
@@ -324,9 +263,10 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
             <div className="pw-progress">
               <div className="pw-progress-fill" style={{
                 width: pct + '%',
-                background: pct >= 90 
-                  ? `linear-gradient(90deg, ${tokens.colors.status.error}, ${tokens.colors.status.warning})`
-                  : `linear-gradient(90deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.light})`,
+                // Solid fills only — the design system bans gradients.
+                background: pct >= 90
+                  ? tokens.colors.status.error
+                  : tokens.colors.accent.primary,
               }} />
             </div>
             {plan === "free" && (
@@ -354,9 +294,9 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
                   justifyContent: 'center',
                   padding: tokens.spacing[2],
                   fontSize: '12px',
-                  background: tokens.colors.accent.glow,
-                  color: tokens.colors.accent.light,
-                  border: `1px solid ${tokens.colors.accent.glowStrong}`,
+                  background: tokens.colors.accent.subtle,
+                  color: tokens.colors.accent.secondary,
+                  border: `1px solid ${tokens.colors.accent.subtleBorder}`,
                 }}
               >
                 Upgrade to Pro →
@@ -386,12 +326,12 @@ function Sidebar({ activeTab, setActiveTab, user, plan, pitchCount, onSignOut, m
               width: 32,
               height: 32,
               borderRadius: '50%',
-              background: `linear-gradient(135deg, ${tokens.colors.accent.primary}, ${tokens.colors.accent.active})`,
+              background: tokens.colors.accent.primary,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '12px',
-              fontWeight: 700,
+              fontWeight: 600,
               color: tokens.colors.text.inverse,
               flexShrink: 0,
             }}>
@@ -489,7 +429,7 @@ function StepIndicator({ current }) {
                   ? tokens.colors.status.success 
                   : active 
                     ? tokens.colors.accent.primary 
-                    : tokens.colors.bg.surface,
+                    : tokens.colors.bg.card,
                 border: `2px solid ${
                   done 
                     ? tokens.colors.status.success 
@@ -511,7 +451,7 @@ function StepIndicator({ current }) {
                 fontSize: '10px',
                 fontWeight: active ? 600 : 400,
                 color: active 
-                  ? tokens.colors.accent.light 
+                  ? tokens.colors.accent.secondary 
                   : done 
                     ? tokens.colors.status.success 
                     : tokens.colors.text.muted,
@@ -817,7 +757,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
       <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
         <div style={{ fontSize: 36, marginBottom: tokens.spacing[4] }}>⚡</div>
         <h3 className="pw-h3">Crafting personalized pitches...</h3>
-        <p style={{ color: tokens.colors.text.tertiary, marginBottom: tokens.spacing[6] }}>
+        <p style={{ color: tokens.colors.text.secondary, marginBottom: tokens.spacing[6] }}>
           {progress} of {investors.length} done
         </p>
         {rateLimitNotice && (
@@ -852,7 +792,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
         gap: tokens.spacing[2],
       }}>
         <h2 className="pw-h2">Review pitches</h2>
-        <span style={{ fontSize: '13px', color: tokens.colors.text.tertiary }}>
+        <span style={{ fontSize: '13px', color: tokens.colors.text.secondary }}>
           {selected.length}/{pitches.length} selected
         </span>
       </div>
@@ -860,7 +800,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
         {pitches.map((pitch, i) => (
           <div key={i} className="pw-card" style={{
             border: `1px solid ${selected.includes(i) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
-            background: selected.includes(i) ? tokens.colors.accent.glow : 'transparent',
+            background: selected.includes(i) ? tokens.colors.accent.subtle : 'transparent',
           }}>
             <div style={{ display: 'flex', gap: tokens.spacing[3], flex: 1, alignItems: 'stretch' }}>
               <input
@@ -893,12 +833,12 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                     <button
                       onClick={() => handleEdit(i)}
                       style={{
-                        background: tokens.colors.accent.glow,
-                        border: `1px solid ${tokens.colors.accent.glowStrong}`,
+                        background: tokens.colors.accent.subtle,
+                        border: `1px solid ${tokens.colors.accent.subtleBorder}`,
                         borderRadius: tokens.radius.sm,
                         padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
                         fontSize: '10px',
-                        color: tokens.colors.accent.light,
+                        color: tokens.colors.accent.secondary,
                         cursor: 'pointer',
                         minHeight: '32px',
                         minWidth: '44px',
@@ -979,7 +919,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                   </div>
                 ) : (
                   <>
-                    <div style={{ fontSize: '13px', color: tokens.colors.accent.light, fontWeight: 600, marginBottom: tokens.spacing[2] }}>
+                    <div style={{ fontSize: '13px', color: tokens.colors.accent.secondary, fontWeight: 600, marginBottom: tokens.spacing[2] }}>
                       Subject: {pitch.subject}
                     </div>
                     <div style={{
@@ -987,7 +927,7 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
                       color: tokens.colors.text.secondary,
                       whiteSpace: 'pre-wrap',
                       lineHeight: 1.9,
-                      background: tokens.colors.bg.elevated,
+                      background: tokens.colors.bg.surface,
                       borderRadius: tokens.radius.md,
                       padding: tokens.spacing[4],
                       width: '100%',
@@ -1582,7 +1522,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                   </span>
                   <span style={{
                     fontSize: '13px',
-                    color: tokens.colors.text.tertiary,
+                    color: tokens.colors.text.secondary,
                     marginLeft: tokens.spacing[3],
                   }}>
                     {selectedIndices.length} selected
@@ -1601,14 +1541,14 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
 
               <div className="pw-dropzone" style={{
                 border: `2px dashed ${csvFile ? tokens.colors.accent.primary : tokens.colors.border.default}`,
-                background: tokens.colors.bg.elevated,
+                background: tokens.colors.bg.surface,
                 marginBottom: tokens.spacing[4],
               }}
               onClick={() => document.getElementById('csv-upload-input').click()}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.currentTarget.style.borderColor = tokens.colors.accent.primary;
-                e.currentTarget.style.background = tokens.colors.accent.glow;
+                e.currentTarget.style.background = tokens.colors.accent.subtle;
               }}
               onDragLeave={(e) => {
                 e.currentTarget.style.borderColor = tokens.colors.border.default;
@@ -1631,7 +1571,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                     width: 48,
                     height: 48,
                     borderRadius: '50%',
-                    background: csvFile ? tokens.colors.accent.glow : 'rgba(255,255,255,0.04)',
+                    background: csvFile ? tokens.colors.accent.subtle : 'rgba(255,255,255,0.04)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1677,7 +1617,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                 alignItems: 'center',
                 gap: tokens.spacing[3],
                 padding: tokens.spacing[3],
-                background: shareWithDatabase ? tokens.colors.accent.glow : 'transparent',
+                background: shareWithDatabase ? tokens.colors.accent.subtle : 'transparent',
                 borderRadius: tokens.radius.md,
                 border: `1px solid ${shareWithDatabase ? tokens.colors.accent.primary : tokens.colors.border.default}`,
                 marginBottom: tokens.spacing[3],
@@ -1738,7 +1678,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                       style={{
                         padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
                         border: `1px solid ${isSelected(index) ? tokens.colors.accent.primary : tokens.colors.border.default}`,
-                        background: isSelected(index) ? tokens.colors.accent.glow : 'transparent',
+                        background: isSelected(index) ? tokens.colors.accent.subtle : 'transparent',
                         cursor: 'pointer',
                       }}
                     >
@@ -1787,7 +1727,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                               </div>
                               <div style={{
                                 fontSize: '13px',
-                                color: tokens.colors.text.tertiary,
+                                color: tokens.colors.text.secondary,
                               }}>
                                 {inv.title ? `${inv.title}${inv.firm ? ` @ ${inv.firm}` : ''}` : inv.firm || ''}
                               </div>
@@ -1798,12 +1738,12 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                               color: inv.score >= 90 
                                 ? tokens.colors.status.success 
                                 : inv.score >= 70 
-                                  ? tokens.colors.accent.light 
+                                  ? tokens.colors.accent.secondary 
                                   : tokens.colors.text.muted,
                               background: inv.score >= 90 
                                 ? 'rgba(52, 211, 153, 0.1)'
                                 : inv.score >= 70 
-                                  ? tokens.colors.accent.glow
+                                  ? tokens.colors.accent.subtle
                                   : 'transparent',
                               padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
                               borderRadius: tokens.radius.full,
@@ -1830,7 +1770,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
                           {inv.matchReasons && (
                             <div style={{
                               fontSize: '12px',
-                              color: tokens.colors.accent.light,
+                              color: tokens.colors.accent.secondary,
                               marginTop: tokens.spacing[1],
                               opacity: 0.7,
                             }}>
@@ -2183,7 +2123,7 @@ function InvestorsTab({ plan, onStartCampaign }) {
           {investors.map(inv => (
             <div key={inv.id} className="pw-card" style={{
               borderColor: selected.includes(inv.id) ? tokens.colors.accent.primary : tokens.colors.border.default,
-              background: selected.includes(inv.id) ? tokens.colors.accent.glow : 'transparent',
+              background: selected.includes(inv.id) ? tokens.colors.accent.subtle : 'transparent',
             }}>
               <div style={{ 
                 display: 'flex', 
@@ -2219,7 +2159,7 @@ function InvestorsTab({ plan, onStartCampaign }) {
                       }}>{inv.firm}</div>
                       <div style={{ 
                         fontSize: '13px', 
-                        color: tokens.colors.text.tertiary,
+                        color: tokens.colors.text.secondary,
                       }}>{inv.hq}</div>
                     </div>
                     {!inv.email && (
@@ -2357,21 +2297,103 @@ function AddInvestorForm({ onClose, onAdded }) {
 // APP (Fixed navigation with persistent hamburger menu)
 // ============================================================
 
+const TABS = ["campaign", "investors", "crm", "followups", "templates", "account"];
+const TAB_STORAGE_KEY = "pitchwire_active_tab";
+
+// Resolves the tab to open on load: URL hash wins over localStorage, so a shared
+// or bookmarked link always lands where it points. Runs before first paint via
+// useState's lazy initializer, which avoids a flash of the campaign tab.
+function resolveInitialTab() {
+  if (typeof window === "undefined") return "campaign";
+  try {
+    const hash = (window.location.hash || "").replace(/^#/, "");
+    if (TABS.indexOf(hash) !== -1) return hash;
+    const stored = window.localStorage.getItem(TAB_STORAGE_KEY);
+    if (stored && TABS.indexOf(stored) !== -1) return stored;
+  } catch (err) {
+    // Private browsing can throw on localStorage access; fall through.
+  }
+  return "campaign";
+}
+
+// Matches the real dashboard layout so the swap to content does not reflow.
+function AppSkeleton() {
+  return (
+    <div style={{ minHeight: "100vh", background: tokens.colors.bg.base }}>
+      <div style={{
+        maxWidth: "720px",
+        margin: "0 auto",
+        padding: tokens.spacing[10] + " " + tokens.spacing[4],
+      }}>
+        <div className="pw-skeleton" style={{ height: 36, width: "45%", marginBottom: tokens.spacing[3] }} />
+        <div className="pw-skeleton" style={{ height: 18, width: "70%", marginBottom: tokens.spacing[10] }} />
+        <div className="pw-skeleton" style={{ height: 132, width: "100%", marginBottom: tokens.spacing[4], borderRadius: 12 }} />
+        <div className="pw-skeleton" style={{ height: 132, width: "100%", marginBottom: tokens.spacing[4], borderRadius: 12 }} />
+        <div className="pw-skeleton" style={{ height: 44, width: "38%", borderRadius: 8 }} />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
   const [pitchCount, setPitchCount] = useState(0);
   const [plan, setPlan] = useState("free");
-  const [activeTab, setActiveTab] = useState("campaign");
+  const [activeTab, setActiveTab] = useState(resolveInitialTab);
   const [preloadedInvestors, setPreloadedInvestors] = useState(null);
   const [savedProfile, setSavedProfile] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Single entry point for tab changes: state, localStorage, and the URL hash
+  // stay in lockstep so a refresh returns to the same place.
+  const changeTab = (tab) => {
+    if (TABS.indexOf(tab) === -1) return;
+    setActiveTab(tab);
+    try {
+      window.localStorage.setItem(TAB_STORAGE_KEY, tab);
+    } catch (err) {
+      // Non-fatal: the hash below still preserves the tab across a refresh.
+    }
+    if (typeof window !== "undefined" && window.location.hash !== "#" + tab) {
+      // replaceState rather than assigning location.hash, so tab switching does
+      // not stack history entries and hijack the browser back button.
+      window.history.replaceState(null, "", "#" + tab);
+    }
+  };
+
+  // Back/forward and manual hash edits should still move the tab.
   useEffect(() => {
+    const onHashChange = () => {
+      const hash = (window.location.hash || "").replace(/^#/, "");
+      if (TABS.indexOf(hash) !== -1 && hash !== activeTab) {
+        setActiveTab(hash);
+        try {
+          window.localStorage.setItem(TAB_STORAGE_KEY, hash);
+        } catch (err) { /* non-fatal */ }
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [activeTab]);
+
+  // Ensures the URL reflects the restored tab on first load.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!window.location.hash) {
+      window.history.replaceState(null, "", "#" + activeTab);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
     async function initializeApp() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled) return;
+
         if (!session) {
           router.push("/login");
           setAuthChecking(false);
@@ -2379,42 +2401,83 @@ export default function App() {
         }
         setUser(session.user);
 
-// Save that user has completed onboarding
-localStorage.setItem('pitchwire_onboarded', 'true');
-
-const count = parseInt(localStorage.getItem("pitches_" + session.user.id) || "0");
-const savedPlan = localStorage.getItem("plan_" + session.user.id) || "free";
-setPitchCount(count);
-setPlan(savedPlan);
-
+        // localStorage is synchronous, so read it immediately and paint the real
+        // plan/usage rather than waiting on the profile round-trip.
         try {
-          const { data, error } = await supabase
-            .from('startup_profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-          
-          if (error) {
-            console.error("Supabase fetch error:", error);
-            setSavedProfile(null);
-          } else if (data) {
-            setSavedProfile(data);
-          } else {
-            setSavedProfile(null);
-          }
+          localStorage.setItem("pitchwire_onboarded", "true");
+          setPitchCount(parseInt(localStorage.getItem("pitches_" + session.user.id) || "0", 10) || 0);
+          setPlan(localStorage.getItem("plan_" + session.user.id) || "free");
         } catch (err) {
-          console.error("Failed to fetch profile:", err);
-          setSavedProfile(null);
+          console.error("localStorage unavailable:", err);
         }
+
+        // Auth is unblocked here: the profile fetch no longer gates first paint,
+        // it resolves into the already-rendered dashboard. Previously this ran
+        // sequentially and the user stared at a blank screen for both round-trips.
+        setAuthChecking(false);
+
+        supabase
+          .from("startup_profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .maybeSingle()
+          .then(({ data, error }) => {
+            if (cancelled) return;
+            if (error) {
+              console.error("Supabase profile fetch error:", error);
+              setSavedProfile(null);
+            } else {
+              setSavedProfile(data || null);
+            }
+          }, (err) => {
+            if (cancelled) return;
+            console.error("Failed to fetch profile:", err);
+            setSavedProfile(null);
+          });
       } catch (error) {
+        if (cancelled) return;
         console.error("Initialization error:", error);
         router.push("/login");
-      } finally {
         setAuthChecking(false);
       }
     }
+
     initializeApp();
+
+    // Keeps plan in sync when Stripe checkout completes in this tab or another.
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled || !session) return;
+      try {
+        setPlan(localStorage.getItem("plan_" + session.user.id) || "free");
+      } catch (err) { /* non-fatal */ }
+    });
+
+    return () => {
+      cancelled = true;
+      if (authListener && authListener.subscription) authListener.subscription.unsubscribe();
+    };
   }, []);
+
+  // Picks up the plan written by /success without needing a manual refresh.
+  useEffect(() => {
+    if (!user) return;
+    const syncPlan = () => {
+      try {
+        const stored = localStorage.getItem("plan_" + user.id);
+        if (stored && stored !== plan) {
+          setPlan(stored);
+          setPitchCount(parseInt(localStorage.getItem("pitches_" + user.id) || "0", 10) || 0);
+        }
+      } catch (err) { /* non-fatal */ }
+    };
+    window.addEventListener("storage", syncPlan);
+    window.addEventListener("focus", syncPlan);
+    syncPlan();
+    return () => {
+      window.removeEventListener("storage", syncPlan);
+      window.removeEventListener("focus", syncPlan);
+    };
+  }, [user, plan]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -2422,18 +2485,17 @@ setPlan(savedPlan);
   };
 
   if (authChecking) {
+    // Skeleton rather than a blank screen or a bare "Loading..." string, so the
+    // first paint already shows the shape of the dashboard.
     return (
-      <div style={styles.page}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          padding: tokens.spacing[4],
-        }}>
-          <div style={{ color: tokens.colors.text.muted, fontSize: '14px' }}>Loading...</div>
-        </div>
-      </div>
+      <>
+        <Head>
+          <title>PitchWire — Dashboard</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        </Head>
+        <GlobalStyles />
+        <AppSkeleton />
+      </>
     );
   }
 
@@ -2498,7 +2560,7 @@ setPlan(savedPlan);
 
         <Sidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={changeTab}
           user={user}
           plan={plan}
           pitchCount={pitchCount}
@@ -2526,7 +2588,7 @@ setPlan(savedPlan);
                 plan={plan}
                 onStartCampaign={(invs) => {
                   setPreloadedInvestors(invs);
-                  setActiveTab("campaign");
+                  changeTab("campaign");
                 }}
               />
             )}

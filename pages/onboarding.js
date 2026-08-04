@@ -10,36 +10,36 @@ import { supabase } from "../lib/supabase";
 const tokens = {
   colors: {
     bg: {
-      base: '#070b14',
-      elevated: '#0c1120',
-      surface: '#111827',
-      surfaceLight: '#1a2332',
-      input: '#0f1625',
+      base: '#F5F0E8',
+      elevated: '#EDE8DE',
+      surface: '#FFFFFF',
+      surfaceLight: '#EDE8DE',
+      input: '#FFFFFF',
     },
     accent: {
-      primary: '#14b8a6',
-      hover: '#2dd4bf',
-      active: '#0d9488',
-      light: '#5eead4',
-      glow: 'rgba(20,184,166,0.12)',
-      glowStrong: 'rgba(20,184,166,0.25)',
+      primary: '#1A1A1A',
+      hover: '#333333',
+      active: '#333333',
+      light: '#8B7355',
+      glow: 'rgba(139,115,85,0.12)',
+      glowStrong: 'rgba(139,115,85,0.25)',
     },
     text: {
-      primary: '#e8eaed',
-      secondary: '#b0b6c4',
-      tertiary: '#7a8194',
-      muted: '#4a5166',
+      primary: '#1A1A1A',
+      secondary: '#5C5248',
+      tertiary: '#9E9589',
+      muted: '#9E9589',
       inverse: '#ffffff',
     },
     border: {
-      default: '#1e2a3a',
-      hover: '#2a3a4a',
-      active: '#14b8a6',
+      default: '#D4CFC7',
+      hover: '#BFB8AD',
+      active: '#1A1A1A',
     },
     status: {
-      error: '#f87171',
-      success: '#34d399',
-      warning: '#fbbf24',
+      error: '#8B1A1A',
+      success: '#2D5016',
+      warning: '#8B7355',
     }
   },
   spacing: {
@@ -61,10 +61,10 @@ const tokens = {
     full: '999px',
   },
   shadows: {
-    sm: '0 2px 8px rgba(0,0,0,0.35)',
-    md: '0 4px 16px rgba(0,0,0,0.4)',
-    lg: '0 8px 32px rgba(0,0,0,0.5)',
-    xl: '0 12px 48px rgba(0,0,0,0.6)',
+    sm: '0 2px 8px rgba(0,0,0,0.06)',
+    md: '0 4px 16px rgba(0,0,0,0.06)',
+    lg: '0 8px 32px rgba(0,0,0,0.06)',
+    xl: '0 12px 48px rgba(0,0,0,0.06)',
   },
   transitions: {
     fast: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -256,11 +256,11 @@ export default function Onboarding() {
 
       <style>{`
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #070b14; margin: 0; padding: 0; }
+        body { background: #F5F0E8; margin: 0; padding: 0; }
 
         .onboarding-page {
           min-height: 100vh;
-          background: #070b14;
+          background: #F5F0E8;
           font-family: 'Inter', system-ui, sans-serif;
           padding: 24px 16px;
           position: relative;
@@ -268,12 +268,9 @@ export default function Onboarding() {
         }
 
         .onboarding-glow {
-          position: absolute;
-          top: 0; left: 50%;
-          transform: translateX(-50%);
-          width: 700px; height: 400px;
-          background: radial-gradient(ellipse, rgba(20,184,166,0.12) 0%, transparent 70%);
-          pointer-events: none;
+          /* Glow removed: the cream design system uses no coloured radial
+             backgrounds. Kept as a no-op so the markup does not need changing. */
+          display: none;
         }
 
         .onboarding-nav {
@@ -307,13 +304,13 @@ export default function Onboarding() {
         .onboarding-logo-text {
           font-size: 18px;
           font-weight: 800;
-          color: #e8eaed;
+          color: #1A1A1A;
           letter-spacing: -0.02em;
         }
 
         .onboarding-user-email {
           font-size: 13px;
-          color: #4a5166;
+          color: #9E9589;
         }
 
         .onboarding-header {
@@ -326,7 +323,7 @@ export default function Onboarding() {
         .onboarding-welcome {
           font-size: 13px;
           font-weight: 600;
-          color: #5eead4;
+          color: #8B7355;
           margin-bottom: 16px;
         }
 
@@ -335,13 +332,13 @@ export default function Onboarding() {
           font-weight: 900;
           letter-spacing: -2px;
           line-height: 1.05;
-          color: #e8eaed;
+          color: #1A1A1A;
           margin-bottom: 12px;
         }
 
         .onboarding-subtitle {
           font-size: 16px;
-          color: #4a5166;
+          color: #9E9589;
           max-width: 420px;
           margin: 0 auto;
           line-height: 1.6;
@@ -358,8 +355,8 @@ export default function Onboarding() {
         }
 
         .onboarding-plan {
-          background: #0c1120;
-          border: 1px solid #1e2a3a;
+          background: #EDE8DE;
+          border: 1px solid #D4CFC7;
           border-radius: 16px;
           padding: 32px 24px;
           display: flex;
@@ -371,16 +368,16 @@ export default function Onboarding() {
         }
 
         .onboarding-plan.hot {
-          background: #111827;
-          border: 1px solid rgba(20,184,166,0.25);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+          background: #FFFFFF;
+          border: 1px solid rgba(139,115,85,0.25);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.06);
         }
 
         .onboarding-plan-badge {
           position: absolute;
           top: 0; left: 50%;
           transform: translateX(-50%);
-          background: #14b8a6;
+          background: #1A1A1A;
           color: #ffffff;
           font-size: 10px;
           font-weight: 700;
@@ -394,7 +391,7 @@ export default function Onboarding() {
         .onboarding-plan-name {
           font-size: 11px;
           font-weight: 700;
-          color: #4a5166;
+          color: #9E9589;
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 16px;
@@ -404,7 +401,7 @@ export default function Onboarding() {
           font-size: clamp(32px, 4vw, 40px);
           font-weight: 900;
           letter-spacing: -2px;
-          color: #e8eaed;
+          color: #1A1A1A;
           line-height: 1;
           margin-bottom: 6px;
         }
@@ -413,12 +410,12 @@ export default function Onboarding() {
           font-size: 14px;
           font-weight: 500;
           letter-spacing: 0;
-          color: #4a5166;
+          color: #9E9589;
         }
 
         .onboarding-plan-desc {
           font-size: 13px;
-          color: #4a5166;
+          color: #9E9589;
           margin-bottom: 24px;
           line-height: 1.5;
         }
@@ -434,7 +431,7 @@ export default function Onboarding() {
 
         .onboarding-plan-features li {
           font-size: clamp(12px, 1.2vw, 13px);
-          color: #b0b6c4;
+          color: #5C5248;
           display: flex;
           gap: 8px;
           line-height: 1.4;
@@ -442,7 +439,7 @@ export default function Onboarding() {
 
         .onboarding-plan-features li svg {
           flex-shrink: 0;
-          color: #5eead4;
+          color: #8B7355;
         }
 
         .onboarding-plan-btn {
@@ -458,25 +455,25 @@ export default function Onboarding() {
         }
 
         .onboarding-plan-btn.primary {
-          background: #14b8a6;
+          background: #1A1A1A;
           color: #ffffff;
         }
 
         .onboarding-plan-btn.primary:hover {
-          background: #2dd4bf;
+          background: #333333;
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(20,184,166,0.25);
+          box-shadow: 0 4px 12px rgba(139,115,85,0.25);
         }
 
         .onboarding-plan-btn.outline {
           background: transparent;
-          color: #b0b6c4;
-          border: 1px solid #1e2a3a;
+          color: #5C5248;
+          border: 1px solid #D4CFC7;
         }
 
         .onboarding-plan-btn.outline:hover {
-          border-color: #14b8a6;
-          color: #e8eaed;
+          border-color: #1A1A1A;
+          color: #1A1A1A;
         }
 
         .onboarding-plan-btn:disabled {
@@ -488,7 +485,7 @@ export default function Onboarding() {
           text-align: center;
           margin-top: 32px;
           font-size: 12px;
-          color: #4a5166;
+          color: #9E9589;
           position: relative;
           z-index: 1;
         }
@@ -522,7 +519,7 @@ export default function Onboarding() {
         <div className="onboarding-nav">
           <div className="onboarding-logo">
             <div className="onboarding-logo-icon">
-              <img src="/logo.png" alt="PitchWire" />
+              <img src="/logo.png" alt="PitchWire" loading="lazy" decoding="async" />
             </div>
             <span className="onboarding-logo-text">PitchWire</span>
           </div>

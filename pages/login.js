@@ -10,35 +10,35 @@ import { useRouter } from "next/router";
 const tokens = {
   colors: {
     bg: {
-      base: '#070b14',
-      elevated: '#0c1120',
-      surface: '#111827',
-      surfaceLight: '#1a2332',
-      input: '#0f1625',
+      base: '#F5F0E8',
+      elevated: '#EDE8DE',
+      surface: '#FFFFFF',
+      surfaceLight: '#EDE8DE',
+      input: '#FFFFFF',
     },
     accent: {
-      primary: '#14b8a6',
-      hover: '#2dd4bf',
-      active: '#0d9488',
-      light: '#5eead4',
-      glow: 'rgba(20,184,166,0.12)',
-      glowStrong: 'rgba(20,184,166,0.25)',
+      primary: '#1A1A1A',
+      hover: '#333333',
+      active: '#333333',
+      light: '#8B7355',
+      glow: 'rgba(139,115,85,0.12)',
+      glowStrong: 'rgba(139,115,85,0.25)',
     },
     text: {
-      primary: '#e8eaed',
-      secondary: '#b0b6c4',
-      tertiary: '#7a8194',
-      muted: '#4a5166',
+      primary: '#1A1A1A',
+      secondary: '#5C5248',
+      tertiary: '#9E9589',
+      muted: '#9E9589',
       inverse: '#ffffff',
     },
     border: {
-      default: '#1e2a3a',
-      hover: '#2a3a4a',
-      active: '#14b8a6',
+      default: '#D4CFC7',
+      hover: '#BFB8AD',
+      active: '#1A1A1A',
     },
     status: {
-      error: '#f87171',
-      success: '#34d399',
+      error: '#8B1A1A',
+      success: '#2D5016',
     }
   },
   spacing: {
@@ -58,8 +58,8 @@ const tokens = {
     full: '999px',
   },
   shadows: {
-    md: '0 4px 16px rgba(0,0,0,0.4)',
-    xl: '0 12px 48px rgba(0,0,0,0.6)',
+    md: '0 4px 16px rgba(0,0,0,0.06)',
+    xl: '0 12px 48px rgba(0,0,0,0.06)',
   },
   transitions: {
     fast: '150ms ease',
@@ -162,14 +162,14 @@ const handleGoogle = async () => {
         }
 
         body {
-          background: #070b14;
+          background: #F5F0E8;
           margin: 0;
           padding: 0;
         }
 
         .login-page {
           min-height: 100vh;
-          background: #070b14;
+          background: #F5F0E8;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -180,15 +180,9 @@ const handleGoogle = async () => {
         }
 
         .login-glow {
-          position: absolute;
-          width: 600px;
-          height: 600px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(20,184,166,0.12) 0%, transparent 70%);
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          pointer-events: none;
+          /* Glow removed: the cream design system uses no coloured radial
+             backgrounds. Kept as a no-op so the markup does not need changing. */
+          display: none;
         }
 
         .login-container {
@@ -227,22 +221,22 @@ const handleGoogle = async () => {
         .login-logo-text {
           font-size: 22px;
           font-weight: 800;
-          color: #e8eaed;
+          color: #1A1A1A;
           letter-spacing: -0.4px;
         }
 
         .login-card {
-          background: #111827;
-          border: 1px solid #1e2a3a;
+          background: #FFFFFF;
+          border: 1px solid #D4CFC7;
           border-radius: 16px;
           padding: 40px 32px;
-          box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+          box-shadow: 0 12px 48px rgba(0,0,0,0.06);
         }
 
         .login-title {
           font-size: 24px;
           font-weight: 800;
-          color: #e8eaed;
+          color: #1A1A1A;
           letter-spacing: -0.8px;
           margin-bottom: 8px;
           text-align: center;
@@ -250,7 +244,7 @@ const handleGoogle = async () => {
 
         .login-subtitle {
           font-size: 14px;
-          color: #4a5166;
+          color: #9E9589;
           text-align: center;
           margin-bottom: 32px;
           line-height: 1.5;
@@ -261,7 +255,7 @@ const handleGoogle = async () => {
           padding: 14px 20px;
           border-radius: 10px;
           background: #ffffff;
-          color: #111827;
+          color: #FFFFFF;
           border: none;
           cursor: pointer;
           font-weight: 600;
@@ -278,47 +272,47 @@ const handleGoogle = async () => {
         .login-google-btn:hover {
           background: #f0f0f0;
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+          box-shadow: 0 4px 12px rgba(26,26,26,0.10);
         }
 
         .login-google-btn:disabled {
           background: #1a1a1a;
-          color: #4a5166;
+          color: #9E9589;
           cursor: not-allowed;
           transform: none;
         }
 
         .login-terms {
           font-size: 12px;
-          color: #4a5166;
+          color: #9E9589;
           text-align: center;
           margin-top: 20px;
           line-height: 1.6;
         }
 
         .login-terms a {
-          color: #7a8194;
+          color: #9E9589;
           text-decoration: none;
         }
 
         .login-terms a:hover {
-          color: #b0b6c4;
+          color: #5C5248;
         }
 
         .login-back {
           text-align: center;
           margin-top: 24px;
           font-size: 13px;
-          color: #4a5166;
+          color: #9E9589;
         }
 
         .login-back a {
-          color: #4a5166;
+          color: #9E9589;
           text-decoration: none;
         }
 
         .login-back a:hover {
-          color: #7a8194;
+          color: #9E9589;
         }
 
         /* MOBILE RESPONSIVE */
@@ -386,7 +380,7 @@ const handleGoogle = async () => {
           <div className="login-logo">
             <a href="/" className="login-logo-link">
               <div className="login-logo-icon">
-                <img src="/logo.png" alt="PitchWire" />
+                <img src="/logo.png" alt="PitchWire" loading="lazy" decoding="async" />
               </div>
               <span className="login-logo-text">PitchWire</span>
             </a>
