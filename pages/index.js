@@ -102,6 +102,7 @@ const TIERS = [
   {
     name: 'Free',
     price: 0,
+    annualPrice: 0,
     blurb: 'Judge the output for yourself.',
     features: ['10 pitches per month', 'Investor database access', 'CSV import', 'Full editing control'],
     cta: 'Start free',
@@ -111,6 +112,7 @@ const TIERS = [
   {
     name: 'Starter',
     price: 29,
+    annualPrice: 276,
     blurb: 'Run a real raise.',
     features: ['100 pitches per month', 'Deck and document upload', 'Investor fit scoring', 'Campaign tracking', 'Email support'],
     cta: 'Choose Starter',
@@ -120,6 +122,7 @@ const TIERS = [
   {
     name: 'Pro',
     price: 99,
+    annualPrice: 948,
     blurb: 'For a full fundraising cycle.',
     features: ['500 pitches per month', 'Deep investor research', 'Full CRM pipeline', 'Follow-up suggestions', 'Priority support'],
     cta: 'Choose Pro',
@@ -2000,8 +2003,21 @@ export default function Landing() {
 
             <div className="lp-tiers">
               {TIERS.map((tier, i) => {
-                const effective = annual ? Math.round(tier.price * 0.8) : tier.price;
-                const discounted = annual && tier.price > 0;
+                // Monthly = show tier.price | Annual = show monthly equivalent (annualPrice / 12)
+                const monthlyDisplay = annual && tier.annualPrice > 0
+                  ? Math.round(tier.annualPrice / 12)
+                  : tier.price;
+                const showDiscount = annual && tier.annualPrice > 0;
+
+                // Build the "billed as X/year" note for annual
+                let billingNote = '';
+                if (tier.price === 0) {
+                  billingNote = 'Free forever';
+                } else if (showDiscount) {
+                  billingNote = `Billed as $${tier.annualPrice}/year`;
+                } else {
+                  billingNote = '';
+                }
 
                 return (
                   <Reveal key={tier.name} delay={i * 120} y={28}>
@@ -2013,13 +2029,11 @@ export default function Landing() {
                       <p className="lp-tier-blurb">{tier.blurb}</p>
 
                       <div className="lp-price-row">
-                        {discounted ? <span className="lp-price-was">${tier.price}</span> : null}
-                        <span className="lp-price">${effective}</span>
+                        {showDiscount ? <span className="lp-price-was">${tier.price}</span> : null}
+                        <span className="lp-price">${monthlyDisplay}</span>
                         <span className="lp-price-per">/month</span>
                       </div>
-                      <p className="lp-price-note">
-                        {discounted ? 'Billed annually · save 20%' : tier.price === 0 ? 'Free forever' : ''}
-                      </p>
+                      <p className="lp-price-note">{billingNote}</p>
 
                       <div className="lp-feat">
                         {tier.features.map((f) => (
@@ -2033,7 +2047,7 @@ export default function Landing() {
                       </div>
 
                       <Link
-                        href={tier.href}
+                        href={tier.href + (annual && tier.annualPrice > 0 ? '&interval=annual' : '')}
                         className={'lp-tier-cta ' + (tier.featured ? 'is-dark' : 'is-plain')}
                       >
                         {tier.cta}

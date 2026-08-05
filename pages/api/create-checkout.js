@@ -3,11 +3,12 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const VALID_PLANS = ["starter", "pro"];
+const VALID_INTERVALS = ["monthly", "annual"];
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { plan, userId, userEmail } = req.body || {};
+  const { plan, billingInterval, userId, userEmail } = req.body || {};
 
   // Validate before calling Stripe. Previously an unknown plan silently resolved
   // to the starter price, and a missing price ID was sent to Stripe as undefined,
@@ -15,6 +16,12 @@ export default async function handler(req, res) {
   if (!plan || VALID_PLANS.indexOf(plan) === -1) {
     return res.status(400).json({ error: "plan must be one of: " + VALID_PLANS.join(", ") });
   }
+
+  const interval = billingInterval || "monthly";
+  if (VALID_INTERVALS.indexOf(interval) === -1) {
+    return res.status(400).json({ error: "billingInterval must be one of: " + VALID_INTERVALS.join(", ") });
+  }
+
   if (!userId) {
     // Without this the webhook receives no client_reference_id and the payment
     // cannot be attributed to an account.
@@ -25,14 +32,33 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Payments are not configured" });
   }
 
-  const priceId = plan === "pro"
-    ? process.env.STRIPE_PRO_PRICE_ID
-    : process.env.STRIPE_STARTER_PRICE_ID;
+  // Select the price for this plan + interval. Annual prices are optional: if
+  // one is not configured we charge the monthly price rather than failing, so a
+  // half-finished Stripe setup degrades to a working checkout instead of a 500.
+  // `effectiveInterval` records what is actually being charged — when a fallback
+  // happens the metadata must say "monthly", or the webhook and the receipt will
+  // disagree about what the customer bought.
+  const PRICES = {
+    starter: { monthly: "STRIPE_STARTER_PRICE_ID", annual: "STRIPE_STARTER_ANNUAL_PRICE_ID" },
+    pro: { monthly: "STRIPE_PRO_PRICE_ID", annual: "STRIPE_PRO_ANNUAL_PRICE_ID" },
+  };
+
+  let effectiveInterval = interval;
+  let priceVar = PRICES[plan][interval];
+  let priceId = process.env[priceVar];
+
+  if (!priceId && interval === "annual") {
+    console.warn(
+      "create-checkout: " + priceVar + " is not set; falling back to monthly billing for the " + plan + " plan"
+    );
+    effectiveInterval = "monthly";
+    priceVar = PRICES[plan].monthly;
+    priceId = process.env[priceVar];
+  }
 
   if (!priceId) {
-    const varName = plan === "pro" ? "STRIPE_PRO_PRICE_ID" : "STRIPE_STARTER_PRICE_ID";
-    console.error("create-checkout: " + varName + " is not set");
-    return res.status(500).json({ error: "The " + plan + " plan is not configured. Missing " + varName + "." });
+    console.error("create-checkout: " + priceVar + " is not set");
+    return res.status(500).json({ error: "The " + plan + " plan is not configured. Missing " + priceVar + "." });
   }
 
   // req.headers.origin is absent on some server-side and non-browser callers,
@@ -53,14 +79,21 @@ export default async function handler(req, res) {
       customer_email: userEmail || undefined,
       // metadata carries the plan; client_reference_id carries the user. The
       // webhook needs both to write the right plan to the right account.
-      metadata: { userId: userId, plan: plan },
+      metadata: { userId: userId, plan: plan, billingInterval: effectiveInterval },
       client_reference_id: userId,
-      success_url: origin + "/success?plan=" + plan,
+      success_url: origin + "/success?plan=" + plan + "&interval=" + effectiveInterval,
       cancel_url: origin + "/app#account",
     });
 
-    console.log("create-checkout: session " + session.id + " for user " + userId + " (" + plan + ")");
-    return res.status(200).json({ url: session.url, sessionId: session.id });
+    console.log(
+      "create-checkout: session " + session.id + " for user " + userId +
+      " (" + plan + " / " + effectiveInterval + ")"
+    );
+    return res.status(200).json({
+      url: session.url,
+      sessionId: session.id,
+      billingInterval: effectiveInterval,
+    });
   } catch (err) {
     console.error("create-checkout: Stripe error: " + (err && err.message ? err.message : String(err)));
     return res.status(500).json({

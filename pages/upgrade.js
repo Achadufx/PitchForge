@@ -9,6 +9,7 @@ const PLAN_DATA = {
   starter: {
     name: "Starter",
     price: "29",
+    annualPrice: "276",
     title: "Keep your outreach going.",
     subtitle: "100 pitches a month — enough to run a real fundraising campaign without hitting a wall.",
     features: [
@@ -22,6 +23,7 @@ const PLAN_DATA = {
   pro: {
     name: "Pro",
     price: "79",
+    annualPrice: "948",
     title: "For a full raise.",
     subtitle: "500 pitches a month, deeper investor research, and the full CRM pipeline.",
     features: [
@@ -40,6 +42,7 @@ export default function Upgrade() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedPlan, setSelectedPlan] = useState("pro");
+  const [annual, setAnnual] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -54,7 +57,12 @@ export default function Upgrade() {
     if (planParam === "starter" || planParam === "pro") {
       setSelectedPlan(planParam);
     }
-  }, [router.isReady, router.query.plan]);
+    // Carried over from the landing page toggle, so a founder who picked annual
+    // there does not have to pick it again here.
+    if (router.query.interval === "annual") {
+      setAnnual(true);
+    }
+  }, [router.isReady, router.query.plan, router.query.interval]);
 
   const plan = PLAN_DATA[selectedPlan];
 
@@ -66,7 +74,12 @@ export default function Upgrade() {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selectedPlan, userId: user.id, userEmail: user.email }),
+        body: JSON.stringify({
+          plan: selectedPlan,
+          billingInterval: annual ? "annual" : "monthly",
+          userId: user.id,
+          userEmail: user.email,
+        }),
       });
       const data = await res.json();
 
@@ -156,6 +169,66 @@ export default function Upgrade() {
             })}
           </div>
 
+          {/* Annual/Monthly toggle */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+            marginBottom: tokens.spacing[5],
+            padding: 4,
+            background: tokens.colors.bg.surface,
+            border: "1px solid " + tokens.colors.border.default,
+            borderRadius: tokens.radius.full,
+            width: "fit-content",
+            margin: "0 auto " + tokens.spacing[5],
+          }}>
+            <button
+              type="button"
+              onClick={() => setAnnual(false)}
+              style={{
+                padding: "9px 20px",
+                borderRadius: tokens.radius.full,
+                fontSize: "13.5px",
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "none",
+                background: annual ? "transparent" : tokens.colors.accent.primary,
+                color: annual ? tokens.colors.text.secondary : tokens.colors.text.inverse,
+                fontFamily: "inherit",
+                transition: "background " + tokens.transitions.fast + ", color " + tokens.transitions.fast,
+              }}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setAnnual(true)}
+              style={{
+                padding: "9px 20px",
+                borderRadius: tokens.radius.full,
+                fontSize: "13.5px",
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "none",
+                background: annual ? tokens.colors.accent.primary : "transparent",
+                color: annual ? tokens.colors.text.inverse : tokens.colors.text.secondary,
+                fontFamily: "inherit",
+                transition: "background " + tokens.transitions.fast + ", color " + tokens.transitions.fast,
+              }}
+            >
+              Annual
+            </button>
+            <span style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              color: tokens.colors.accent.secondaryHover,
+              paddingRight: 12,
+            }}>
+              Save 20%
+            </span>
+          </div>
+
           <div style={{
             background: tokens.colors.bg.card,
             border: "1px solid " + tokens.colors.border.default,
@@ -215,7 +288,7 @@ export default function Upgrade() {
                 color: tokens.colors.text.primary,
                 lineHeight: 1,
               }}>
-                ${plan.price}
+                ${annual && plan.annualPrice ? Math.round(Number(plan.annualPrice) / 12) : plan.price}
                 <span style={{
                   fontSize: "16px",
                   fontWeight: 400,
@@ -230,7 +303,9 @@ export default function Upgrade() {
                 color: tokens.colors.text.muted,
                 marginTop: tokens.spacing[1],
               }}>
-                Cancel anytime
+                {annual && plan.annualPrice
+                  ? `Billed as $${plan.annualPrice}/year`
+                  : "Cancel anytime"}
               </div>
             </div>
 
