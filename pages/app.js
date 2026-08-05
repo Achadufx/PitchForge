@@ -502,9 +502,21 @@ async function generateSingle(inv, startup) {
 
   var res;
   try {
+    // Optional: lets the route file the draft against the CRM. Generation works
+    // without it.
+    var pitchHeaders = { 'Content-Type': 'application/json' };
+    try {
+      var sess = await supabase.auth.getSession();
+      if (sess && sess.data && sess.data.session && sess.data.session.access_token) {
+        pitchHeaders.Authorization = 'Bearer ' + sess.data.session.access_token;
+      }
+    } catch (authErr) {
+      console.error('Could not attach session to pitch generation:', authErr);
+    }
+
     res = await fetch('/api/research-and-pitch', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: pitchHeaders,
       body: JSON.stringify({
         investorName: inv.name,
         firm: inv.firm || '',
@@ -982,9 +994,22 @@ function SendStep({ pitches, onRestart }) {
     if (!senderName) return;
     setSending(true);
     try {
+      // The token is what lets /api/send-pitches mirror these sends into the
+      // CRM. It is optional there by design — without it the emails still go
+      // out, they just don't land on a timeline.
+      const headers = { "Content-Type": "application/json" };
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.access_token) {
+          headers.Authorization = "Bearer " + session.access_token;
+        }
+      } catch (authErr) {
+        console.error("Could not attach session to send:", authErr);
+      }
+
       const res = await fetch(API_URL + "/api/send-pitches", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ pitches, senderName }),
       });
       const data = await res.json();

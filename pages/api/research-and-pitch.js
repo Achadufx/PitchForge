@@ -2,6 +2,7 @@ import { researchInvestor } from '../../lib/researchInvestor';
 import { generatePitch } from '../../lib/generatePitch';
 import { geminiConfigError } from '../../lib/geminiClient';
 import { groqConfigError } from '../../lib/groqClient';
+import { optionalCrmContext, recordPitchGenerated } from '../../lib/crm/ingest';
 
 // Spacing between the research call and the pitch call. These hit DIFFERENT
 // providers — research on Gemini, pitch on Groq — so they do not share a quota
@@ -212,6 +213,31 @@ export default async function handler(req, res) {
       error: pitchError || 'Pitch generation failed',
       researchError: researchError
     });
+  }
+
+  // Save the draft against the investor's pipeline row so the timeline shows
+  // the pitch existed before it was sent. Best-effort and last: the pitch is
+  // already generated, and a CRM write must never cost the caller a result it
+  // waited 40 seconds for. Silent without a session or a CRM plan.
+  try {
+    var ctx = await optionalCrmContext(req);
+    if (ctx) {
+      await recordPitchGenerated(ctx, {
+        // No relationship is created here — one is made when the pitch is
+        // actually sent. Generating a draft is not yet contact, and creating a
+        // row per draft would fill the board with investors never approached.
+        relationshipId: null,
+        investorFirm: firm || null,
+        investorName: investorName || null,
+        subject: pitch.subject,
+        body: pitch.body,
+        researchNotes: research ? JSON.stringify(research) : null,
+        model: process.env.GROQ_MODEL || null,
+      });
+    }
+  } catch (err) {
+    console.error('research-and-pitch: CRM recording failed: ' +
+      (err && err.message ? err.message : String(err)));
   }
 
   return res.status(200).json({

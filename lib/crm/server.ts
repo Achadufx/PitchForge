@@ -36,7 +36,7 @@ type Handler = (ctx: CrmContext) => Promise<unknown>;
  * Defaults to 'free' on any failure. A plan lookup that errors should lock
  * features, never unlock them.
  */
-async function resolvePlan(userId: string): Promise<Plan> {
+export async function resolvePlan(userId: string): Promise<Plan> {
   try {
     const { data, error } = await supabaseAdmin()
       .from('user_plans')

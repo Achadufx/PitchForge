@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { optionalCrmContext, recordEmailsSent } from "../../lib/crm/ingest";
 
 const SENDER_EMAIL = process.env.SENDER_EMAIL || "pitchblast@onresend.com";
 const SENDER_NAME = process.env.SENDER_NAME || "PitchBlast";
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { pitches, senderName } = req.body || {};
+  const { pitches, senderName, campaignId } = req.body || {};
 
   if (!pitches || !Array.isArray(pitches) || pitches.length === 0) {
     return res.status(400).json({ error: "No pitches provided" });
@@ -28,6 +29,9 @@ export default async function handler(req, res) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const results = [];
+  // Only what actually left the building, kept alongside the investor details
+  // the CRM needs. A failed send is not a timeline event.
+  const delivered = [];
 
   for (const pitch of pitches) {
     const label = (pitch && pitch.name) || (pitch && pitch.email) || 'unknown';
@@ -72,6 +76,16 @@ export default async function handler(req, res) {
         id: sent && sent.data ? sent.data.id : undefined
       });
 
+      delivered.push({
+        firm: pitch.firm || pitch.name || 'Unknown Investor',
+        contact: pitch.name || null,
+        email: pitch.email,
+        subject: pitch.subject,
+        body: String(pitch.body),
+        providerMessageId: sent && sent.data ? sent.data.id : null,
+        emailType: 'initial_pitch',
+      });
+
     } catch (err) {
       console.error('send-pitches: failed to send to ' + pitch.email + ': ' + err.message);
       results.push({ name: pitch.name, email: pitch.email, success: false, error: err.message });
@@ -81,5 +95,23 @@ export default async function handler(req, res) {
   const sentCount = results.filter(r => r.success).length;
   console.log('send-pitches: ' + sentCount + '/' + results.length + ' delivered');
 
-  return res.json({ results, sent: sentCount, total: results.length });
+  // Mirror the delivered sends into the CRM. This runs after every send has
+  // been attempted and its outcome recorded, and it is wrapped because the
+  // emails have already gone out: a CRM write that throws here must not turn a
+  // successful send into a 500 the founder reads as "it didn't send".
+  //
+  // Silent when the caller has no session or no CRM on their plan, which is why
+  // the pitch flow keeps working unchanged for everyone else.
+  let crm = null;
+  try {
+    const ctx = await optionalCrmContext(req);
+    if (ctx && delivered.length) {
+      crm = await recordEmailsSent(ctx, delivered, campaignId || null);
+      console.log('send-pitches: CRM recorded ' + crm.recorded + '/' + delivered.length);
+    }
+  } catch (err) {
+    console.error('send-pitches: CRM recording failed: ' + (err && err.message ? err.message : String(err)));
+  }
+
+  return res.json({ results, sent: sentCount, total: results.length, crm });
 }
