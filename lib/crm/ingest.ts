@@ -279,6 +279,13 @@ export interface SendRecord {
   emailType?: EmailType;
   investorId?: string | number | null;
   generatedPitchId?: string | null;
+  /**
+   * Set when the caller already knows which pipeline row this send belongs to —
+   * the follow-up queue does, because it started from that row. Skips the
+   * firm/email lookup, so a follow-up can never file itself against a different
+   * relationship than the pitch it is following up on.
+   */
+  relationshipId?: string | null;
 }
 
 export interface IngestSummary {
@@ -312,12 +319,28 @@ export async function recordEmailsSent(
 
   for (const send of sends) {
     try {
-      const relationshipId = await findOrCreateRelationship(ctx, campaignId, {
-        firm: send.firm,
-        contact: send.contact,
-        email: send.email,
-        investorId: send.investorId,
-      });
+      // A caller-supplied id is verified rather than trusted: the read runs
+      // under the caller's RLS, so an id belonging to another founder resolves
+      // to nothing and falls through to the normal lookup.
+      let relationshipId: string | null = null;
+      if (send.relationshipId) {
+        const { data: owned } = await ctx.db
+          .from('investor_relationships')
+          .select('id')
+          .eq('id', send.relationshipId)
+          .maybeSingle();
+        relationshipId = owned?.id ?? null;
+      }
+
+      if (!relationshipId) {
+        relationshipId = await findOrCreateRelationship(ctx, campaignId, {
+          firm: send.firm,
+          contact: send.contact,
+          email: send.email,
+          investorId: send.investorId,
+        });
+      }
+
       if (!relationshipId) {
         summary.failed += 1;
         continue;

@@ -6,7 +6,9 @@ import { Spinner, ErrorNote, Button, UpgradeGate } from '@/components/crm/ui';
 import Dashboard from '@/components/crm/Dashboard';
 import Pipeline from '@/components/crm/Pipeline';
 import Campaigns from '@/components/crm/Campaigns';
+import Followups from '@/components/crm/Followups';
 import RelationshipDetail from '@/components/crm/RelationshipDetail';
+import SidePanel from '@/components/crm/SidePanel';
 
 const c = tokens.colors;
 
@@ -17,11 +19,12 @@ interface Bootstrap {
   totals: CampaignStats | null;
 }
 
-type View = 'dashboard' | 'pipeline' | 'campaigns';
+type View = 'dashboard' | 'pipeline' | 'followups' | 'campaigns';
 
 const VIEWS: Array<{ key: View; label: string }> = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'pipeline', label: 'Pipeline' },
+  { key: 'followups', label: 'Follow-ups' },
   { key: 'campaigns', label: 'Campaigns' },
 ];
 
@@ -43,8 +46,11 @@ export default function CrmTab({ plan = 'free' }: { plan?: Plan }) {
   // Bumped to force the dashboard to refetch after a change elsewhere.
   const [version, setVersion] = useState(0);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  // `quiet` refetches without dropping the whole tab back to a spinner. A
+  // child saving something must not unmount the drawer the founder is typing
+  // in, so background refreshes leave the current render standing.
+  const load = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
     setError(null);
     setGate(null);
     try {
@@ -55,7 +61,7 @@ export default function CrmTab({ plan = 'free' }: { plan?: Plan }) {
       if (err instanceof ApiError && err.status === 402) setGate(err);
       else setError(err instanceof ApiError ? err.message : 'Failed to load your CRM');
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   }, []);
 
@@ -65,7 +71,7 @@ export default function CrmTab({ plan = 'free' }: { plan?: Plan }) {
 
   const refresh = useCallback(() => {
     setVersion((v) => v + 1);
-    load();
+    load(true);
   }, [load]);
 
   if (loading) return <Spinner label="Loading your CRM" />;
@@ -81,23 +87,13 @@ export default function CrmTab({ plan = 'free' }: { plan?: Plan }) {
   }
 
   if (error || !boot) {
-    return <ErrorNote onRetry={load}>{error || 'Your CRM could not be loaded.'}</ErrorNote>;
+    return <ErrorNote onRetry={() => load()}>{error || 'Your CRM could not be loaded.'}</ErrorNote>;
   }
 
-  // The detail view replaces the whole tab rather than opening beside it: on a
-  // phone there is no beside, and one layout is better than two that diverge.
-  if (openId) {
-    return (
-      <RelationshipDetail
-        id={openId}
-        plan={plan}
-        stages={boot.stages}
-        onBack={() => setOpenId(null)}
-        onChanged={refresh}
-      />
-    );
-  }
-
+  // The detail opens in a drawer over the board rather than replacing it. The
+  // founder's place in the pipeline survives opening an investor, so working
+  // through a column is one continuous action instead of a series of round
+  // trips through a separate page.
   return (
     <div>
       <nav
@@ -134,15 +130,44 @@ export default function CrmTab({ plan = 'free' }: { plan?: Plan }) {
         />
       )}
 
+      {view === 'followups' && (
+        <Followups
+          key={version}
+          stages={boot.stages}
+          campaigns={boot.campaigns}
+          onOpen={setOpenId}
+          onChanged={refresh}
+        />
+      )}
+
       {view === 'campaigns' && (
         <Campaigns campaigns={boot.campaigns} stats={boot.stats} onChanged={refresh} />
       )}
 
+      {openId && (
+        <SidePanel title="Investor" onClose={() => setOpenId(null)}>
+          <RelationshipDetail
+            id={openId}
+            plan={plan}
+            stages={boot.stages}
+            onBack={() => setOpenId(null)}
+            onChanged={refresh}
+            embedded
+          />
+        </SidePanel>
+      )}
+
       {/* Touch targets. The buttons are sized for a dense desktop toolbar;
-          on a touch screen every one of them lifts to the 44px minimum. */}
+          on a touch screen every one of them lifts to the 44px minimum.
+          The pipeline drag grip is the same story in reverse — it is only
+          reachable by finger, so it is small until there is a finger. */}
       <style jsx global>{`
         @media (hover: none) and (pointer: coarse) {
           .crm-btn {
+            min-height: 44px;
+          }
+          .crm-grip {
+            min-width: 44px;
             min-height: 44px;
           }
         }

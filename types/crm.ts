@@ -63,6 +63,25 @@ export type Plan = 'free' | 'starter' | 'pro';
 // Rows
 // ---------------------------------------------------------------------------
 
+/**
+ * A stable handle on a stage whose name the founder can change at will.
+ *
+ * Set on the ten seeded stages and null on anything a founder builds, which is
+ * what lets the automation in migration 0007 stay out of a custom pipeline
+ * rather than guessing at it. Never render this — render `name`.
+ */
+export type StageKey =
+  | 'prospect'
+  | 'qualified'
+  | 'pitch_sent'
+  | 'engaged'
+  | 'meeting'
+  | 'diligence'
+  | 'invested'
+  | 'passed'
+  | 'no_response'
+  | 'archived';
+
 export interface PipelineStage {
   id: string;
   owner_id: string;
@@ -70,6 +89,7 @@ export interface PipelineStage {
   position: number;
   color: string;
   kind: StageKind;
+  stage_key: StageKey | null;
   is_default: boolean;
   created_at: string;
   updated_at: string;
@@ -230,6 +250,13 @@ export interface CampaignStatsRow {
   investors_emailed: number;
   investors_replied: number;
   investors_met: number;
+  /** Distinct investors who opened at least one email in the thread. */
+  investors_opened: number;
+  /**
+   * Mean days from first send to first reply, over the investors who replied.
+   * Null until somebody has — an average of nothing is not zero.
+   */
+  avg_days_to_first_reply: number | null;
   emails_sent: number;
   pitches_generated: number;
   last_activity_at: string | null;
@@ -237,6 +264,7 @@ export interface CampaignStatsRow {
 
 /** `campaign_stats` with the derived percentages the UI actually renders. */
 export interface CampaignStats extends CampaignStatsRow {
+  open_rate: number;
   reply_rate: number;
   meeting_rate: number;
   investment_rate: number;
@@ -298,4 +326,43 @@ export interface DashboardSummary {
   /** Echoed from the server so the heading states the window it applied. */
   quietAfterDays: number;
   totalActive: number;
+}
+
+// ---------------------------------------------------------------------------
+// Follow-ups
+// ---------------------------------------------------------------------------
+
+/**
+ * One investor waiting on the founder, with the numbers the queue sorts by
+ * already computed.
+ *
+ * `daysSincePitch` is server-computed rather than derived in the component
+ * because the bucket boundaries (3, 7, 14 days) have to agree with the cron
+ * sweep's 14-day threshold, and two implementations of "how many days" that
+ * round differently would put an investor in a bucket the sweep disagrees with.
+ */
+export interface FollowupCandidate {
+  relationship: RelationshipCard;
+  /** Newest email in the thread, or null if they were added but never pitched. */
+  lastEmailAt: string | null;
+  lastEmailSubject: string | null;
+  /** Newest event of any kind, which is what "last activity" shows. */
+  lastActivityAt: string | null;
+  lastActivitySummary: string | null;
+  /** Whole days since the last send. Null when nothing was ever sent. */
+  daysSincePitch: number | null;
+  /** How many follow-ups have already gone out, so the copy can escalate. */
+  followupCount: number;
+  opened: boolean;
+  replied: boolean;
+}
+
+export type FollowupBucket = 'today' | 'three_to_seven' | 'seven_to_fourteen' | 'over_fourteen';
+
+export interface FollowupsResponse {
+  candidates: FollowupCandidate[];
+  counts: Record<FollowupBucket, number>;
+  total: number;
+  /** Echoed so the UI states the same threshold the cron sweep uses. */
+  noResponseAfterDays: number;
 }

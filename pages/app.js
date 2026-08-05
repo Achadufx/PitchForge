@@ -2621,7 +2621,7 @@ export default function App() {
               />
             )}
             {activeTab === "crm" && <CrmTab plan={plan} />}
-            {activeTab === "followups" && <FollowupsTab />}
+            {activeTab === "followups" && <FollowupsTab plan={plan} />}
             {activeTab === "templates" && <TemplatesTab />}
             {activeTab === "account" && (
               <AccountTab

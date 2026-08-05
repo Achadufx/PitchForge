@@ -6,6 +6,7 @@ import type {
   PipelineStage,
   RelationshipEvent,
   RelationshipNote,
+  RelationshipMeeting,
   Task,
   CrmEventType,
   Plan,
@@ -43,7 +44,16 @@ const TONE_COLOR: Record<string, string> = {
   system: c.text.muted,
 };
 
-type Panel = 'timeline' | 'notes' | 'tasks';
+type Panel = 'timeline' | 'notes' | 'tasks' | 'meetings';
+
+/** Outcomes worth recording. Free text would make these unaggregatable later. */
+const MEETING_OUTCOMES = [
+  { value: 'positive', label: 'Went well — they want to keep talking' },
+  { value: 'neutral', label: 'Neutral — no clear signal' },
+  { value: 'needs_followup', label: 'They asked for something' },
+  { value: 'passed', label: 'They passed' },
+  { value: 'no_show', label: 'No show' },
+];
 
 export default function RelationshipDetail({
   id,
@@ -51,12 +61,15 @@ export default function RelationshipDetail({
   stages,
   onBack,
   onChanged,
+  /** True when rendered inside the side panel, which owns its own close control. */
+  embedded = false,
 }: {
   id: string;
   plan: Plan;
   stages: PipelineStage[];
   onBack: () => void;
   onChanged?: () => void;
+  embedded?: boolean;
 }) {
   const [data, setData] = useState<RelationshipDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -102,9 +115,11 @@ export default function RelationshipDetail({
 
   return (
     <div>
-      <Button variant="ghost" size="sm" onClick={onBack} style={{ marginBottom: 14, paddingLeft: 0 }}>
-        ← Back to pipeline
-      </Button>
+      {!embedded && (
+        <Button variant="ghost" size="sm" onClick={onBack} style={{ marginBottom: 14, paddingLeft: 0 }}>
+          ← Back to pipeline
+        </Button>
+      )}
 
       {error && <ErrorNote onRetry={load}>{error}</ErrorNote>}
 
@@ -195,7 +210,7 @@ export default function RelationshipDetail({
 
       {/* Panel switcher */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-        {(['timeline', 'notes', 'tasks'] as Panel[]).map((key) => (
+        {(['timeline', 'notes', 'tasks', 'meetings'] as Panel[]).map((key) => (
           <Button
             key={key}
             size="sm"
@@ -206,7 +221,9 @@ export default function RelationshipDetail({
               ? `Timeline (${data.events.length})`
               : key === 'notes'
               ? `Notes (${data.notes.length})`
-              : `Tasks (${data.tasks.filter((t) => t.status === 'pending').length})`}
+              : key === 'tasks'
+              ? `Tasks (${data.tasks.filter((t) => t.status === 'pending').length})`
+              : `Meetings (${data.meetings.length})`}
           </Button>
         ))}
       </div>
@@ -221,6 +238,9 @@ export default function RelationshipDetail({
       )}
       {panel === 'notes' && <Notes notes={data.notes} relationshipId={id} onChanged={load} />}
       {panel === 'tasks' && <Tasks tasks={data.tasks} relationshipId={id} onChanged={load} />}
+      {panel === 'meetings' && (
+        <Meetings meetings={data.meetings} relationshipId={id} onChanged={load} />
+      )}
     </div>
   );
 }
@@ -606,6 +626,193 @@ function Tasks({
           </Card>
         );
       })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Meetings
+// ---------------------------------------------------------------------------
+
+/**
+ * The meeting log.
+ *
+ * A meeting a founder had is worth more to the pipeline than a meeting they
+ * scheduled, so this form defaults to "already happened": pick the date, write
+ * what was said, choose an outcome. Scheduling a future one is the same form
+ * with a future date and no outcome yet.
+ */
+function Meetings({
+  meetings,
+  relationshipId,
+  onChanged,
+}: {
+  meetings: RelationshipMeeting[];
+  relationshipId: string;
+  onChanged: () => void;
+}) {
+  const [when, setWhen] = useState('');
+  const [notes, setNotes] = useState('');
+  const [outcome, setOutcome] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function log(e: React.FormEvent) {
+    e.preventDefault();
+    if (!when) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const scheduledAt = new Date(when).toISOString();
+      const { meeting } = await crmApi.post<{ meeting: RelationshipMeeting }>('/api/crm/meetings', {
+        relationship_id: relationshipId,
+        scheduled_at: scheduledAt,
+        notes: notes.trim() || null,
+      });
+
+      // Two steps rather than one because the trigger in 0005 writes
+      // MEETING_SCHEDULED on insert and MEETING_COMPLETED on completion. A
+      // meeting logged after the fact should produce both, in that order, so
+      // the timeline reads the same as one scheduled ahead and then held.
+      if (outcome) {
+        await crmApi.patch(`/api/crm/meetings?id=${meeting.id}`, {
+          completed: true,
+          completed_at: scheduledAt,
+          outcome,
+        });
+      }
+
+      setWhen('');
+      setNotes('');
+      setOutcome('');
+      onChanged();
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.status === 402
+            ? 'Meeting tracking is on a paid plan.'
+            : err.message
+          : 'Could not log that meeting'
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function complete(meeting: RelationshipMeeting, value: string) {
+    setError(null);
+    try {
+      await crmApi.patch(`/api/crm/meetings?id=${meeting.id}`, { completed: true, outcome: value });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not update that meeting');
+    }
+  }
+
+  const outcomeLabel = (value: string | null) =>
+    MEETING_OUTCOMES.find((option) => option.value === value)?.label || value;
+
+  return (
+    <div>
+      <SectionTitle>Meetings</SectionTitle>
+      {error && <ErrorNote>{error}</ErrorNote>}
+
+      <Card style={{ marginBottom: 16 }}>
+        <form onSubmit={log}>
+          <Field label="When" hint="A past date logs a meeting you already had.">
+            <TextInput type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
+          </Field>
+          <Field label="Notes">
+            <TextArea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Who was in the room, what they pushed on, what they asked for…"
+            />
+          </Field>
+          <Field label="Outcome" hint="Leave blank if the meeting has not happened yet.">
+            <Select value={outcome} onChange={(e) => setOutcome(e.target.value)}>
+              <option value="">Not yet held</option>
+              {MEETING_OUTCOMES.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Button type="submit" variant="primary" disabled={saving || !when}>
+            {saving ? 'Saving…' : outcome ? 'Log meeting' : 'Schedule meeting'}
+          </Button>
+        </form>
+      </Card>
+
+      {meetings.length === 0 ? (
+        <EmptyState title="No meetings yet" body="Every call you log here shows up on the timeline." />
+      ) : (
+        meetings.map((meeting) => (
+          <Card key={meeting.id} style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: c.text.primary }}>
+                  {meeting.title || 'Meeting'}
+                </div>
+                <div style={{ fontSize: 12, color: c.text.muted, marginTop: 3 }}>
+                  {new Date(meeting.scheduled_at).toLocaleString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                  {meeting.duration_minutes ? ` · ${meeting.duration_minutes} min` : ''}
+                </div>
+              </div>
+              {meeting.completed_at ? (
+                <Badge
+                  color={
+                    meeting.outcome === 'passed' || meeting.outcome === 'no_show'
+                      ? c.status.error
+                      : meeting.outcome === 'positive'
+                      ? c.status.success
+                      : undefined
+                  }
+                >
+                  {outcomeLabel(meeting.outcome) || 'Held'}
+                </Badge>
+              ) : (
+                <Select
+                  value=""
+                  onChange={(e) => e.target.value && complete(meeting, e.target.value)}
+                  aria-label="Mark this meeting held"
+                  style={{ flex: '0 1 200px', width: 'auto' }}
+                >
+                  <option value="">Mark as held…</option>
+                  {MEETING_OUTCOMES.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            </div>
+
+            {meeting.notes && (
+              <div
+                style={{
+                  fontSize: 13,
+                  color: c.text.secondary,
+                  lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap',
+                  marginTop: 10,
+                  paddingTop: 10,
+                  borderTop: `1px solid ${c.border.default}`,
+                }}
+              >
+                {meeting.notes}
+              </div>
+            )}
+          </Card>
+        ))
+      )}
     </div>
   );
 }

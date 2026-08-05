@@ -123,10 +123,19 @@ export default function Campaigns({
                 >
                   <Metric label="Investors" value={stat.total_investors} />
                   <Metric label="Emailed" value={stat.investors_emailed} />
+                  <Metric label="Opened" value={stat.investors_opened} pct={stat.open_rate} />
                   <Metric label="Replied" value={stat.investors_replied} pct={stat.reply_rate} />
                   <Metric label="Met" value={stat.investors_met} pct={stat.meeting_rate} />
                   <Metric label="Invested" value={stat.investments} pct={stat.investment_rate} />
                   <Metric label="Passed" value={stat.passes} />
+                  <Metric
+                    label="Avg. reply"
+                    value={
+                      stat.avg_days_to_first_reply == null
+                        ? '—'
+                        : `${Number(stat.avg_days_to_first_reply)}d`
+                    }
+                  />
                 </div>
               )}
             </Card>
@@ -147,7 +156,7 @@ export default function Campaigns({
   );
 }
 
-function Metric({ label, value, pct }: { label: string; value: number; pct?: number }) {
+function Metric({ label, value, pct }: { label: string; value: number | string; pct?: number }) {
   return (
     <div>
       <div style={{ fontSize: 11, color: c.text.muted, fontWeight: 600, marginBottom: 2 }}>{label}</div>

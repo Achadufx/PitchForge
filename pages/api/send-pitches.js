@@ -4,6 +4,11 @@ import { optionalCrmContext, recordEmailsSent } from "../../lib/crm/ingest";
 const SENDER_EMAIL = process.env.SENDER_EMAIL || "pitchblast@onresend.com";
 const SENDER_NAME = process.env.SENDER_NAME || "PitchBlast";
 
+// Mirrors the crm_email_type enum. An unrecognised value from the client falls
+// back to 'initial_pitch' rather than reaching Postgres and failing the insert
+// after the mail has already gone out.
+const VALID_EMAIL_TYPES = ['initial_pitch', 'followup', 'sequence_step', 'manual'];
+
 function isValidEmail(value) {
   if (!value || typeof value !== 'string') return false;
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
@@ -83,7 +88,17 @@ export default async function handler(req, res) {
         subject: pitch.subject,
         body: String(pitch.body),
         providerMessageId: sent && sent.data ? sent.data.id : null,
-        emailType: 'initial_pitch',
+        // The CRM follow-up queue sends through this same route and needs the
+        // send filed as a follow-up, not a first touch: the trigger in 0005
+        // maps email_type onto FOLLOWUP_SENT vs EMAIL_SENT, and the wrong one
+        // makes a third nudge count as a third investor reached.
+        emailType: VALID_EMAIL_TYPES.indexOf(pitch.emailType) !== -1
+          ? pitch.emailType
+          : 'initial_pitch',
+        // Sent straight through when the caller already knows the pipeline row,
+        // which skips the firm/email lookup and removes any chance of the
+        // follow-up landing on a different relationship than the original.
+        relationshipId: pitch.relationshipId || null,
       });
 
     } catch (err) {

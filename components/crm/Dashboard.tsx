@@ -3,6 +3,7 @@ import tokens from '@/lib/designTokens';
 import { crmApi, ApiError } from '@/lib/crm/api';
 import type { DashboardSummary, Plan } from '@/types/crm';
 import { Spinner, ErrorNote, Card, Button, Badge, SectionTitle, EmptyState } from '@/components/crm/ui';
+import StatsPanel from '@/components/crm/StatsPanel';
 import { relativeTime } from '@/lib/crm/stats';
 import { eventMeta } from '@/lib/crm/events';
 
@@ -59,40 +60,13 @@ export default function CrmDashboard({ plan }: { plan: Plan }) {
         </p>
       </div>
 
-      {/* Funnel stats */}
-      {stats && (
-        <Card padding="20px 22px" style={{ marginBottom: 20 }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: 18,
-            }}
-          >
-            <Stat label="Investors" value={stats.total_investors} />
-            <Stat label="Emailed" value={stats.investors_emailed} />
-            <Stat
-              label="Replies"
-              value={stats.investors_replied}
-              sub={stats.reply_rate > 0 ? `${stats.reply_rate}%` : undefined}
-            />
-            <Stat
-              label="Meetings"
-              value={stats.investors_met}
-              sub={stats.meeting_rate > 0 ? `${stats.meeting_rate}%` : undefined}
-            />
-            <Stat
-              label="Invested"
-              value={stats.investments}
-              sub={stats.investment_rate > 0 ? `${stats.investment_rate}%` : undefined}
-              highlight
-            />
-          </div>
-        </Card>
-      )}
+      {/* Campaign funnel — pitched, opened, replied, met, plus where everyone
+          is standing right now. */}
+      {stats && <StatsPanel stats={stats} stageCounts={stageCounts} />}
 
-      {/* Pipeline stages */}
-      {stageCounts.length > 0 && (
+      {/* Pipeline stages. Only when there are no campaign stats to hang the
+          progress bar off — otherwise this is the same information twice. */}
+      {!stats && stageCounts.length > 0 && (
         <div style={{ marginBottom: 28 }}>
           <SectionTitle>Pipeline</SectionTitle>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -314,48 +288,6 @@ export default function CrmDashboard({ plan }: { plan: Plan }) {
             }
           />
         )}
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  sub,
-  highlight,
-}: {
-  label: string;
-  value: number;
-  sub?: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: c.text.muted, marginBottom: 4, letterSpacing: '0.03em' }}>
-        {label}
-      </div>
-      <div
-        style={{
-          fontSize: 26,
-          fontWeight: 800,
-          color: highlight ? c.accent.secondary : c.text.primary,
-          lineHeight: 1.2,
-        }}
-      >
-        {value}
-        {sub && (
-          <span
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              color: c.text.muted,
-              marginLeft: 6,
-            }}
-          >
-            {sub}
-          </span>
-        )}
-      </div>
     </div>
   );
 }
