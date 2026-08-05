@@ -31,35 +31,34 @@ const PITCHES = [
   {
     firm: 'TLcom Capital',
     to: 'm.caio@tlcomcapital.com',
-    subject: 'TIDE Africa Fund II and the $300 problem in Nigerian hospitals',
+    subject: 'TIDE Africa Fund II and a $300 problem worth fixing',
     body:
-      'Your $154M TIDE Africa Fund II close while most funds pulled back says something about conviction. ' +
-      'In Lagos right now a diabetes patient moving between clinics loses her entire diagnostic history because ' +
-      'her paper file disappeared — forcing $300 in redundant bloodwork. We built ForcepX to eliminate this. ' +
-      'Blockchain-anchored patient records, patient-controlled permissions, cross-system compliant. ' +
-      'Three hospital design partners in Lagos already. 15 minutes Thursday?',
+      'Closing $154M in TIDE Africa Fund II while most funds pulled back signals real conviction in African ' +
+      'infrastructure. Right now in Lagos, a diabetes patient moving between clinics loses her entire diagnostic ' +
+      'history because her paper file disappeared — forcing $300 in redundant tests her family cannot afford. ' +
+      'We built ForcepX to end this. Blockchain-anchored records, patient-controlled permissions, cross-system ' +
+      'compliant. Three hospital design partners already live. 15 minutes this Thursday?',
   },
   {
     firm: 'Novastar Ventures',
-    to: 'j.ademola@novastarventures.com',
-    subject: 'The Africa People + Planet Fund and the file that vanished in Lagos',
+    to: 'partner@novastar.vc',
+    subject: 'Novastar’s Ilara Health bet and what comes next',
     body:
-      'The Africa People + Planet Fund reads like a bet on infrastructure that outlasts the round, not on apps ' +
-      'that sit on top of it. Here is what is still broken underneath: a diabetes patient changes clinics in Lagos, ' +
-      'her paper file goes missing, and she pays $300 to repeat bloodwork she already did last month. ' +
-      'ForcepX makes the record itself portable — blockchain-anchored, patient-controlled, compliant across systems. ' +
-      'Three hospital design partners live. 15 minutes Thursday?',
+      'Your Series A in Ilara Health shows you understand that African healthcare runs on broken data rails. ' +
+      'Ilara solves the device layer. We are solving the trust layer underneath it. ForcepX gives patients ' +
+      'cryptographic control over their health records — verifiable, portable, tamper-evident. Pilots underway ' +
+      'with three Lagos teaching hospitals. The infrastructure Ilara needs to scale already exists in our stack. ' +
+      '15 minutes Thursday to show you how they connect?',
   },
   {
     firm: 'Ventures Platform',
-    to: 'k.aina@venturesplatform.com',
-    subject: 'Reliance Health, and the $300 Nigerian patients spend twice',
+    to: 'hello@venturesplatform.com',
+    subject: 'Ventures Platform thesis and healthcare data',
     body:
-      'Backing Reliance Health said you already believe Nigerian healthcare gets fixed at the infrastructure layer. ' +
-      'The layer underneath it is still paper. A diabetes patient moves between clinics, her file disappears, and ' +
-      'she pays $300 for diagnostics she completed four weeks ago. ForcepX anchors the record itself — ' +
-      'patient-controlled permissions, portable across hospitals, compliant by default. ' +
-      'Three Lagos design partners already running it. 15 minutes Thursday?',
+      'You back founders solving Nigeria’s infrastructure gaps from the ground up — SeamlessHR for HR, ' +
+      'Brass for banking. We are doing the same for healthcare data. Nigerian patients lose medical records ' +
+      'every time they switch hospitals. ForcepX makes those records patient-owned and cross-system readable. ' +
+      'Pre-seed, two hospital pilots signed, raising $500K. 15 minutes this week?',
   },
 ];
 
@@ -146,7 +145,7 @@ const OG_SVG = [
   '<text x="88" y="300" font-family="Inter,Helvetica,Arial,sans-serif" font-size="76" font-weight="400" fill="#5C5248">Investors can tell a</text>',
   '<text x="88" y="386" font-family="Inter,Helvetica,Arial,sans-serif" font-size="76" font-weight="400" fill="#5C5248">generic pitch in</text>',
   '<text x="88" y="480" font-family="Inter,Helvetica,Arial,sans-serif" font-size="88" font-weight="800" fill="#1A1A1A">3 seconds.</text>',
-  '<text x="88" y="556" font-family="Inter,Helvetica,Arial,sans-serif" font-size="27" font-weight="500" fill="#75604A">Investor pitch intelligence for African founders</text>',
+  '<text x="88" y="556" font-family="Inter,Helvetica,Arial,sans-serif" font-size="27" font-weight="500" fill="#75604A">Investor pitch intelligence for founders</text>',
   '</svg>',
 ].join('');
 
@@ -329,6 +328,33 @@ function CustomCursor() {
 }
 
 // ----------------------------------------------------------------------------
+// LOGO
+// Mark plus wordmark. If the image 404s or is blocked, the <img> is removed and
+// the wordmark alone carries the brand — so the nav never renders a broken-image
+// glyph next to it.
+// ----------------------------------------------------------------------------
+
+function Logo() {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <Link href="/" className="lp-logo" aria-label="PitchWire home">
+      {failed ? null : (
+        <img
+          src="/logo.png"
+          alt=""
+          width={30}
+          height={30}
+          decoding="async"
+          onError={() => setFailed(true)}
+        />
+      )}
+      <span>PitchWire</span>
+    </Link>
+  );
+}
+
+// ----------------------------------------------------------------------------
 // ICONS — all inline, all stroke-based, all inherit currentColor.
 // ----------------------------------------------------------------------------
 
@@ -441,7 +467,7 @@ function useTypewriterCycle(pitches, active, reduced) {
       setText(body.slice(0, i));
 
       if (i < body.length) {
-        timer = setTimeout(step, 30);
+        timer = setTimeout(step, 18);
         return;
       }
 
@@ -638,7 +664,7 @@ export default function Landing() {
         <title>PitchWire — Investors can tell a generic pitch in 3 seconds</title>
         <meta
           name="description"
-          content="PitchWire researches every investor and writes emails that open with something only they would recognise. Built for African founders raising pre-seed and seed."
+          content="PitchWire researches every investor and writes emails that open with something only they would recognise. Built for founders raising pre-seed and seed rounds globally."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#F5F0E8" />
@@ -650,19 +676,19 @@ export default function Landing() {
         <meta property="og:title" content="Investors can tell a generic pitch in 3 seconds" />
         <meta
           property="og:description"
-          content="PitchWire researches every investor and writes emails that open with something only they would recognise. Built for African founders raising pre-seed and seed."
+          content="PitchWire researches every investor and writes emails that open with something only they would recognise. Built for founders raising pre-seed and seed rounds globally."
         />
         <meta property="og:url" content="https://pitchwire.app/" />
         <meta property="og:image" content={OG_IMAGE} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="PitchWire — investor pitch intelligence for African founders" />
+        <meta property="og:image:alt" content="PitchWire — investor pitch intelligence for founders" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Investors can tell a generic pitch in 3 seconds" />
         <meta
           name="twitter:description"
-          content="Researched investor emails that open on something only they would recognise. For African founders raising pre-seed and seed."
+          content="Researched investor emails that open on something only they would recognise. For founders raising pre-seed and seed rounds globally."
         />
         <meta name="twitter:image" content={OG_IMAGE} />
 
@@ -840,11 +866,24 @@ export default function Landing() {
           height: 76px;
         }
         .lp-logo {
+          display: inline-flex;
+          align-items: center;
+          gap: 9px;
           font-size: 19px;
           font-weight: 800;
           letter-spacing: -0.035em;
           color: var(--text-1);
           text-decoration: none;
+        }
+        /* logo.png is a centred mark on an opaque white square (no alpha
+           channel), which would otherwise read as a white card floating on the
+           cream. Multiply drops pure white into the background so only the mark
+           survives. */
+        .lp-logo img {
+          width: 30px;
+          height: 30px;
+          object-fit: contain;
+          mix-blend-mode: multiply;
         }
         .lp-nav-mid {
           display: flex;
@@ -1163,10 +1202,50 @@ export default function Landing() {
            TENSION — the one dark section
            ========================================================== */
         .lp-tension {
+          position: relative;
+          isolation: isolate;
           background: var(--ink);
           color: var(--on-dark);
           padding: 168px 0;
           text-align: center;
+          overflow: hidden;
+        }
+        /* Engraved-plate texture: a fine rule grid, a finer diagonal hatch, and
+           a dot lattice on the intersections — three layers at different pitches
+           so it reads as printed tone rather than a visible screen. Everything
+           is one flat cream at 0.06, so nothing competes with the type. */
+        .lp-tension::before {
+          content: '';
+          position: absolute;
+          inset: -1px;
+          z-index: -1;
+          pointer-events: none;
+          opacity: 0.06;
+          background-image:
+            repeating-linear-gradient(90deg, var(--on-dark) 0 1px, transparent 1px 88px),
+            repeating-linear-gradient(0deg, var(--on-dark) 0 1px, transparent 1px 88px),
+            repeating-linear-gradient(45deg, var(--on-dark) 0 0.5px, transparent 0.5px 14px),
+            radial-gradient(circle at center, var(--on-dark) 0 1.4px, transparent 1.6px);
+          background-size: 88px 88px, 88px 88px, 28px 28px, 88px 88px;
+          background-position: 0 0, 0 0, 0 0, 44px 44px;
+          /* Thinned out behind the headline, densest toward the edges — the
+             pattern frames the statement instead of sitting under it. */
+          -webkit-mask-image: radial-gradient(ellipse 62% 68% at 50% 50%, transparent 0%, #000 78%);
+          mask-image: radial-gradient(ellipse 62% 68% at 50% 50%, transparent 0%, #000 78%);
+        }
+        /* A single hairline of warm brown across the top edge — the one place
+           colour appears on the dark band, and it marks the section boundary. */
+        .lp-tension::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          z-index: -1;
+          pointer-events: none;
+          background: linear-gradient(90deg, transparent, var(--brown) 32%, var(--brown) 68%, transparent);
+          opacity: 0.5;
         }
         .lp-tension-h {
           margin: 0 auto;
@@ -1680,7 +1759,7 @@ export default function Landing() {
         {/* ---------- NAV ---------- */}
         <header className={'lp-nav' + (scrolled ? ' is-scrolled' : '')}>
           <div className="lp-shell lp-nav-inner">
-            <Link href="/" className="lp-logo">PitchWire</Link>
+            <Logo />
 
             <nav className="lp-nav-mid" aria-label="Primary">
               <a href="#how" className="lp-nav-a">How it works</a>
@@ -1733,7 +1812,7 @@ export default function Landing() {
           <Reveal delay={380} y={16}>
             <p className="lp-hero-sub">
               PitchWire researches every investor and writes emails that open with something only
-              they would recognise. Built for African founders raising pre-seed and seed.
+              they would recognise. Built for founders raising pre-seed and seed rounds globally.
             </p>
           </Reveal>
 
@@ -1973,7 +2052,7 @@ export default function Landing() {
             <p>
               Founders have used PitchWire to pitch <strong>TLcom Capital</strong>,{' '}
               <strong>Novastar Ventures</strong>, <strong>Ventures Platform</strong>,{' '}
-              <strong>Founders Factory Africa</strong>, and 40+ other African investors.
+              <strong>Founders Factory</strong>, and 40+ other investors.
             </p>
           </Reveal>
         </section>
@@ -1992,7 +2071,7 @@ export default function Landing() {
         {/* ---------- FOOTER ---------- */}
         <footer className="lp-shell">
           <div className="lp-footer">
-            <Link href="/" className="lp-logo">PitchWire</Link>
+            <Logo />
             <nav className="lp-footer-mid" aria-label="Footer">
               <a href="#how" className="lp-footer-a">How it works</a>
               <a href="#difference" className="lp-footer-a">The difference</a>
