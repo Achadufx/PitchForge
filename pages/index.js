@@ -216,14 +216,28 @@ function useInView(threshold = 0.12) {
 
 // Fades and lifts a block into place on scroll. `y` is exposed as a custom
 // property so the mobile breakpoint can shorten every travel distance at once.
-function Reveal({ children, delay = 0, y = 24, className = '', style }) {
+// `immediate` opts a block out of scroll gating and plays its entrance on mount.
+// Used for the hero, which is above the fold by definition — and where a
+// below-the-fold observer would otherwise hold the compose card at opacity 0
+// while its typewriter ran unseen.
+function Reveal({ children, delay = 0, y = 24, className = '', style, immediate = false }) {
   const reduced = useReducedMotion();
   const [ref, inView] = useInView();
-  const shown = reduced || inView;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (!immediate) return undefined;
+    // rAF, not a 0ms timeout: guarantees the pre-transition frame is painted so
+    // the entrance actually animates instead of snapping to its end state.
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, [immediate]);
+
+  const shown = reduced || (immediate ? mounted : inView);
 
   return (
     <div
-      ref={ref}
+      ref={immediate ? undefined : ref}
       className={'lp-reveal' + (shown ? ' is-in' : '') + (className ? ' ' + className : '')}
       style={Object.assign({ '--ry': y + 'px', '--rd': delay + 'ms' }, style)}
     >
@@ -436,14 +450,26 @@ function Icon({ name }) {
 // Types the current pitch, holds, fades, advances. One timer chain, one cancel
 // flag, cleared on every re-run and on unmount — so a fast unmount can never
 // leave a setState firing against a dead component.
-function useTypewriterCycle(pitches, active, reduced) {
+function useTypewriterCycle(pitches, reduced) {
   const [index, setIndex] = useState(0);
   const [text, setText] = useState('');
   const [typing, setTyping] = useState(true);
   const [visible, setVisible] = useState(true);
 
+  // Gates the first keystroke to 500ms after mount, and nothing else. Not tied
+  // to scroll position: the card is the hero's proof, so it must be mid-type by
+  // the time anyone looks at it, on every viewport. An IntersectionObserver here
+  // meant a desktop viewport that placed the card below the fold never started
+  // it at all.
+  const [started, setStarted] = useState(false);
+
   useEffect(() => {
-    if (!active) return undefined;
+    const t = setTimeout(() => setStarted(true), 500);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!started) return undefined;
 
     const body = pitches[index].body;
 
@@ -485,25 +511,26 @@ function useTypewriterCycle(pitches, active, reduced) {
       }, 2500);
     };
 
-    timer = setTimeout(step, 420);
+    // The first keystroke is already delayed by the mount gate above, so this
+    // only spaces out the transition between pitches on subsequent cycles.
+    timer = setTimeout(step, index === 0 ? 0 : 420);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [index, active, reduced, pitches]);
+  }, [index, started, reduced, pitches]);
 
   return { index: index, text: text, typing: typing, visible: visible };
 }
 
 function ComposeWindow() {
   const reduced = useReducedMotion();
-  const [ref, inView] = useInView(0.25);
-  const { index, text, typing, visible } = useTypewriterCycle(PITCHES, inView, reduced);
+  const { index, text, typing, visible } = useTypewriterCycle(PITCHES, reduced);
   const pitch = PITCHES[index];
 
   return (
-    <div ref={ref} className="lp-compose-outer">
+    <div className="lp-compose-outer">
       <div className="lp-compose-float">
         <div className="lp-compose">
           <div className="lp-compose-bar">
@@ -771,6 +798,11 @@ export default function Landing() {
           color: var(--text-1);
           font-family: var(--font);
           -webkit-font-smoothing: antialiased;
+          /* Belt and braces against a stray wide child on small screens: nothing
+             in the layout should exceed the viewport, but if it ever does the page
+             must not become horizontally scrollable. */
+          overflow-x: hidden;
+          max-width: 100vw;
         }
 
         .lp-root ::selection {
@@ -782,6 +814,7 @@ export default function Landing() {
           max-width: var(--shell);
           margin: 0 auto;
           padding: 0 var(--gutter);
+          width: 100%;
         }
 
         .lp-section { padding: var(--section) 0; }
@@ -926,7 +959,7 @@ export default function Landing() {
           font-weight: 500;
           color: var(--text-2);
           text-decoration: none;
-          padding: 10px 14px;
+          padding: 12px 14px;
           border-radius: var(--r-full);
           transition: color 160ms ease, background 160ms ease;
         }
@@ -1043,7 +1076,9 @@ export default function Landing() {
         }
         .lp-label {
           display: inline-block;
-          font-size: 11px;
+          /* 12px is the floor everywhere on the page, including these uppercase
+             eyebrow labels. Tracking carries the label look instead of size. */
+          font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -1123,7 +1158,7 @@ export default function Landing() {
         }
         .lp-compose-firm {
           margin-left: auto;
-          font-size: 10.5px;
+          font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.07em;
           text-transform: uppercase;
@@ -1343,7 +1378,7 @@ export default function Landing() {
           color: var(--brown);
         }
         .lp-mock-drop-t { font-size: 13px; font-weight: 600; color: var(--text-1); }
-        .lp-mock-drop-s { font-size: 11.5px; color: var(--text-3); }
+        .lp-mock-drop-s { font-size: 12px; color: var(--text-3); }
         .lp-mock-file {
           display: flex;
           align-items: center;
@@ -1353,7 +1388,7 @@ export default function Landing() {
           padding: 9px 12px;
         }
         .lp-mock-file-n { font-size: 12.5px; font-weight: 550; color: var(--text-1); }
-        .lp-mock-file-s { font-size: 11.5px; color: var(--text-3); }
+        .lp-mock-file-s { font-size: 12px; color: var(--text-3); }
         .lp-mock-bar { height: 4px; border-radius: var(--r-full); background: var(--cream-hover); overflow: hidden; }
         .lp-mock-bar-f { display: block; height: 100%; width: 72%; border-radius: var(--r-full); background: var(--ink); }
 
@@ -1364,7 +1399,7 @@ export default function Landing() {
           border-radius: var(--r-md);
           background: var(--ink);
           color: var(--white);
-          font-size: 11.5px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.02em;
           display: flex;
@@ -1372,7 +1407,7 @@ export default function Landing() {
           justify-content: center;
         }
         .lp-mock-head-t { display: block; font-size: 13.5px; font-weight: 650; color: var(--text-1); }
-        .lp-mock-head-s { display: block; font-size: 11.5px; color: var(--text-3); }
+        .lp-mock-head-s { display: block; font-size: 12px; color: var(--text-3); }
         .lp-mock-rows { display: flex; flex-direction: column; }
         .lp-mock-row {
           display: flex;
@@ -1386,7 +1421,7 @@ export default function Landing() {
         .lp-mock-row span:last-child { color: var(--text-1); font-weight: 550; text-align: right; }
 
         .lp-mock-mail { display: flex; flex-direction: column; gap: 7px; }
-        .lp-mock-mail-to { font-size: 11.5px; color: var(--text-3); }
+        .lp-mock-mail-to { font-size: 12px; color: var(--text-3); }
         .lp-mock-mail-sub {
           font-size: 13px;
           font-weight: 650;
@@ -1401,7 +1436,7 @@ export default function Landing() {
           align-items: center;
           gap: 6px;
           align-self: flex-start;
-          font-size: 11.5px;
+          font-size: 12px;
           font-weight: 600;
           color: var(--ok);
           background: var(--ok-bg);
@@ -1445,7 +1480,7 @@ export default function Landing() {
         .lp-badge.is-check { background: var(--ok-bg); border: 1px solid var(--ok-line); color: var(--ok); }
 
         .lp-diff-k {
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -1549,7 +1584,7 @@ export default function Landing() {
         .lp-tier-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .lp-tier-n { font-size: 16px; font-weight: 650; color: var(--text-1); }
         .lp-tier-pop {
-          font-size: 10.5px;
+          font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.07em;
           text-transform: uppercase;
@@ -1670,8 +1705,8 @@ export default function Landing() {
 
         @media (max-width: 760px) {
           .lp-root {
-            --gutter: 22px;
-            --section: 82px;
+            --gutter: 20px;
+            --section: 60px;
             --t-hero: 44px;
             --t-section: 36px;
             --t-body: 16px;
@@ -1689,16 +1724,24 @@ export default function Landing() {
           .lp-hero-cta .lp-pill { width: 100%; justify-content: center; }
           .lp-hero-note { margin-top: 48px; }
 
+          /* Card is width-capped by the shell gutter rather than its own 640px
+             max, so it can never be the thing that causes horizontal scroll. */
+          .lp-compose-outer { max-width: 100%; }
+          .lp-compose { border-radius: var(--r-lg); }
           .lp-compose-float { animation: none; }
           .lp-compose-firm { display: none; }
           .lp-compose-body { min-height: 300px; padding: 18px 16px 6px; }
-          .lp-field { padding: 11px 16px; gap: 10px; }
-          .lp-field-k { flex-basis: 48px; font-size: 11px; }
-          .lp-field-v { font-size: 13.5px; }
-          .lp-compose-text { font-size: 13.5px; line-height: 1.75; }
+          .lp-field { padding: 12px 16px; gap: 10px; }
+          .lp-field-k { flex-basis: 52px; font-size: 12px; }
+          .lp-field-v { font-size: 15px; }
+          /* Long unbroken addresses and subjects are the one thing here that can
+             exceed 390px; break them rather than letting them push the layout. */
+          .lp-field-mono { word-break: break-all; }
+          .lp-field-strong { overflow-wrap: anywhere; }
+          .lp-compose-text { font-size: 15px; line-height: 1.72; }
 
-          .lp-tension { padding: 96px 0; }
-          .lp-head { margin-bottom: 48px; max-width: 100%; }
+          .lp-tension { padding: 72px 0; }
+          .lp-head { margin-bottom: 40px; max-width: 100%; }
 
           .lp-step {
             grid-template-columns: 1fr;
@@ -1707,6 +1750,14 @@ export default function Landing() {
           }
           .lp-step-n { font-size: 64px; line-height: 1; }
           .lp-step-t { font-size: 23px; }
+
+          /* Body copy floor: 14.5px reads fine at desktop measure but is under
+             the 15px minimum for phones, so every prose-carrying class is
+             lifted here rather than at the base. */
+          .lp-diff-body,
+          .lp-res-line,
+          .lp-feat-i,
+          .lp-tier-blurb { font-size: 15px; }
 
           .lp-diff { grid-template-columns: 1fr; gap: 18px; }
           .lp-diff-card { padding: 24px 22px 28px; }
@@ -1732,6 +1783,42 @@ export default function Landing() {
 
           .lp-footer { flex-direction: column; gap: 26px; text-align: center; }
           .lp-footer-mid { flex-wrap: wrap; justify-content: center; gap: 20px; }
+
+          /* Touch targets. Every tappable thing gets a 44px minimum box on
+             touch screens, expressed as min-height plus centring rather than
+             extra padding so none of it shifts the surrounding layout. The
+             text links and footer links are the ones that actually needed it —
+             the pills and tier CTAs already cleared 44px from padding alone,
+             and are pinned here so a later padding tweak cannot regress them. */
+          .lp-pill,
+          .lp-ghost,
+          .lp-textlink,
+          .lp-tier-cta,
+          .lp-toggle button {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+          }
+          /* Inline-level links inside centred text: padding would break the
+             line box, so grow the hit area with min-height on a flex box that
+             still sits in the normal flow. */
+          .lp-footer-a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+          }
+          .lp-mobile-a { padding: 0; min-height: 52px; display: flex; align-items: center; }
+        }
+
+        /* Tablet: research grid to single column */
+        @media (max-width: 600px) {
+          .lp-research { grid-template-columns: 1fr; }
+        }
+
+        /* Extra-small screens: tighten hero headline further */
+        @media (max-width: 400px) {
+          .lp-root { --t-hero: 36px; --gutter: 16px; }
         }
 
         /* ==========================================================
@@ -1803,7 +1890,7 @@ export default function Landing() {
 
         {/* ---------- HERO ---------- */}
         <section className="lp-shell lp-hero">
-          <Reveal y={12}>
+          <Reveal y={12} immediate>
             <span className="lp-label">Investor pitch intelligence</span>
           </Reveal>
 
@@ -1812,14 +1899,14 @@ export default function Landing() {
             <WordReveal className="lp-h1-b" text="in 3 seconds." stagger={70} delay={490} />
           </h1>
 
-          <Reveal delay={380} y={16}>
+          <Reveal delay={380} y={16} immediate>
             <p className="lp-hero-sub">
               PitchWire researches every investor and writes emails that open with something only
               they would recognise. Built for founders raising pre-seed and seed rounds globally.
             </p>
           </Reveal>
 
-          <Reveal delay={520} y={16}>
+          <Reveal delay={520} y={16} immediate>
             <div className="lp-hero-cta">
               <Link href="/login" className="lp-pill is-lg">
                 Get 10 free pitches
@@ -1830,11 +1917,11 @@ export default function Landing() {
             </div>
           </Reveal>
 
-          <Reveal delay={640} y={16}>
+          <Reveal delay={640} y={16} immediate>
             <p className="lp-hero-note">↑ Real pitch generated by PitchWire</p>
           </Reveal>
 
-          <Reveal delay={700} y={28}>
+          <Reveal delay={700} y={28} immediate>
             <ComposeWindow />
           </Reveal>
         </section>
