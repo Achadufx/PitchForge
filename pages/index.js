@@ -121,8 +121,8 @@ const TIERS = [
   },
   {
     name: 'Pro',
-    price: 99,
-    annualPrice: 948,
+    price: 79,
+    annualPrice: 758,
     blurb: 'For a full fundraising cycle.',
     features: ['500 pitches per month', 'Deep investor research', 'Full CRM pipeline', 'Follow-up suggestions', 'Priority support'],
     cta: 'Choose Pro',

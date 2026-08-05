@@ -23,7 +23,7 @@ const PLAN_DATA = {
   pro: {
     name: "Pro",
     price: "79",
-    annualPrice: "948",
+    annualPrice: "758",
     title: "For a full raise.",
     subtitle: "500 pitches a month, deeper investor research, and the full CRM pipeline.",
     features: [
