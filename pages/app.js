@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import DocumentUpload from "../components/DocumentUpload";
 import { useRouter } from "next/router";
 import AccountTab from "../components/AccountTab";
-import CrmTab from "../components/CrmTab";
+import CrmTab from "../components/crm/CrmTab";
 import FollowupsTab from "../components/FollowupsTab";
 import TemplatesTab from "../components/TemplatesTab";
 import GlobalStyles from "../components/GlobalStyles";
@@ -2570,7 +2570,10 @@ export default function App() {
         />
 
         <main className="pw-main-content">
-          <div style={styles.main}>
+          {/* 720px is the reading measure for the pitch flow. The CRM's
+              pipeline board is columnar and needs the room, so it — and only
+              it — gets the wider container. */}
+          <div style={activeTab === "crm" ? { ...styles.main, maxWidth: "1180px" } : styles.main}>
             {activeTab === "campaign" && (
               <CampaignTab
                 pitchCount={pitchCount}
@@ -2592,7 +2595,7 @@ export default function App() {
                 }}
               />
             )}
-            {activeTab === "crm" && <CrmTab />}
+            {activeTab === "crm" && <CrmTab plan={plan} />}
             {activeTab === "followups" && <FollowupsTab />}
             {activeTab === "templates" && <TemplatesTab />}
             {activeTab === "account" && (

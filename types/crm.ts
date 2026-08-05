@@ -251,25 +251,51 @@ export interface RelationshipWithStage extends InvestorRelationship {
   stage: PipelineStage | null;
 }
 
-/** Everything the relationship detail page loads in one round trip. */
-export interface RelationshipDetail extends RelationshipWithStage {
+/** What the board and list views receive: stage plus the owning campaign. */
+export interface RelationshipCard extends RelationshipWithStage {
   campaign: Pick<Campaign, 'id' | 'name' | 'status'> | null;
+}
+
+/**
+ * Everything the relationship detail page loads in one round trip.
+ *
+ * The children stay siblings of the relationship rather than being folded into
+ * it: they are separately paginated and separately plan-gated, and flattening
+ * would imply they always arrive complete.
+ */
+export interface RelationshipDetailResponse {
+  relationship: RelationshipCard;
   events: RelationshipEvent[];
   notes: RelationshipNote[];
   tasks: Task[];
   meetings: RelationshipMeeting[];
   emails: SentEmail[];
   pitches: GeneratedPitch[];
+  stageHistory: StageHistoryEntry[];
+  /** Null on Pro, where the timeline is uncapped. */
+  historyWindowDays: number | null;
 }
 
+/**
+ * A row joined to the bare minimum of its relationship. The dashboard lists
+ * tasks, meetings and events across every investor, so each line needs a firm
+ * name to be meaningful — but not the whole relationship, which would multiply
+ * the payload by the number of rows sharing a parent.
+ */
+export type WithRelationshipRef<T> = T & {
+  relationship: Pick<InvestorRelationship, 'id' | 'investor_firm'> | null;
+};
+
 export interface DashboardSummary {
-  activeCampaign: Campaign | null;
   stats: CampaignStats | null;
-  overdueTasks: Task[];
-  upcomingTasks: Task[];
-  upcomingMeetings: RelationshipMeeting[];
-  recentEvents: RelationshipEvent[];
+  stageCounts: Array<{ stage: PipelineStage; count: number }>;
+  overdueTasks: Array<WithRelationshipRef<Task>>;
+  upcomingTasks: Array<WithRelationshipRef<Task>>;
+  upcomingMeetings: Array<WithRelationshipRef<RelationshipMeeting>>;
+  recentEvents: Array<WithRelationshipRef<RelationshipEvent>>;
   /** Active relationships with no interaction inside the staleness window. */
   goneQuiet: RelationshipWithStage[];
-  stageCounts: Array<{ stage: PipelineStage; count: number }>;
+  /** Echoed from the server so the heading states the window it applied. */
+  quietAfterDays: number;
+  totalActive: number;
 }

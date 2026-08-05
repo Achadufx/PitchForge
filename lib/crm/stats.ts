@@ -101,18 +101,30 @@ export function formatDuration(seconds: number | null): string {
   return `${days}d`;
 }
 
-/** Relative time for the timeline: "just now", "3h ago", "12 Mar". */
+/**
+ * Relative time for the timeline: "just now", "3h ago", "12 Mar".
+ *
+ * Handles both directions. Half of what the CRM renders is in the future —
+ * upcoming meetings, tasks due next week — and a past-only formatter collapses
+ * all of it to "just now", which is worse than showing nothing.
+ */
 export function relativeTime(iso: string, now: Date = new Date()): string {
+  if (!iso) return '—';
   const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return '—';
+
   const diff = now.getTime() - then.getTime();
-  const minutes = Math.floor(diff / 60000);
+  const future = diff < 0;
+  const minutes = Math.floor(Math.abs(diff) / 60000);
+
+  const ago = (value: string) => (future ? `in ${value}` : `${value} ago`);
 
   if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return ago(`${minutes}m`);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return ago(`${hours}h`);
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return ago(`${days}d`);
 
   const sameYear = then.getFullYear() === now.getFullYear();
   return then.toLocaleDateString('en-GB', {
