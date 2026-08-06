@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import tokens from "../lib/designTokens";
+import { crmApi, ApiError } from "../lib/crm/api";
 
 // ============================================================
 // DESIGN SYSTEM
@@ -28,6 +29,16 @@ const PLAN_META = {
     bg: tokens.colors.status.successBg,
     border: tokens.colors.status.successBorder,
   },
+};
+
+const GMAIL_CALLBACK_MESSAGES = {
+  connected: { ok: true, message: '✓ Gmail connected successfully' },
+  cancelled: { ok: false, message: 'Connection cancelled' },
+  expired: { ok: false, message: 'Connection expired — try again' },
+  no_refresh_token: { ok: false, message: 'Gmail connection incomplete — try again' },
+  denied: { ok: false, message: 'Gmail access denied' },
+  not_configured: { ok: false, message: 'Gmail is not configured on this deployment' },
+  error: { ok: false, message: 'Connection failed — try again' },
 };
 
 // ============================================================
@@ -101,10 +112,50 @@ function Card({ children, style = {} }) {
 
 export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
   const [checkoutLoading, setCheckoutLoading] = useState("");
+  const [gmailStatus, setGmailStatus] = useState(null);
+  const [gmailLoading, setGmailLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
+  const [callbackNotice, setCallbackNotice] = useState(null);
   const limit = PLAN_LIMITS[plan] || 10;
   const pct = Math.min((pitchCount / limit) * 100, 100);
   const meta = PLAN_META[plan] || PLAN_META.free;
   const initial = (user?.user_metadata?.full_name || user?.email || "F")[0].toUpperCase();
+
+  const loadGmailStatus = useCallback(async () => {
+    try {
+      const data = await crmApi.get("/api/gmail/status");
+      setGmailStatus(data);
+    } catch (err) {
+      console.error("Failed to load Gmail status:", err);
+    } finally {
+      setGmailLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadGmailStatus();
+  }, [loadGmailStatus]);
+
+  // /api/gmail/callback redirects back here with ?gmail=<status>#account. The
+  // param is stripped once read so a refresh does not re-show a stale banner —
+  // and so "connected" does not stay in the URL if the founder shares the link.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("gmail");
+    if (!status) return;
+
+    setCallbackNotice(GMAIL_CALLBACK_MESSAGES[status] || GMAIL_CALLBACK_MESSAGES.error);
+
+    params.delete("gmail");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (query ? "?" + query : "") + window.location.hash
+    );
+  }, []);
 
   const handleCheckout = async (p) => {
     setCheckoutLoading(p);
@@ -118,6 +169,45 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
       if (data.url) window.location.href = data.url;
     } catch (err) { console.error(err); }
     setCheckoutLoading("");
+  };
+
+  const handleGmailConnect = async () => {
+    try {
+      const data = await crmApi.post("/api/gmail/connect", {});
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      console.error("Failed to start Gmail connection:", err);
+    }
+  };
+
+  const handleGmailDisconnect = async () => {
+    if (!window.confirm("Disconnect Gmail? PitchWire will stop checking for investor replies.")) return;
+    try {
+      await crmApi.post("/api/gmail/disconnect", {});
+      await loadGmailStatus();
+      setSyncResult(null);
+    } catch (err) {
+      console.error("Failed to disconnect Gmail:", err);
+    }
+  };
+
+  const handleGmailSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const data = await crmApi.post("/api/gmail/sync", {});
+      setSyncResult(data);
+      await loadGmailStatus();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setSyncResult({ error: "Gmail access expired. Reconnect your account." });
+        await loadGmailStatus();
+      } else {
+        setSyncResult({ error: err instanceof ApiError ? err.message : "Sync failed" });
+      }
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (
@@ -397,6 +487,132 @@ export default function AccountTab({ user, plan, pitchCount, onSignOut }) {
               </div>
             </button>
           </div>
+        </Card>
+      )}
+
+      {/* Gmail Integration */}
+      {!gmailLoading && gmailStatus && gmailStatus.available && gmailStatus.eligible && (
+        <Card>
+          <SectionLabel>Gmail Integration</SectionLabel>
+          {callbackNotice && (
+            <div style={{
+              fontSize: 12,
+              marginBottom: tokens.spacing[4],
+              padding: tokens.spacing[2],
+              borderRadius: tokens.radius.sm,
+              background: callbackNotice.ok ? tokens.colors.status.successBg : tokens.colors.status.warningBg,
+              border: `1px solid ${callbackNotice.ok ? tokens.colors.status.successBorder : tokens.colors.status.warningBorder}`,
+              color: callbackNotice.ok ? tokens.colors.status.success : tokens.colors.status.warning,
+            }}>
+              {callbackNotice.message}
+            </div>
+          )}
+          {gmailStatus.connection.connected ? (
+            <>
+              <div style={{ marginBottom: tokens.spacing[4] }}>
+                <div style={{ fontSize: 13, color: tokens.colors.text.primary, marginBottom: tokens.spacing[2] }}>
+                  <span style={{ fontWeight: 600 }}>Connected as:</span> {gmailStatus.connection.email}
+                </div>
+                {gmailStatus.connection.lastSyncedAt && (
+                  <div style={{ fontSize: 12, color: tokens.colors.text.muted }}>
+                    Last synced: {new Date(gmailStatus.connection.lastSyncedAt).toLocaleString()}
+                  </div>
+                )}
+                {gmailStatus.connection.needsReconnect && (
+                  <div style={{
+                    fontSize: 12,
+                    color: tokens.colors.status.warning,
+                    marginTop: tokens.spacing[2],
+                    padding: tokens.spacing[2],
+                    background: tokens.colors.status.warningBg,
+                    border: `1px solid ${tokens.colors.status.warningBorder}`,
+                    borderRadius: tokens.radius.sm,
+                  }}>
+                    ⚠ {gmailStatus.connection.syncError || 'Reconnect required'}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: tokens.spacing[2], flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleGmailSync}
+                  disabled={syncing}
+                  style={{
+                    background: tokens.colors.accent.primary,
+                    color: tokens.colors.text.inverse,
+                    border: 'none',
+                    borderRadius: tokens.radius.md,
+                    padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
+                    fontWeight: 600,
+                    fontSize: 12,
+                    cursor: syncing ? 'not-allowed' : 'pointer',
+                    minHeight: '44px',
+                    opacity: syncing ? 0.6 : 1,
+                  }}
+                >
+                  {syncing ? 'Syncing...' : 'Sync Now'}
+                </button>
+                <button
+                  onClick={handleGmailDisconnect}
+                  style={{
+                    background: 'transparent',
+                    color: tokens.colors.text.muted,
+                    border: `1px solid ${tokens.colors.border.default}`,
+                    borderRadius: tokens.radius.md,
+                    padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
+                    fontWeight: 600,
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    minHeight: '44px',
+                  }}
+                >
+                  Disconnect
+                </button>
+              </div>
+              {syncResult && (
+                <div style={{
+                  marginTop: tokens.spacing[3],
+                  fontSize: 12,
+                  padding: tokens.spacing[2],
+                  borderRadius: tokens.radius.sm,
+                  background: syncResult.error ? tokens.colors.status.errorBg : tokens.colors.status.successBg,
+                  border: `1px solid ${syncResult.error ? tokens.colors.status.errorBorder : tokens.colors.status.successBorder}`,
+                  color: syncResult.error ? tokens.colors.status.error : tokens.colors.status.success,
+                }}>
+                  {syncResult.error || `Found ${syncResult.repliesFound || 0} new ${syncResult.repliesFound === 1 ? 'reply' : 'replies'}`}
+                </div>
+              )}
+              <div style={{
+                fontSize: 11,
+                color: tokens.colors.text.muted,
+                marginTop: tokens.spacing[3],
+                lineHeight: 1.5,
+              }}>
+                PitchWire checks your Gmail every 30 minutes for investor replies and automatically updates your CRM.
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 13, color: tokens.colors.text.secondary, marginBottom: tokens.spacing[4] }}>
+                Connect your Gmail so PitchWire can automatically detect when investors reply.
+              </div>
+              <button
+                onClick={handleGmailConnect}
+                style={{
+                  background: tokens.colors.accent.primary,
+                  color: tokens.colors.text.inverse,
+                  border: 'none',
+                  borderRadius: tokens.radius.md,
+                  padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
+                  fontWeight: 600,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  minHeight: '44px',
+                }}
+              >
+                Connect Gmail
+              </button>
+            </>
+          )}
         </Card>
       )}
 
