@@ -567,8 +567,44 @@ export default function GlobalStyles() {
         100% { transform: translateX(100%); }
       }
 
+      /* ============================================================
+         ACCOUNT TAB MOTION
+         The plan badge breathes on a 3s cycle; --glow-color is set inline
+         per plan so one keyframe serves all three tiers.
+         ============================================================ */
+
+      @keyframes pw-plan-glow {
+        0%, 100% { box-shadow: 0 0 0 0 transparent; }
+        50%      { box-shadow: 0 0 2px 2px var(--glow-color, transparent); }
+      }
+
+      @keyframes pw-spin {
+        100% { transform: rotate(360deg); }
+      }
+
+      @keyframes pw-toast-fade {
+        0%   { opacity: 0; transform: translateX(-50%) translateY(6px); }
+        12%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+        82%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+        100% { opacity: 0; transform: translateX(-50%) translateY(6px); }
+      }
+
+      /* The quick-action row becomes a swipeable strip rather than wrapping,
+         so the three cards keep a consistent height on narrow screens. */
+      @media (max-width: 560px) {
+        .pw-account-quick {
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: 4px;
+        }
+        .pw-account-quick::-webkit-scrollbar { display: none; }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .pw-skeleton::after { animation: none; }
+        .pw-plan-badge { animation: none !important; }
         * { transition-duration: 0.01ms !important; }
       }
 

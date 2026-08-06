@@ -2629,6 +2629,8 @@ export default function App() {
                 plan={plan}
                 pitchCount={pitchCount}
                 onSignOut={handleSignOut}
+                onNavigate={changeTab}
+                savedProfile={savedProfile}
               />
             )}
           </div>
