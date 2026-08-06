@@ -4,11 +4,21 @@ import { supabaseAdmin } from '../../lib/supabaseAdmin';
 /**
  * Resend delivery webhook.
  *
- * Opens and replies are the two signals that tell a founder a pitch landed, and
- * neither of them happens while the founder is looking at the app. Without this
- * endpoint `sent_emails.opened_at` and `replied_at` stay NULL forever, which
- * means the reply rate on the dashboard reads 0% no matter how well the raise
- * is going, and nothing ever moves out of Pitch Sent on its own.
+ * SCOPE AS OF THE GMAIL MIGRATION
+ * Pitches no longer go out through Resend — they are sent from the founder's own
+ * mailbox by /api/send-pitches, and their `provider_message_id` is an RFC 2822
+ * Message-ID rather than a Resend email_id. So this endpoint will stop matching
+ * rows for pitch sends, and the lookup below falls through to its existing
+ * `matched: false` branch, which is the correct outcome rather than an error.
+ *
+ * It stays wired up for transactional mail that still goes through Resend, and
+ * for pitch rows written before the migration. Note that `opened_at` has no
+ * equivalent under Gmail: the API reports nothing about opens, so open tracking
+ * only exists for those older rows.
+ *
+ * Replies are now detected by lib/gmail.js, which matches In-Reply-To and
+ * References against the stored Message-ID. That is a real signal, unlike the
+ * `email.replied` branch here, which Resend does not emit for ordinary outbound.
  *
  * This handler is deliberately thin. It writes two timestamp columns; the
  * triggers in 0005 and 0007 turn those writes into timeline events and stage
@@ -21,12 +31,6 @@ import { supabaseAdmin } from '../../lib/supabaseAdmin';
  *      email.bounced, email.complained
  *   4. Copy the signing secret (starts with `whsec_`) into RESEND_WEBHOOK_SECRET
  *      in Vercel → Settings → Environment Variables, then redeploy.
- *
- * A note on replies: Resend does not emit `email.replied` for ordinary outbound
- * sending — reply detection needs an inbound route or a mailbox integration.
- * The branch is here and correct so that the day it starts arriving nothing
- * needs changing, but do not expect reply rate to populate from this endpoint
- * alone.
  */
 
 const SIGNATURE_TOLERANCE_SECONDS = 5 * 60;

@@ -30,7 +30,11 @@ export default withCrmAuth(['GET'], async (ctx) => {
 
   return {
     available: gmailConfigured(),
-    eligible: can(ctx.plan, 'crm_pipeline'),
+    // Connecting is what makes sending work, so it follows the send gate.
+    // `syncEligible` is the narrower question — whether reply detection will
+    // actually run — and stays on the pipeline gate.
+    eligible: can(ctx.plan, 'email_sending'),
+    syncEligible: can(ctx.plan, 'crm_pipeline'),
     connection: data ? publicConnection(data) : { connected: false },
   };
 });

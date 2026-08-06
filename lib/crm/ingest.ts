@@ -40,6 +40,24 @@ export interface IngestContext {
  * or the plan has no CRM. Callers treat null as "don't record".
  */
 export async function optionalCrmContext(req: NextApiRequest): Promise<IngestContext | null> {
+  const ctx = await authContext(req);
+  if (!ctx) return null;
+  if (!can(ctx.plan, 'crm_pipeline')) return null;
+  return ctx;
+}
+
+/**
+ * Resolves the caller with no plan gate at all.
+ *
+ * Separate from optionalCrmContext because the two questions stopped being the
+ * same one when pitches moved onto Gmail. Recording to the pipeline is a Starter
+ * feature, so optionalCrmContext returning null for a free founder is correct.
+ * *Sending* is a free feature, and the send route now needs a user id to find
+ * their mailbox — routing that through the CRM-gated helper would answer
+ * "authentication required" to every free account, which is a plan gate wearing
+ * an auth error's clothes.
+ */
+export async function authContext(req: NextApiRequest): Promise<IngestContext | null> {
   try {
     const token = bearerToken(req as unknown as { headers: Record<string, unknown> });
     if (!token) return null;
@@ -50,7 +68,6 @@ export async function optionalCrmContext(req: NextApiRequest): Promise<IngestCon
 
     const userId = data.user.id;
     const plan = await resolvePlan(userId);
-    if (!can(plan, 'crm_pipeline')) return null;
 
     return { userId, plan, db };
   } catch (err) {
@@ -276,6 +293,7 @@ export interface SendRecord {
   subject: string;
   body: string;
   providerMessageId?: string | null;
+  providerThreadId?: string | null;
   emailType?: EmailType;
   investorId?: string | number | null;
   generatedPitchId?: string | null;
@@ -355,6 +373,7 @@ export async function recordEmailsSent(
         subject: send.subject,
         body: send.body,
         provider_message_id: send.providerMessageId ?? null,
+        provider_thread_id: send.providerThreadId ?? null,
         delivery_status: 'sent',
         sent_at: new Date().toISOString(),
       });

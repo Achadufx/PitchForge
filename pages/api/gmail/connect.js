@@ -20,9 +20,11 @@ import { buildAuthUrl, createOAuthState, gmailConfigured } from '../../../lib/gm
  * testable with curl and a token.
  */
 export default withCrmAuth(['GET', 'POST'], async (ctx) => {
-  // The point of reading a mailbox is to fill the pipeline, so this rides on
-  // the same gate as the pipeline itself.
-  assertCan(ctx.plan, 'crm_pipeline');
+  // Gated on sending, not on the pipeline. Reading the mailbox fills the CRM,
+  // which is a Starter feature — but pitches now leave through the founder's own
+  // Gmail on every plan, so gating the connection on crm_pipeline would take
+  // sending away from free accounts that have it today.
+  assertCan(ctx.plan, 'email_sending');
 
   if (!gmailConfigured()) {
     throw new CrmError(503, 'Gmail is not configured on this deployment');

@@ -6,3 +6,5 @@ node_modules/
 
 # TypeScript incremental build cache — machine-local, regenerated on every build.
 tsconfig.tsbuildinfo
+.vercel
+.env*

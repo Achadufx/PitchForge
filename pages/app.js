@@ -984,19 +984,52 @@ function ReviewStep({ investors, startup, onNext, onBack, onPitchGenerated }) {
 // SEND STEP
 // ============================================================
 
-function SendStep({ pitches, onRestart }) {
+function SendStep({ pitches, onRestart, changeTab }) {
   const [senderName, setSenderName] = useState("");
   const [sending, setSending] = useState(false);
   const [results, setResults] = useState([]);
   const [done, setDone] = useState(false);
+  const [gmail, setGmail] = useState({ loading: true, connected: false, email: null, needsReconnect: false });
+
+  // Pitches leave through the founder's own Gmail, so a missing connection is a
+  // hard blocker rather than a warning. Checked on mount so the founder finds
+  // out before they write their name and press send.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          if (alive) setGmail({ loading: false, connected: false, email: null, needsReconnect: false });
+          return;
+        }
+        const res = await fetch(API_URL + "/api/gmail/status", {
+          headers: { Authorization: "Bearer " + session.access_token },
+        });
+        const data = await res.json();
+        if (!alive) return;
+        setGmail({
+          loading: false,
+          connected: Boolean(data?.connection?.connected),
+          email: data?.connection?.email || null,
+          needsReconnect: Boolean(data?.connection?.needsReconnect),
+        });
+      } catch (err) {
+        console.error("Could not check Gmail status:", err);
+        // Fail open: the send route re-checks and returns a clear error, so a
+        // flaky status call must not block a founder whose Gmail is fine.
+        if (alive) setGmail({ loading: false, connected: true, email: null, needsReconnect: false });
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const handleSend = async () => {
     if (!senderName) return;
     setSending(true);
     try {
-      // The token is what lets /api/send-pitches mirror these sends into the
-      // CRM. It is optional there by design — without it the emails still go
-      // out, they just don't land on a timeline.
+      // Gmail sending requires the session: the route looks up the founder's
+      // connection by the user id on this token.
       const headers = { "Content-Type": "application/json" };
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -1013,7 +1046,25 @@ function SendStep({ pitches, onRestart }) {
         body: JSON.stringify({ pitches, senderName }),
       });
       const data = await res.json();
-      setResults(data.results || []);
+
+      if (!res.ok) {
+        // The route reports "no Gmail" and "reconnect" as structured flags so
+        // this can send the founder to the right place instead of showing a
+        // generic failure next to every investor.
+        const message = data?.error || "Send failed";
+        if (data?.needsGmailConnection || data?.needsReconnect) {
+          setGmail((g) => ({
+            ...g,
+            connected: false,
+            needsReconnect: Boolean(data?.needsReconnect),
+          }));
+          setSending(false);
+          return;
+        }
+        setResults(data.partialResults || pitches.map(p => ({ ...p, success: false, error: message })));
+      } else {
+        setResults(data.results || []);
+      }
     } catch (err) {
       setResults(pitches.map(p => ({ ...p, success: false, error: err.message })));
     }
@@ -1023,20 +1074,77 @@ function SendStep({ pitches, onRestart }) {
 
   if (done) {
     const succeeded = results.filter(r => r.success).length;
+    const failed = results.filter(r => !r.success);
     return (
       <div style={{ textAlign: "center", padding: tokens.spacing[12] }}>
         <div style={{ fontSize: 48, marginBottom: tokens.spacing[4] }}>🚀</div>
         <h2 className="pw-h2">{succeeded} pitch{succeeded !== 1 ? "es" : ""} sent!</h2>
-        <p className="pw-body" style={{ marginBottom: tokens.spacing[6] }}>Now sit back and let the replies come in.</p>
+        <p className="pw-body" style={{ marginBottom: tokens.spacing[6] }}>
+          {failed.length
+            ? `${failed.length} could not be sent — ${failed[0].error}`
+            : "Now sit back and let the replies come in."}
+        </p>
         <button onClick={onRestart} className="pw-btn-primary">Start new campaign</button>
       </div>
     );
   }
 
+  const blocked = !gmail.loading && !gmail.connected;
+
   return (
     <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <h2 className="pw-h2">Ready to launch</h2>
-      <p className="pw-body">Your name will appear as the sender.</p>
+      <p className="pw-body">
+        {gmail.email
+          ? `Pitches send from ${gmail.email}. Your name will appear as the sender.`
+          : "Your name will appear as the sender."}
+      </p>
+
+      {blocked && (
+        <div style={{
+          background: tokens.colors.status.warningBg,
+          border: `1px solid ${tokens.colors.status.warningBorder}`,
+          borderRadius: tokens.radius.md,
+          padding: tokens.spacing[4],
+          marginBottom: tokens.spacing[4],
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: tokens.spacing[2],
+            marginBottom: tokens.spacing[2],
+            fontSize: '14px',
+            fontWeight: 600,
+            color: tokens.colors.text.primary,
+          }}>
+            <Icons.Mail size={16} />
+            <span>
+              {gmail.needsReconnect
+                ? 'Reconnect your Gmail to send'
+                : 'Connect your Gmail to send'}
+            </span>
+          </div>
+          <p style={{
+            margin: 0,
+            marginBottom: tokens.spacing[3],
+            fontSize: '13px',
+            lineHeight: 1.5,
+            color: tokens.colors.text.secondary,
+          }}>
+            {gmail.needsReconnect
+              ? 'Google ended the previous connection. Reconnect in Account settings and your queued pitches will be here waiting.'
+              : 'Pitches send from your own Gmail so replies land in your inbox and show up in your pipeline. Connect it in Account settings — your queued pitches will still be here.'}
+          </p>
+          <button
+            onClick={() => changeTab && changeTab("account")}
+            className="pw-btn-secondary"
+            style={{ fontSize: '13px' }}
+          >
+            Go to Account settings →
+          </button>
+        </div>
+      )}
+
       <div style={{ marginBottom: tokens.spacing[4] }}>
         <label className="pw-label">Your name</label>
         <input
@@ -1064,13 +1172,13 @@ function SendStep({ pitches, onRestart }) {
       </div>
       <button
         onClick={handleSend}
-        disabled={sending || !senderName}
+        disabled={sending || !senderName || blocked || gmail.loading}
         className="pw-btn-primary"
         style={{
           width: '100%',
           justifyContent: 'center',
-          opacity: (sending || !senderName) ? 0.4 : 1,
-          cursor: (sending || !senderName) ? 'not-allowed' : 'pointer',
+          opacity: (sending || !senderName || blocked || gmail.loading) ? 0.4 : 1,
+          cursor: (sending || !senderName || blocked || gmail.loading) ? 'not-allowed' : 'pointer',
         }}
       >
         {sending ? "Sending..." : `🚀 Send ${pitches.length} Pitch${pitches.length !== 1 ? "es" : ""}`}
@@ -1905,7 +2013,7 @@ function DescribeStep({ onNext, onBack, plan, preloadedInvestors, savedProfile, 
 // CAMPAIGN TAB
 // ============================================================
 
-function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload, savedProfile, setSavedProfile }) {
+function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors, clearPreload, savedProfile, setSavedProfile, changeTab }) {
   const [step, setStep] = useState("describe");
   const [investors, setInvestors] = useState(preloadedInvestors || []);
   const [startup, setStartup] = useState(null);
@@ -1994,6 +2102,7 @@ function CampaignTab({ pitchCount, plan, setPitchCount, user, preloadedInvestors
             <SendStep
               pitches={finalPitches}
               onRestart={restart}
+              changeTab={changeTab}
             />
           )}
         </div>
@@ -2609,6 +2718,7 @@ export default function App() {
                 clearPreload={() => setPreloadedInvestors(null)}
                 savedProfile={savedProfile}
                 setSavedProfile={setSavedProfile}
+                changeTab={changeTab}
               />
             )}
             {activeTab === "investors" && (
