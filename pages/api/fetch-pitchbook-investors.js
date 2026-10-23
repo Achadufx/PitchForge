@@ -1,4 +1,7 @@
 import { ApifyClient } from 'apify-client';
+import pitchbookInvestors from '../../lib/pitchbookInvestors';
+
+const { collectCompanyUrls, companiesToInvestors } = pitchbookInvestors;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,30 +17,37 @@ export default async function handler(req, res) {
       });
     }
 
+    const companyUrls = collectCompanyUrls(req.body || {});
+    if (!companyUrls.length) {
+      return res.status(400).json({
+        error: 'companyUrls is required',
+        details:
+          'Pass PitchBook company profile URLs (companyUrls). Sector-only search is no longer available because the previous PitchBook actor returns 404.',
+      });
+    }
+
+    const actorId = "johnvc~pitchbook-company-api";
+    const input = {
+      companyUrls,
+    };
+
+    console.log("🚀 Fetching investors from PitchBook...");
+    console.log("🔍 Company URLs:", companyUrls.length);
+
     const client = new ApifyClient({
       token: process.env.APIFY_API_TOKEN,
     });
 
-    const actorId = "crawlerbros~pitchbook-investors-scraper";
-    const searchQuery = req.body.sector || "venture capital";
-
-    const input = {
-      searchQuery: searchQuery,
-      maxItems: 20,
-    };
-
-    console.log("🚀 Fetching investors from PitchBook...");
-    console.log("🔍 Search query:", searchQuery);
-
     const run = await client.actor(actorId).call(input);
     const { items } = await client.dataset(run.defaultDatasetId).listItems();
+    const investors = companiesToInvestors(items);
 
-    console.log(`✅ Found ${items.length} investors`);
+    console.log(`✅ Found ${investors.length} investors`);
 
     res.status(200).json({ 
       success: true, 
-      investors: items,
-      count: items.length 
+      investors,
+      count: investors.length 
     });
 
   } catch (error) {
